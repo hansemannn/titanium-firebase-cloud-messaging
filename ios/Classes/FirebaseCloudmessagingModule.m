@@ -9,8 +9,7 @@
 #import "TiBase.h"
 #import "TiHost.h"
 #import "TiUtils.h"
-
-@import FirebaseCore;
+#import "TiApp.h"
 
 @implementation FirebaseCloudmessagingModule
 
@@ -34,13 +33,18 @@
   NSLog(@"[DEBUG] %@ loaded", self);
 }
 
-#pragma Public APIs
+// Uncomment once 7.0.0.GA is released, bump module-version as well
+//
+//- (id)_initWithPageContext:(id<TiEvaluator>)context
+//{
+//  if (self = [super _initWithPageContext:context]) {
+//    [[TiApp app] setApplicationDelegate:self];
+//  }
+//
+//  return self;
+//}
 
-- (void)configure:(id)unused
-{
-  [[FIRMessaging messaging] setDelegate:self];
-  [FIRApp configure];
-}
+#pragma Public APIs
 
 - (NSString *)fcmToken
 {
@@ -116,7 +120,7 @@
   [[FIRMessaging messaging] unsubscribeFromTopic:topic];
 }
 
-#pragma mark Delegates
+#pragma mark FIRMessaging Delegates
 
 - (void)messaging:(FIRMessaging *)messaging didReceiveMessage:(FIRMessagingRemoteMessage *)remoteMessage
 {

@@ -14,13 +14,11 @@
 @import FirebaseMessaging;
 
 #if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-@interface FirebaseCloudmessagingModule : TiModule<FIRMessagingDelegate, UNUserNotificationCenterDelegate> {
+@interface FirebaseCloudmessagingModule : TiModule<FIRMessagingDelegate, UIApplicationDelegate, UNUserNotificationCenterDelegate> {
 #else
-@interface FirebaseCloudmessagingModule : TiModule<FIRMessagingDelegate> {
+@interface FirebaseCloudmessagingModule : TiModule<FIRMessagingDelegate, UIApplicationDelegate> {
 #endif
 }
-
-- (void)configure:(id)unused;
 
 - (NSString *)fcmToken;
 

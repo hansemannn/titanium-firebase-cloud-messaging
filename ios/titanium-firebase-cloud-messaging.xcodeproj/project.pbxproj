@@ -30,7 +30,6 @@
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 		DB4B81F71F94B3530034B0F6 /* FirebaseMessaging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4B81F61F94B34C0034B0F6 /* FirebaseMessaging.framework */; };
 		DB4B81F81F94B3530034B0F6 /* Protobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4B81F51F94B34C0034B0F6 /* Protobuf.framework */; };
-		DB4B81FA1F94B62A0034B0F6 /* FirebaseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4B81F91F94B6220034B0F6 /* FirebaseCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,7 +53,6 @@
 		D2AAC07E0554694100DB518D /* libfirebase.cloudmessaging.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libfirebase.cloudmessaging.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB4B81F51F94B34C0034B0F6 /* Protobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Protobuf.framework; path = platform/Protobuf.framework; sourceTree = "<group>"; };
 		DB4B81F61F94B34C0034B0F6 /* FirebaseMessaging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseMessaging.framework; path = platform/FirebaseMessaging.framework; sourceTree = "<group>"; };
-		DB4B81F91F94B6220034B0F6 /* FirebaseCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCore.framework; path = platform/FirebaseCore.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +60,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DB4B81FA1F94B62A0034B0F6 /* FirebaseCore.framework in Frameworks */,
 				DB4B81F71F94B3530034B0F6 /* FirebaseMessaging.framework in Frameworks */,
 				DB4B81F81F94B3530034B0F6 /* Protobuf.framework in Frameworks */,
 				AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */,
@@ -94,7 +91,6 @@
 		0867D69AFE84028FC02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				DB4B81F91F94B6220034B0F6 /* FirebaseCore.framework */,
 				DB4B81F61F94B34C0034B0F6 /* FirebaseMessaging.framework */,
 				DB4B81F51F94B34C0034B0F6 /* Protobuf.framework */,
 				AACBBE490F95108600F1A2B1 /* Foundation.framework */,

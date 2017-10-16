@@ -2,6 +2,6 @@
 var FirebaseCloudMessaging = require('firebase.cloudmessaging');
 
 // Configure FirebaseCloudMessaging
-FirebaseCloudMessaging.configure();
+Ti.API.info('FCM-Token :' + FirebaseCloudMessaging.fcmToken);
 
 // TODO: Write more examples based from the Readme.

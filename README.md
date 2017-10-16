@@ -10,8 +10,6 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 #### Methods
 
-##### `configure()`
-
 ##### `registerForPushNotifications()`
 
 ##### `appDidReceiveMessage(parameters)`
@@ -50,7 +48,7 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 ```js
 var FirebaseCloudMessaging = require('firebase.cloudmessaging');
 
-FirebaseCloudMessaging.configure();
+Ti.API.info('FCM-Token: ' + FirebaseCloudMessaging.fcmToken);
 ```
 
 ## Build

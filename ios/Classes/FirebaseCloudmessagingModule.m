@@ -10,6 +10,8 @@
 #import "TiHost.h"
 #import "TiUtils.h"
 
+@import FirebaseCore;
+
 @implementation FirebaseCloudmessagingModule
 
 #pragma mark Internal
@@ -34,6 +36,100 @@
 
 #pragma Public APIs
 
+- (void)configure:(id)unused
+{
+  [[FIRMessaging messaging] setDelegate:self];
+  [FIRApp configure];
+}
 
+- (NSString *)fcmToken
+{
+  return [[FIRMessaging messaging] FCMToken];
+}
+
+- (void)registerForPushNotifications:(id)arguments
+{
+  if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_9_x_Max) {
+    UIUserNotificationType allNotificationTypes =
+    (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
+    UIUserNotificationSettings *settings =
+    [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
+    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+  } else {
+#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+    [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError * _Nullable error) {
+    }];
+#endif
+  }
+  
+  [[UIApplication sharedApplication] registerForRemoteNotifications];
+}
+
+- (void)setApnsToken:(NSString *)apnsToken
+{
+  [[FIRMessaging messaging] setAPNSToken:[apnsToken dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+
+- (void)setShouldEstablishDirectChannel:(NSNumber *)shouldEstablishDirectChannel
+{
+  [[FIRMessaging messaging] setShouldEstablishDirectChannel:[TiUtils boolValue:shouldEstablishDirectChannel]];
+}
+
+- (NSNumber *)shouldEstablishDirectChannel
+{
+  return NUMBOOL([[FIRMessaging messaging] shouldEstablishDirectChannel]);
+}
+
+- (void)appDidReceiveMessage:(id)arguments
+{
+  ENSURE_SINGLE_ARG(arguments, NSDictionary);
+  [[FIRMessaging messaging] appDidReceiveMessage:arguments];
+}
+
+- (void)sendMessage:(id)arguments
+{
+  ENSURE_SINGLE_ARG(arguments, NSDictionary);
+  
+  NSDictionary *message = [arguments objectForKey:@"message"];
+  NSString *messageID = [arguments objectForKey:@"messageID"];
+  NSString *to = [arguments objectForKey:@"to"];
+  int64_t timeToLive = [(NSNumber *)[arguments objectForKey:@"timeToLive"] unsignedLongLongValue];
+
+  [[FIRMessaging messaging] sendMessage:message
+                                     to:to
+                          withMessageID:messageID
+                             timeToLive:timeToLive];
+}
+
+- (void)subscribeToTopic:(id)topic
+{
+  ENSURE_SINGLE_ARG(topic, NSString);
+  [[FIRMessaging messaging] subscribeToTopic:topic];
+}
+
+- (void)unsubscribeFromTopic:(id)topic
+{
+  ENSURE_SINGLE_ARG(topic, NSString);
+  [[FIRMessaging messaging] unsubscribeFromTopic:topic];
+}
+
+#pragma mark Delegates
+
+- (void)messaging:(FIRMessaging *)messaging didReceiveMessage:(FIRMessagingRemoteMessage *)remoteMessage
+{
+  if ([self _hasListeners:@"didReceiveMessage"]) {
+    [self fireEvent:@"didReceiveMessage" withObject:@{ @"message": remoteMessage.appData }];
+  }
+}
+
+- (void)messaging:(FIRMessaging *)messaging didRefreshRegistrationToken:(NSString *)fcmToken
+{
+  if ([self _hasListeners:@"didRefreshRegistrationToken"]) {
+    [self fireEvent:@"didRefreshRegistrationToken" withObject:@{ @"fcmToken": fcmToken }];
+  }
+}
 
 @end

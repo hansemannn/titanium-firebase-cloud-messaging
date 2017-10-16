@@ -10,17 +10,47 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 #### Methods
 
-TBA
+##### `configure()`
+
+##### `registerForPushNotifications()`
+
+##### `appDidReceiveMessage(parameters)`
+  - `parameters` (Dictionary)
   
+##### `sendMessage(parameters)`
+  - `parameters` (Dictionary)
+    - `message` (String)
+    - `messageID` (String)
+    - `to` (String)
+    - `timeTiLive` (Number)
+  
+##### `subcribeToTopic(topic)`
+  - `topic` (String)
+
+##### `unsubcribeFromTopic(topic)`
+  - `topic` (String)
+  
+#### Properties
+
+##### `fcmToken` (String, get)
+
+##### `apnsToken` (String, set)
+
+##### `shouldEstablishDirectChannel` (Number, get/set)
+
+#### Events
+
+##### `didReceiveMessage`
+  - `message` (Dictionary)
+  
+##### `didRefreshRegistrationToken`
+  - `fcmToken` (String)
+
 ## Example
 ```js
-// Require the required Firebase modules
-var Firebase = require('firebase');
-var FirebaseStorage = require('firebase.storage');
+var FirebaseCloudMessaging = require('firebase.cloudmessaging');
 
-Firebase.configure();
-
-// More APIs TBA
+FirebaseCloudMessaging.configure();
 ```
 
 ## Build

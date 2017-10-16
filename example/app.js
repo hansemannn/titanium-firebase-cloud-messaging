@@ -1,7 +1,7 @@
-// Require the Firebase Storage module
-var FirebaseStorage = require('firebase.storage');
+// Require the Firebase CloudMessaging module
+var FirebaseCloudMessaging = require('firebase.cloudmessaging');
 
-// Configure FirebaseStorage
-FirebaseStorage.configure();
+// Configure FirebaseCloudMessaging
+FirebaseCloudMessaging.configure();
 
-// TODO: Write more examples based on the Readme.
+// TODO: Write more examples based from the Readme.

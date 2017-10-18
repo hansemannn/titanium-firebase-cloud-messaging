@@ -20,7 +20,7 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
     - `message` (String)
     - `messageID` (String)
     - `to` (String)
-    - `timeTiLive` (Number)
+    - `timeToLive` (Number)
   
 ##### `subcribeToTopic(topic)`
   - `topic` (String)

@@ -53,7 +53,7 @@ Ti.API.info('FCM-Token: ' + FirebaseCloudMessaging.fcmToken);
 
 ## Build
 ```js
-cd iphone
+cd ios
 appc ti build -p ios --build-only
 ```
 

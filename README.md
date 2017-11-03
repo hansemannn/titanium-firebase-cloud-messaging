@@ -1,4 +1,4 @@
-# Firebase Cloud Messaging Titanium Module
+# Firebase Cloud Messaging - Titanium Module
 Use the native Firebase SDK in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
 ## Requirements

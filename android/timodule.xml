@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ti:module xmlns:ti="http://ti.appcelerator.org" xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- Similar to tiapp.xml, but contains module/platform specific configuration in <iphone> and <android> sections -->
+	<iphone></iphone>
+	<android xmlns:android="http://schemas.android.com/apk/res/android">
+		<manifest>
+			<service android:name=".TiFirebaseMessagingService">
+				<intent-filter>
+					<action android:name="com.google.firebase.MESSAGING_EVENT"/>
+				</intent-filter>
+			</service>
+			<service android:name=".TiFirebaseInstanceIDService">
+				<intent-filter>
+					<action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+				</intent-filter>
+			</service>
+		</manifest>
+	</android>
+	<modules>
+		<module platform="android">ti.playservices</module>
+	</modules>
+</ti:module>

@@ -28,8 +28,6 @@ public class CloudMessagingModule extends KrollModule
 {
 
 	private static final String LCAT = "FirebaseCloudMessaging";
-	private KrollFunction onToken = null;
-	private KrollFunction onMessage = null;
 	private static CloudMessagingModule instance = null;
 
 	public CloudMessagingModule()
@@ -46,16 +44,8 @@ public class CloudMessagingModule extends KrollModule
 
 	// Methods
 	@Kroll.method
-	public void registerForPushNotifications(KrollDict opt)
+	public void registerForPushNotifications()
 	{
-		if (opt.containsKey("onMessage")) {
-			onMessage = (KrollFunction) opt.get("onMessage");
-			Log.d(LCAT,""+onMessage);
-		}
-		if (opt.containsKey("onToken")) {
-			onToken = (KrollFunction) opt.get("onToken");
-		}
-
 		FirebaseInstanceId.getInstance().getToken();
 	}
 
@@ -94,19 +84,21 @@ public class CloudMessagingModule extends KrollModule
 		}
 	}
 
-	public void onTokenRefresh(String token){
-		if (onToken != null) {
-			HashMap<String, Object> event = new HashMap<String, Object>();
-			event.put("fcmToken", token);
-			onMessage.call(getKrollObject(), event);
+	public void onTokenRefresh(String token)
+	{
+		if (hasListeners("didRefreshRegistrationToken")) {
+			KrollDict data = new KrollDict();
+			data.put("fcmToken", token);
+			fireEvent("didRefreshRegistrationToken", data);
 		}
 	}
 
-	public void onMessageReceived(HashMap message){
-		if (onMessage != null) {
-			HashMap<String, HashMap> event = new HashMap<String, HashMap>();
-			event.put("message", message);
-			onMessage.call(getKrollObject(), event);
+	public void onMessageReceived(HashMap message)
+	{
+		if (hasListeners("didReceiveMessage")) {
+			KrollDict data = new KrollDict();
+			data.put("message", message);
+			fireEvent("didReceiveMessage", data);
 		}
 	}
 

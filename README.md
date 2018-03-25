@@ -14,8 +14,7 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 #### Methods
 
-##### `registerForPushNotifications()` (iOS)
-##### `registerForPushNotifications({onToken: function(e){}, onMessage: function(e){} })` (Android)
+##### `registerForPushNotifications()`
 
 ##### `appDidReceiveMessage(parameters)`
   - `parameters` (Dictionary)
@@ -41,7 +40,7 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 ##### `shouldEstablishDirectChannel` (Number, get/set)
 
-#### Events (iOS)
+#### Events
 
 ##### `didReceiveMessage`
   - `message` (Dictionary)
@@ -52,27 +51,18 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 ## Example
 ```js
 var fcm = require('firebase.cloudmessaging');
-fcm.registerForPushNotifications({
-    onToken: function(e){
-        // get token from callback
-        Ti.API.info("Token: " + e.token);
-    },
-    onMessage: function(e){
-        // got message
-        Ti.API.info("Message", e.message);
-    }
-});
+fcm.registerForPushNotifications();
+fcm.addEventListener("didRefreshRegistrationToken", onToken);
+fcm.addEventListener("didReceiveMessage", onMessage);
 
-if (OS_IOS){
-    // get token from callback
-    fcm.addEventListener("didRefreshRegistrationToken", function(e){
-        Ti.API.info("Token: " + e.token);
-    });
+function onToken(e){
+    // got token
+    Ti.API.info("Token: " + e.token);
+}
 
+function onMessage(e){
     // got message
-    fcm.addEventListener("didReceiveMessage", function(e){
-        Ti.API.info("Message", e.message);
-    });
+    Ti.API.info("Message", e.message);
 }
 
 // check if token is already available

@@ -53,14 +53,20 @@ public class CloudMessagingModule extends KrollModule
 	public void subcribeToTopic(String topic)
 	{
 		FirebaseMessaging.getInstance().subscribeToTopic(topic);
-		Log.i(LCAT, "subscribe to " + topic);
+		Log.d(LCAT, "subscribe to " + topic);
 	}
 
 	@Kroll.method
 	public void unsubcribeFromTopic(String topic)
 	{
 		FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
-		Log.i(LCAT, "unsubscribe from " + topic);
+		Log.d(LCAT, "unsubscribe from " + topic);
+	}
+
+	@Kroll.method
+	public void appDidReceiveMessage(KrollDict opt)
+	{
+		// empty
 	}
 
 	@Kroll.method
@@ -71,7 +77,7 @@ public class CloudMessagingModule extends KrollModule
 		String fireTo = obj.getString("to");
 		String fireMessageId = obj.getString("messageId");
 		String fireMessage = obj.getString("message");
-		int ttl = TiConvert.toInt(obj.get("ttl"), 84600);
+		int ttl = TiConvert.toInt(obj.get("timeToLive"), 0);
 
 		if (fireTo != "" && fireMessageId != ""){
 			fm.send(new RemoteMessage.Builder(fireTo)
@@ -106,6 +112,12 @@ public class CloudMessagingModule extends KrollModule
 	public String fcmToken()
 	{
 		return FirebaseInstanceId.getInstance().getToken();
+	}
+
+	@Kroll.setProperty
+	public void apnsToken(String str)
+	{
+		// empty
 	}
 
 	public static CloudMessagingModule getInstance() {

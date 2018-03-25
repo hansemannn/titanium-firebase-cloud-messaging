@@ -25,7 +25,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 
 	@Override
 	public void onSendError(String msgID, Exception exception) {
-		Log.d(TAG, "Sent Error: " + msgID + " " + exception);
+		Log.e(TAG, "Sent Error: " + msgID + " " + exception);
 	}
 
 	@Override

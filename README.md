@@ -16,7 +16,7 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 ##### `registerForPushNotifications()`
 
-##### `appDidReceiveMessage(parameters)`
+##### `appDidReceiveMessage(parameters)`  - iOS only
   - `parameters` (Dictionary)
   
 ##### `sendMessage(parameters)`
@@ -36,7 +36,7 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 ##### `fcmToken` (String, get)
 
-##### `apnsToken` (String, set)
+##### `apnsToken` (String, set) - iOS only
 
 ##### `shouldEstablishDirectChannel` (Number, get/set)
 

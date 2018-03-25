@@ -33,16 +33,14 @@
   NSLog(@"[DEBUG] %@ loaded", self);
 }
 
-// Uncomment once 7.0.0.GA is released, bump module-version as well
-//
-//- (id)_initWithPageContext:(id<TiEvaluator>)context
-//{
-//  if (self = [super _initWithPageContext:context]) {
-//    [[TiApp app] setApplicationDelegate:self];
-//  }
-//
-//  return self;
-//}
+- (id)_initWithPageContext:(id<TiEvaluator>)context
+{
+  if (self = [super _initWithPageContext:context]) {
+    [[FIRMessaging messaging] setDelegate:self];
+  }
+  
+  return self;
+}
 
 #pragma Public APIs
 

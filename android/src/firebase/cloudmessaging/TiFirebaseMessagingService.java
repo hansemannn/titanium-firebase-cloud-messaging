@@ -10,11 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
-import com.firebase.jobdispatcher.Constraint;
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
+import java.util.HashMap;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -23,50 +19,32 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 	private static final String TAG = "FirebaseMsgService";
 
 	@Override
+	public void onMessageSent(String msgID) {
+		Log.d(TAG, "Message sent: " + msgID );
+		//super.onMessageSent(msgID);
+	}
+
+	@Override
+	public void onSendError(String msgID, Exception exception) {
+		Log.d(TAG, "Sent Error : " + msgID + " " + exception);
+	}
+
+	@Override
 	public void onMessageReceived(RemoteMessage remoteMessage) {
 		// TODO(developer): Handle FCM messages here.
 		// Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-		Log.i(TAG, "From: " + remoteMessage.getFrom());
-
-		// Check if message contains a data payload.
-		if (remoteMessage.getData().size() > 0) {
-			Log.i(TAG, "Message data payload: " + remoteMessage.getData());
-
-			if (/* Check if data needs to be processed by long running job */ true) {
-				// For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
-				scheduleJob();
-			} else {
-				// Handle message within 10 seconds
-				handleNow();
-			}
-
-		}
+		Log.d(TAG, "From: " + remoteMessage.getFrom());
 
 		// Check if message contains a notification payload.
 		if (remoteMessage.getNotification() != null) {
-			Log.i(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+			Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+
+			HashMap<String, Object> msg = new HashMap<String, Object>();
+			msg.put("from", remoteMessage.getFrom());
+			msg.put("title", remoteMessage.getNotification().getTitle());
+			msg.put("body", remoteMessage.getNotification().getBody());
+			CloudMessagingModule.getInstance().onMessageReceived(msg);
 		}
-	}
-
-	/**
-	* Schedule a job using FirebaseJobDispatcher.
-	*/
-	private void scheduleJob() {
-		// [START dispatch_job]
-		FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-		Job myJob = dispatcher.newJobBuilder()
-			.setService(TiJobService.class)
-			.setTag("my-job-tag")
-			.build();
-		dispatcher.schedule(myJob);
-		// [END dispatch_job]
-	}
-
-	/**
-	* Handle time allotted to BroadcastReceivers.
-	*/
-	private void handleNow() {
-		Log.i(TAG, "Short lived task is done.");
 	}
 
 	/**

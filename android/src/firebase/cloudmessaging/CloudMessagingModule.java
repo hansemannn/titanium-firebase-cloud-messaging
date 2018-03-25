@@ -9,27 +9,33 @@
 package firebase.cloudmessaging;
 
 import org.appcelerator.kroll.KrollModule;
-import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.KrollObject;
 import org.appcelerator.kroll.annotations.Kroll;
-
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.kroll.common.TiConfig;
-
+import org.appcelerator.titanium.util.TiConvert;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.common.Log;
+import java.util.HashMap;
+import org.appcelerator.kroll.KrollFunction;
 
 @Kroll.module(name="CloudMessaging", id="firebase.cloudmessaging")
 public class CloudMessagingModule extends KrollModule
 {
 
-	// Standard Debugging variables
-	private static final String LCAT = "CloudMessaging";
+	private static final String LCAT = "FirebaseCloudMessaging";
+	private KrollFunction onToken = null;
+	private KrollFunction onMessage = null;
+	private static CloudMessagingModule instance = null;
 
 	public CloudMessagingModule()
 	{
 		super();
+		instance = this;
 	}
 
 	@Kroll.onAppCreate
@@ -40,8 +46,16 @@ public class CloudMessagingModule extends KrollModule
 
 	// Methods
 	@Kroll.method
-	public void registerForPushNotifications()
+	public void registerForPushNotifications(KrollDict opt)
 	{
+		if (opt.containsKey("onMessage")) {
+			onMessage = (KrollFunction) opt.get("onMessage");
+			Log.d(LCAT,""+onMessage);
+		}
+		if (opt.containsKey("onToken")) {
+			onToken = (KrollFunction) opt.get("onToken");
+		}
+
 		FirebaseInstanceId.getInstance().getToken();
 	}
 
@@ -64,14 +78,36 @@ public class CloudMessagingModule extends KrollModule
 	{
 		FirebaseMessaging fm = FirebaseMessaging.getInstance();
 
-		String fireTo = (String) obj.get("to");
-		String fireMessageId = (String) obj.get("messageId");
-		String fireMessage = (String) obj.get("message");
+		String fireTo = obj.getString("to");
+		String fireMessageId = obj.getString("messageId");
+		String fireMessage = obj.getString("message");
+		int ttl = TiConvert.toInt(obj.get("ttl"), 84600);
 
-		fm.send(new RemoteMessage.Builder(fireTo)
-			.setMessageId(fireMessageId)
-			.addData("message", fireMessage)
-			.build());
+		if (fireTo != "" && fireMessageId != ""){
+			fm.send(new RemoteMessage.Builder(fireTo)
+				.setMessageId(fireMessageId)
+				.addData("message", fireMessage)
+				.setTtl(ttl)
+				.build());
+		} else {
+			Log.e(LCAT, "Please set 'to' and 'messageId'");
+		}
+	}
+
+	public void onTokenRefresh(String token){
+		if (onToken != null) {
+			HashMap<String, Object> event = new HashMap<String, Object>();
+			event.put("fcmToken", token);
+			onMessage.call(getKrollObject(), event);
+		}
+	}
+
+	public void onMessageReceived(HashMap message){
+		if (onMessage != null) {
+			HashMap<String, HashMap> event = new HashMap<String, HashMap>();
+			event.put("message", message);
+			onMessage.call(getKrollObject(), event);
+		}
 	}
 
 	@Kroll.getProperty
@@ -80,4 +116,7 @@ public class CloudMessagingModule extends KrollModule
 		return FirebaseInstanceId.getInstance().getToken();
 	}
 
+	public static CloudMessagingModule getInstance() {
+		return instance;
+	}
 }

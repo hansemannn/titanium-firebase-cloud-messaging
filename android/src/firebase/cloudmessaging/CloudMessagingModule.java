@@ -109,7 +109,7 @@ public class CloudMessagingModule extends KrollModule
 	{
 		if (hasListeners("didReceiveMessage")) {
 			KrollDict data = new KrollDict();
-			data.put("message", message);
+			data.put("message", new KrollDict(message));
 			fireEvent("didReceiveMessage", data);
 		}
 	}

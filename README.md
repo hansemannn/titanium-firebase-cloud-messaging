@@ -18,6 +18,9 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 ##### `appDidReceiveMessage(parameters)`  - iOS only
   - `parameters` (Dictionary)
+
+Note: Only call this method if method swizzling is disabled (enabled by default). Messages are received via the native delegates instead,
+so receive the `gcm.message_id` key from the notification payload instead.
   
 ##### `sendMessage(parameters)`
   - `parameters` (Dictionary)
@@ -44,6 +47,9 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 ##### `didReceiveMessage`
   - `message` (Dictionary)
+  
+Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
+are still delivered via the Titanium notification events, e.g. `notification` and `remotenotification`.
   
 ##### `didRefreshRegistrationToken`
   - `fcmToken` (String)

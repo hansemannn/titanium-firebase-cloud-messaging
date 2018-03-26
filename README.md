@@ -21,10 +21,10 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
   
 ##### `sendMessage(parameters)`
   - `parameters` (Dictionary)
-    - `message` (String)
     - `messageID` (String)
     - `to` (String)
     - `timeToLive` (Number)
+    - `data` (Dictionary)
   
 ##### `subcribeToTopic(topic)`
   - `topic` (String)
@@ -87,6 +87,10 @@ To test your app you can use this PHP script to send messages to the device/topi
 			'notification' => array (
 					"title" => "TiFirebaseMessaging",
 					"body" => "Message received"
+			),
+			"data" => array(
+				"key1" => "value1",
+				"key2" => "value2"
 			)
 	);
 

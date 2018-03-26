@@ -22,6 +22,7 @@ import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.common.Log;
 import java.util.HashMap;
 import org.appcelerator.kroll.KrollFunction;
+import java.util.Map;
 
 @Kroll.module(name="CloudMessaging", id="firebase.cloudmessaging")
 public class CloudMessagingModule extends KrollModule
@@ -76,15 +77,20 @@ public class CloudMessagingModule extends KrollModule
 
 		String fireTo = obj.getString("to");
 		String fireMessageId = obj.getString("messageId");
-		String fireMessage = obj.getString("message");
 		int ttl = TiConvert.toInt(obj.get("timeToLive"), 0);
 
+		RemoteMessage.Builder rm = new RemoteMessage.Builder(fireTo);
+		rm.setMessageId(fireMessageId);
+		rm.setTtl(ttl);
+
+		// add custom data
+		Map<String, String> data = (HashMap)obj.get("data");
+		for (Object o:data.keySet()) {
+			rm.addData((String) o, data.get(o));
+		}
+
 		if (fireTo != "" && fireMessageId != ""){
-			fm.send(new RemoteMessage.Builder(fireTo)
-				.setMessageId(fireMessageId)
-				.addData("message", fireMessage)
-				.setTtl(ttl)
-				.build());
+			fm.send(rm.build());
 		} else {
 			Log.e(LCAT, "Please set 'to' and 'messageId'");
 		}

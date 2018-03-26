@@ -13,6 +13,7 @@ import android.util.Log;
 import java.util.HashMap;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import org.appcelerator.kroll.KrollDict;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -39,6 +40,12 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 			msg.put("from", remoteMessage.getFrom());
 			msg.put("title", remoteMessage.getNotification().getTitle());
 			msg.put("body", remoteMessage.getNotification().getBody());
+			msg.put("to", remoteMessage.getTo());
+			msg.put("ttl", remoteMessage.getTtl());
+			msg.put("messageId", remoteMessage.getMessageId());
+			msg.put("messageType", remoteMessage.getMessageType());
+			msg.put("data", new KrollDict(remoteMessage.getData()));
+			msg.put("sendTime", remoteMessage.getSentTime());
 			CloudMessagingModule.getInstance().onMessageReceived(msg);
 		}
 	}

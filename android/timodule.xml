@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:module xmlns:ti="http://ti.appcelerator.org" xmlns:android="http://schemas.android.com/apk/res/android">
-	<!-- Similar to tiapp.xml, but contains module/platform specific configuration in <iphone> and <android> sections -->
-	<iphone></iphone>
+	<!-- Configure the Android platform by added the required permissions, services and notification receiver -->
 	<android xmlns:android="http://schemas.android.com/apk/res/android">
 		<manifest package="firebase.cloudmessaging">
 			<uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -29,6 +28,7 @@
 		</manifest>
 	</android>
 	<modules>
+		<!-- The Ti.PlayServices module is required to resolve module-independent Play Services dependency -->
 		<module platform="android">ti.playservices</module>
 	</modules>
 </ti:module>

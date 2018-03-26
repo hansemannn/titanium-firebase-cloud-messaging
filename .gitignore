@@ -27,7 +27,13 @@ android/.classpath
 android/.settings
 android/dist/
 android/launch-*
+android/example/
 nbproject
 /metadata.json
 /ios/metadata.json
 ios/firebase.cloudmessaging-iphone-*.zip
+
+android/java-sources.txt
+android/build.properties
+android/.project
+android/platform/README.md

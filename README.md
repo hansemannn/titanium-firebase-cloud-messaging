@@ -16,7 +16,7 @@ Use the native Firebase SDK in Axway Titanium. This repository is part of the [T
 
 ##### `registerForPushNotifications()`
 
-##### `appDidReceiveMessage(parameters)`
+##### `appDidReceiveMessage(parameters)`  - iOS only
   - `parameters` (Dictionary)
 
 Note: Only call this method if method swizzling is disabled (enabled by default). Messages are received via the native delegates instead,
@@ -24,10 +24,10 @@ so receive the `gcm.message_id` key from the notification payload instead.
   
 ##### `sendMessage(parameters)`
   - `parameters` (Dictionary)
-    - `message` (String)
     - `messageID` (String)
     - `to` (String)
     - `timeToLive` (Number)
+    - `data` (Dictionary)
   
 ##### `subcribeToTopic(topic)`
   - `topic` (String)
@@ -39,7 +39,7 @@ so receive the `gcm.message_id` key from the notification payload instead.
 
 ##### `fcmToken` (String, get)
 
-##### `apnsToken` (String, set)
+##### `apnsToken` (String, set) - iOS only
 
 ##### `shouldEstablishDirectChannel` (Number, get/set)
 
@@ -56,10 +56,69 @@ are still delivered via the Titanium notification events, e.g. `notification` an
 
 ## Example
 ```js
-var FirebaseCloudMessaging = require('firebase.cloudmessaging');
+var fcm = require('firebase.cloudmessaging');
+fcm.registerForPushNotifications();
+fcm.addEventListener("didRefreshRegistrationToken", onToken);
+fcm.addEventListener("didReceiveMessage", onMessage);
 
-Ti.API.info('FCM-Token: ' + FirebaseCloudMessaging.fcmToken);
+function onToken(e){
+    // got token
+    Ti.API.info("Token: " + e.token);
+}
+
+function onMessage(e){
+    // got message
+    Ti.API.info("Message", e.message);
+}
+
+// check if token is already available
+if (fcm.fcmToken != null){
+    Ti.API.info('FCM-Token: ' + fcm.fcmToken);
+} else {
+    Ti.API.info('Token is empty. Wait for the token callback.');
+}
+
+// subscribe to topic
+fcm.subcribeToTopic("testTopic");
 ```
+
+## Send FCM messages with PHP
+To test your app you can use this PHP script to send messages to the device/topic:
+
+```php
+<?php $url = 'https://fcm.googleapis.com/fcm/send';
+
+	$fields = array (
+			'to' => "/topics/testTopic", // or device token
+			'notification' => array (
+					"title" => "TiFirebaseMessaging",
+					"body" => "Message received"
+			),
+			"data" => array(
+				"key1" => "value1",
+				"key2" => "value2"
+			)
+	);
+
+	$headers = array (
+			'Authorization: key=SERVER_ID_FROM_FIREBASE_SETTIGNS_CLOUD_MESSAGING',
+			'Content-Type: application/json'
+	);
+
+	$ch = curl_init ();
+	curl_setopt ( $ch, CURLOPT_URL, $url );
+	curl_setopt ( $ch, CURLOPT_POST, true );
+	curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
+	curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
+	curl_setopt ( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
+
+	$result = curl_exec ( $ch );
+	echo $result;
+	curl_close ( $ch );
+?>
+```
+
+Run it locally with `php filelane.php` or put it on a webserver where you can execute PHP files.
 
 ## Build
 ```js

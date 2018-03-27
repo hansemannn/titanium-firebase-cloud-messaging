@@ -24,7 +24,7 @@ import java.util.HashMap;
 import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
 
-@Kroll.module(name="CloudMessaging", id="firebase.cloudmessaging")
+@Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
 public class CloudMessagingModule extends KrollModule
 {
 
@@ -84,12 +84,12 @@ public class CloudMessagingModule extends KrollModule
 		rm.setTtl(ttl);
 
 		// add custom data
-		Map<String, String> data = (HashMap)obj.get("data");
-		for (Object o:data.keySet()) {
+		Map<String, String> data = (HashMap) obj.get("data");
+		for (Object o : data.keySet()) {
 			rm.addData((String) o, data.get(o));
 		}
 
-		if (fireTo != "" && fireMessageId != ""){
+		if (fireTo != "" && fireMessageId != "") {
 			fm.send(rm.build());
 		} else {
 			Log.e(LCAT, "Please set 'to' and 'messageId'");
@@ -126,7 +126,8 @@ public class CloudMessagingModule extends KrollModule
 		// empty
 	}
 
-	public static CloudMessagingModule getInstance() {
+	public static CloudMessagingModule getInstance()
+	{
 		return instance;
 	}
 }

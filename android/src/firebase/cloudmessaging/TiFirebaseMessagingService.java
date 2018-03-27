@@ -15,22 +15,26 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import org.appcelerator.kroll.KrollDict;
 
-public class TiFirebaseMessagingService extends FirebaseMessagingService {
+public class TiFirebaseMessagingService extends FirebaseMessagingService
+{
 
 	private static final String TAG = "FirebaseMsgService";
 
 	@Override
-	public void onMessageSent(String msgID) {
+	public void onMessageSent(String msgID)
+	{
 		Log.d(TAG, "Message sent: " + msgID);
 	}
 
 	@Override
-	public void onSendError(String msgID, Exception exception) {
+	public void onSendError(String msgID, Exception exception)
+	{
 		Log.e(TAG, "Sent Error: " + msgID + " " + exception);
 	}
 
 	@Override
-	public void onMessageReceived(RemoteMessage remoteMessage) {
+	public void onMessageReceived(RemoteMessage remoteMessage)
+	{
 		Log.d(TAG, "From: " + remoteMessage.getFrom());
 
 		if (remoteMessage.getNotification() != null) {

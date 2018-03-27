@@ -1,8 +1,10 @@
 # Firebase Cloud Messaging - Titanium Module
-Use the native Firebase SDK in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
+
+Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
 ## Requirements
-- [x] Titanium SDK 6.2.0 or later
+- [x] iOS: Titanium SDK 6.2.0+
+- [x] Android: Titanium SDK 6.2.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 
 ## Download
 - [x] [Stable release](https://github.com/hansemannn/titanium-firebase-cloud-messaging/releases)
@@ -48,7 +50,7 @@ so receive the `gcm.message_id` key from the notification payload instead.
 ##### `didReceiveMessage`
   - `message` (Dictionary)
   
-Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
+iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
 are still delivered via the Titanium notification events, e.g. `notification` and `remotenotification`.
   
 ##### `didRefreshRegistrationToken`
@@ -56,30 +58,37 @@ are still delivered via the Titanium notification events, e.g. `notification` an
 
 ## Example
 ```js
+var core = require('firebase.core');
 var fcm = require('firebase.cloudmessaging');
-fcm.registerForPushNotifications();
-fcm.addEventListener("didRefreshRegistrationToken", onToken);
-fcm.addEventListener("didReceiveMessage", onMessage);
 
-function onToken(e){
-    // got token
-    Ti.API.info("Token: " + e.token);
+// Configure core module (required for all Firebase modules)
+core.configure();
+
+// Called when the Firebase token is ready
+fcm.addEventListener('didRefreshRegistrationToken', onToken);
+
+// Called when direct messages arrive. Note that these are different from push notifications
+fcm.addEventListener('didReceiveMessage', onMessage);
+
+fcm.registerForPushNotifications();
+
+function onToken(e) {
+    Ti.API.info('Token', e.fcmToken);
 }
 
-function onMessage(e){
-    // got message
-    Ti.API.info("Message", e.message);
+function onMessage(e) {
+    Ti.API.info('Message', e.message);
 }
 
 // check if token is already available
-if (fcm.fcmToken != null){
-    Ti.API.info('FCM-Token: ' + fcm.fcmToken);
+if (fcm.fcmToken !== null) {
+    Ti.API.info('FCM-Token', fcm.fcmToken);
 } else {
-    Ti.API.info('Token is empty. Wait for the token callback.');
+    Ti.API.info('Token is empty. Waiting for the token callback ...');
 }
 
 // subscribe to topic
-fcm.subcribeToTopic("testTopic");
+fcm.subcribeToTopic('testTopic');
 ```
 
 ## Send FCM messages with PHP
@@ -89,14 +98,14 @@ To test your app you can use this PHP script to send messages to the device/topi
 <?php $url = 'https://fcm.googleapis.com/fcm/send';
 
 	$fields = array (
-			'to' => "/topics/testTopic", // or device token
+			'to' => '/topics/testTopic', // or device token
 			'notification' => array (
-					"title" => "TiFirebaseMessaging",
-					"body" => "Message received"
+					'title' => 'TiFirebaseMessaging',
+					'body' => 'Message received'
 			),
-			"data" => array(
-				"key1" => "value1",
-				"key2" => "value2"
+			'data' => array(
+				'key1' => 'value1',
+				'key2' => 'value2'
 			)
 	);
 
@@ -121,12 +130,21 @@ To test your app you can use this PHP script to send messages to the device/topi
 Run it locally with `php filelane.php` or put it on a webserver where you can execute PHP files.
 
 ## Build
+
+### iOS
+
 ```js
 cd ios
 appc ti build -p ios --build-only
 ```
 
+### Android
+
+```js
+cd android
+appc ti build -p android --build-only
+```
+
 ## Legal
 
-This module is Copyright (c) 2017-Present by Appcelerator, Inc. All Rights Reserved. 
-Usage of this module is subject to the Terms of Service agreement with Appcelerator, Inc.  
+(c) 2017-Present by Hans Knöchel & Michael Gangolf

@@ -4,7 +4,7 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 
 ## Requirements
 - [x] iOS: Titanium SDK 6.2.0+
-- [x] Android: Titanium SDK 6.2.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
+- [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 
 ## Download
 - [x] [Stable release](https://github.com/hansemannn/titanium-firebase-cloud-messaging/releases)

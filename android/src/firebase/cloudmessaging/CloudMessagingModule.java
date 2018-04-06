@@ -51,14 +51,14 @@ public class CloudMessagingModule extends KrollModule
 	}
 
 	@Kroll.method
-	public void subcribeToTopic(String topic)
+	public void subscribeToTopic(String topic)
 	{
 		FirebaseMessaging.getInstance().subscribeToTopic(topic);
 		Log.d(LCAT, "subscribe to " + topic);
 	}
 
 	@Kroll.method
-	public void unsubcribeFromTopic(String topic)
+	public void unsubscribeFromTopic(String topic)
 	{
 		FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
 		Log.d(LCAT, "unsubscribe from " + topic);

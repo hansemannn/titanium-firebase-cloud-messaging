@@ -23,20 +23,20 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 
 Note: Only call this method if method swizzling is disabled (enabled by default). Messages are received via the native delegates instead,
 so receive the `gcm.message_id` key from the notification payload instead.
-  
+
 ##### `sendMessage(parameters)`
   - `parameters` (Dictionary)
     - `messageID` (String)
     - `to` (String)
     - `timeToLive` (Number)
     - `data` (Dictionary)
-  
-##### `subcribeToTopic(topic)`
+
+##### `subscribeToTopic(topic)`
   - `topic` (String)
 
-##### `unsubcribeFromTopic(topic)`
+##### `unsubscribeFromTopic(topic)`
   - `topic` (String)
-  
+
 #### Properties
 
 ##### `fcmToken` (String, get)
@@ -49,10 +49,10 @@ so receive the `gcm.message_id` key from the notification payload instead.
 
 ##### `didReceiveMessage`
   - `message` (Dictionary)
-  
+
 iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
 are still delivered via the Titanium notification events, e.g. `notification` and `remotenotification`.
-  
+
 ##### `didRefreshRegistrationToken`
   - `fcmToken` (String)
 
@@ -88,7 +88,7 @@ if (fcm.fcmToken !== null) {
 }
 
 // subscribe to topic
-fcm.subcribeToTopic('testTopic');
+fcm.subscribeToTopic('testTopic');
 ```
 
 ## Send FCM messages with PHP

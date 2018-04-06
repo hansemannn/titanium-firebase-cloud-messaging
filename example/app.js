@@ -28,4 +28,4 @@ if (fcm.fcmToken !== null) {
 }
 
 // subscribe to topic
-fcm.subcribeToTopic('testTopic');
+fcm.subscribeToTopic('testTopic');

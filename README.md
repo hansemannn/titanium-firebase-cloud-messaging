@@ -3,7 +3,7 @@
 Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
 ## Requirements
-- [x] iOS: Titanium SDK 6.2.0+
+- [x] iOS: Titanium SDK 6.3.0+
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 
 ## Download

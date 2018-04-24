@@ -3,7 +3,7 @@
 Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
 ## Requirements
-- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module
+- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module. The options `{googleAppID: '...', GCMSenderID: '...'}` are required, or `{file: 'myplist.plist'}`.
 - [x] iOS: Titanium SDK 6.3.0+
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 
@@ -20,17 +20,17 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 ##### `registerForPushNotifications()`
 
 ##### `appDidReceiveMessage(parameters)`  - iOS only
-  - `parameters` (Dictionary)
+  - `parameters` (Object)
 
 Note: Only call this method if method swizzling is disabled (enabled by default). Messages are received via the native delegates instead,
 so receive the `gcm.message_id` key from the notification payload instead.
 
 ##### `sendMessage(parameters)`
-  - `parameters` (Dictionary)
+  - `parameters` (Object)
     - `messageID` (String)
     - `to` (String)
     - `timeToLive` (Number)
-    - `data` (Dictionary)
+    - `data` (Object)
 
 ##### `subscribeToTopic(topic)`
   - `topic` (String)
@@ -49,10 +49,10 @@ so receive the `gcm.message_id` key from the notification payload instead.
 #### Events
 
 ##### `didReceiveMessage`
-  - `message` (Dictionary)
+  - `message` (Object)
 
 iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
-are still delivered via the Titanium notification events, e.g. `notification` and `remotenotification`.
+are still delivered via the Titanium notification events, e.g. `Ti.App.iOS.addEventListener('notification', function(n) {});` and `Ti.App.iOS.addEventListener('remotenotificationaction', function(n) {});` .
 
 ##### `didRefreshRegistrationToken`
   - `fcmToken` (String)
@@ -62,33 +62,34 @@ are still delivered via the Titanium notification events, e.g. `notification` an
 var core = require('firebase.core');
 var fcm = require('firebase.cloudmessaging');
 
-// Configure core module (required for all Firebase modules)
-core.configure();
+// Configure core module (required for all Firebase modules).
+core.configure({
+    GCMSenderID: '...',
+    googleAppID: '...', // Differs between Android and iOS.
+    // file: 'GoogleService-Info.plist' // If using a plist (iOS only).
+});
 
-// Called when the Firebase token is ready
-fcm.addEventListener('didRefreshRegistrationToken', onToken);
+// Called when the Firebase token is registered or refreshed.
+fcm.addEventListener('didRefreshRegistrationToken', function(e) {
+    Ti.API.info('Token', e.fcmToken);
+});
 
-// Called when direct messages arrive. Note that these are different from push notifications
-fcm.addEventListener('didReceiveMessage', onMessage);
+// Called when direct messages arrive. Note that these are different from push notifications.
+fcm.addEventListener('didReceiveMessage', function(e) {
+    Ti.API.info('Message', e.message);
+});
 
+// Register the device with the FCM service.
 fcm.registerForPushNotifications();
 
-function onToken(e) {
-    Ti.API.info('Token', e.fcmToken);
-}
-
-function onMessage(e) {
-    Ti.API.info('Message', e.message);
-}
-
-// check if token is already available
-if (fcm.fcmToken !== null) {
+// Check if token is already available.
+if (fcm.fcmToken) {
     Ti.API.info('FCM-Token', fcm.fcmToken);
 } else {
     Ti.API.info('Token is empty. Waiting for the token callback ...');
 }
 
-// subscribe to topic
+// Subscribe to a topic.
 fcm.subscribeToTopic('testTopic');
 ```
 
@@ -96,35 +97,36 @@ fcm.subscribeToTopic('testTopic');
 To test your app you can use this PHP script to send messages to the device/topic:
 
 ```php
-<?php $url = 'https://fcm.googleapis.com/fcm/send';
+<?php
+    $url = 'https://fcm.googleapis.com/fcm/send';
 
-	$fields = array (
-			'to' => '/topics/testTopic', // or device token
-			'notification' => array (
-					'title' => 'TiFirebaseMessaging',
-					'body' => 'Message received'
-			),
-			'data' => array(
-				'key1' => 'value1',
-				'key2' => 'value2'
-			)
-	);
+    $fields = [
+        'to' => '/topics/testTopic', // or device token
+        'notification' => [
+            'title' => 'TiFirebaseMessaging',
+            'body' => 'Message received'
+        ],
+        'data' => [
+            'key1' => 'value1',
+            'key2' => 'value2'
+        ]
+    ];
 
-	$headers = array (
-			'Authorization: key=SERVER_ID_FROM_FIREBASE_SETTIGNS_CLOUD_MESSAGING',
-			'Content-Type: application/json'
-	);
+    $headers = [
+        'Authorization: key=SERVER_ID_FROM_FIREBASE_SETTIGNS_CLOUD_MESSAGING', 'Content-Type: application/json'
+    ];
+    $ch = curl_init();
 
-	$ch = curl_init ();
-	curl_setopt ( $ch, CURLOPT_URL, $url );
-	curl_setopt ( $ch, CURLOPT_POST, true );
-	curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
-	curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-	curl_setopt ( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
 
-	$result = curl_exec ( $ch );
-	echo $result;
-	curl_close ( $ch );
+    $result = curl_exec($ch);
+
+    echo $result;
+    curl_close($ch);
 ?>
 ```
 

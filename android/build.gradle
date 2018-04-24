@@ -7,12 +7,11 @@ repositories {
 }
 
 dependencies {
-compile 'com.google.firebase:firebase-iid:15.0.0'
-compile 'com.google.firebase:firebase-messaging:15.0.0'
+  compile 'com.google.firebase:firebase-messaging:11.0.4'
 }
 
 configurations.all {
-    transitive = false
+  transitive = false
 }
 
 task getDeps(type: Copy) {

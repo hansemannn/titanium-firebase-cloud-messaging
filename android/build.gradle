@@ -7,6 +7,7 @@ repositories {
 }
 
 dependencies {
+compile 'com.google.firebase:firebase-iid:15.0.0'
 compile 'com.google.firebase:firebase-messaging:15.0.0'
 }
 

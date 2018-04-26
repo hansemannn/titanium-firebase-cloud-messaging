@@ -3,7 +3,8 @@
 Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
 ## Requirements
-- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module. The options `{googleAppID: '...', GCMSenderID: '...'}` are required, or `{file: 'myplist.plist'}`.
+- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module. 
+The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
 - [x] iOS: Titanium SDK 6.3.0+
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 
@@ -52,7 +53,16 @@ so receive the `gcm.message_id` key from the notification payload instead.
   - `message` (Object)
 
 iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
-are still delivered via the Titanium notification events, e.g. `Ti.App.iOS.addEventListener('notification', function(n) {});` and `Ti.App.iOS.addEventListener('remotenotificationaction', function(n) {});` .
+are still delivered via the Titanium notification events, e.g. 
+```js
+Ti.App.iOS.addEventListener('notification', function(event) {
+  // Handle foreground notification
+});
+
+Ti.App.iOS.addEventListener('remotenotificationaction', function(event) {
+  // Handle background notification action click
+});
+```
 
 ##### `didRefreshRegistrationToken`
   - `fcmToken` (String)

@@ -48,7 +48,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			msg.put("messageType", remoteMessage.getMessageType());
 			msg.put("data", new KrollDict(remoteMessage.getData()));
 			msg.put("sendTime", remoteMessage.getSentTime());
-			CloudMessagingModule.getInstance().onMessageReceived(msg);
+
+			if (CloudMessagingModule.getInstance() != null) {
+				CloudMessagingModule.getInstance().onMessageReceived(msg);
+			}
 		}
 	}
 }

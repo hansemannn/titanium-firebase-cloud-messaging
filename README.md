@@ -12,6 +12,39 @@ The options `googleAppID` and `GCMSenderID` are required for Android, or `file` 
 - [x] [Stable release](https://github.com/hansemannn/titanium-firebase-cloud-messaging/releases)
 - [x] [![gitTio](http://hans-knoechel.de/shields/shield-gittio.svg)](http://gitt.io/component/firebase.cloudmessaging)
 
+## iOS Notes
+
+To register for push notifications on iOS, first register for notification settings, then for the push notifications
+and finally for the Firebase messaging (thanks to @garycrook for the snippet):
+```js
+var FirebaseCloud = require('firebase.cloudmessaging');
+
+// Listen to the notification settings event
+Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
+  // Remove the event again to prevent duplicate calls through the Firebase API
+  Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
+  
+  // Register for push notifications
+  Ti.Network.registerForPushNotifications({
+    success: function () { ... },
+    error: function () { ... },
+    callback: function () { ... } // Fired for all kind of notifications (foreground, background & closed)
+  });
+  
+  // Register for Firebase Cloud Messaging
+	FirebaseCloud.registerForPushNotifications();
+});
+
+// Register for the notification settings event
+Ti.App.iOS.registerUserNotificationSettings({
+  types: [
+    Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT,
+    Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND,
+    Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE
+  ]
+});
+```
+
 ## API's
 
 ### `FirebaseCloudMessaging`

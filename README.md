@@ -15,7 +15,7 @@ The options `googleAppID` and `GCMSenderID` are required for Android, or `file` 
 ## iOS Notes
 
 To register for push notifications on iOS, first register for notification settings, then for the push notifications
-and finally for the Firebase messaging (thanks to @garycrook for the snippet):
+and finally for the Firebase messaging (thanks to [@garycrook](https://github.com/garycrook) for the snippet):
 ```js
 var FirebaseCloud = require('firebase.cloudmessaging');
 

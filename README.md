@@ -72,6 +72,15 @@ so receive the `gcm.message_id` key from the notification payload instead.
 ##### `unsubscribeFromTopic(topic)`
   - `topic` (String)
 
+##### `createNotificationChannel(parameters)`
+https://developer.android.com/reference/android/app/NotificationChannel
+  - `parameters` (Object)
+    - `sound` (String) - refers to a sound file (without extension) at `platform/android/res/raw`
+    either this or channelId is required. If sound == "default" or not passed in, will use the default sound. If sound == "silent" the channel will have no sound
+    - `channelId` (String)
+    - `channelName` (String) optional, defaults to `channelId`
+    - `importance` (String) optional
+
 #### Properties
 
 ##### `fcmToken` (String, get)
@@ -121,6 +130,14 @@ fcm.addEventListener('didRefreshRegistrationToken', function(e) {
 fcm.addEventListener('didReceiveMessage', function(e) {
     Ti.API.info('Message', e.message);
 });
+
+//For configuring custom sounds and importance for the generated system notifications when app is in the background
+fcm.createNotificationChannel({
+    sound: 'warm_sound',
+    channelId: 'general',
+    channelName: 'General Notifications',
+    importance: 'high' //will pop in from the top and make a sound
+})
 
 // Register the device with the FCM service.
 fcm.registerForPushNotifications();

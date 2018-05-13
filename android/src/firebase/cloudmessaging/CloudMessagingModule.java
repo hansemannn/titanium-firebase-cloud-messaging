@@ -8,6 +8,13 @@
  */
 package firebase.cloudmessaging;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.KrollObject;
 import org.appcelerator.kroll.annotations.Kroll;
@@ -113,6 +120,42 @@ public class CloudMessagingModule extends KrollModule
 			fireEvent("didReceiveMessage", data);
 		}
 	}
+
+    @Kroll.method
+	public void createNotificationChannel(KrollDict options)
+    {
+        Log.d(LCAT, "createNotificationChannel " + options.toString());
+        Context context = Utils.getApplicationContext();
+        String sound = (String) Utils.getOrDefault(options, "sound", "default");
+        String importance = (String) Utils.getOrDefault(options, "importance", "default");
+        String channelId = (String) Utils.getOrDefault(options, "channelId", sound);
+        String channelName = (String) Utils.getOrDefault(options, "channelName", channelId);
+        int importanceVal = NotificationManager.IMPORTANCE_DEFAULT;
+        if (importance.equals("low")) {
+            importanceVal = NotificationManager.IMPORTANCE_LOW;
+        } else if (importance.equals("high")) {
+            importanceVal = NotificationManager.IMPORTANCE_HIGH;
+        }
+        
+        Uri soundUri = null;
+        if ("default".equals(sound)) {
+            soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        } else if (!"silent".equals(sound)){
+            String path = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + Utils.getResourceIdentifier("raw", sound);
+            Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + path);
+            soundUri = Uri.parse(path);
+        }
+        
+        NotificationChannel channel = new NotificationChannel(channelId, channelName, importanceVal);
+        if (soundUri != null) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE).build();
+            channel.setSound(soundUri, audioAttributes);
+        }
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(channel);
+    }
 
 	@Kroll.getProperty
 	public String fcmToken()

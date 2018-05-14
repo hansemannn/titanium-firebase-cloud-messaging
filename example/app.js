@@ -1,5 +1,6 @@
 var core = require('firebase.core');
 var fcm = require('firebase.cloudmessaging');
+var isAndroid = Ti.Platform.osname === 'android';
 
 // Configure core module (required for all Firebase modules)
 core.configure();
@@ -20,12 +21,13 @@ function onMessage(e) {
     Ti.API.info('Message', e.message);
 }
 
-//For configuring custom sounds and importance for the generated system notifications when app is in the background
-fcm.createNotificationChannel({
-	sound: 'warm_sound',
-	channelId: 'general',
-	channelName: 'General Notifications',
-	importance: 'high' //will pop in from the top and make a sound
+// Android: For configuring custom sounds and importance for the generated system 
+// notifications when app is in the background
+isAndroid && fcm.createNotificationChannel({
+  sound: 'warn_sound',
+  channelId: 'general',
+  channelName: 'General Notifications',
+  importance: 'high' //will pop in from the top and make a sound
 });
 
 // check if token is already available

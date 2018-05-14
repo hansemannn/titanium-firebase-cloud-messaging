@@ -8,6 +8,7 @@
  */
 package firebase.cloudmessaging;
 
+import android.os.Build;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
@@ -124,6 +125,9 @@ public class CloudMessagingModule extends KrollModule
     @Kroll.method
 	public void createNotificationChannel(KrollDict options)
     {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
         Log.d(LCAT, "createNotificationChannel " + options.toString());
         Context context = Utils.getApplicationContext();
         String sound = (String) Utils.getOrDefault(options, "sound", "default");

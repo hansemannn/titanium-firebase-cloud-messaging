@@ -72,14 +72,16 @@ so receive the `gcm.message_id` key from the notification payload instead.
 ##### `unsubscribeFromTopic(topic)`
   - `topic` (String)
 
-##### `createNotificationChannel(parameters)`
-https://developer.android.com/reference/android/app/NotificationChannel
+##### `createNotificationChannel(parameters)` - Android-only
+
   - `parameters` (Object)
     - `sound` (String) - refers to a sound file (without extension) at `platform/android/res/raw`
     either this or channelId is required. If sound == "default" or not passed in, will use the default sound. If sound == "silent" the channel will have no sound
     - `channelId` (String)
     - `channelName` (String) optional, defaults to `channelId`
     - `importance` (String) optional
+    
+Read more in the [official Android docs](https://developer.android.com/reference/android/app/NotificationChannel).
 
 #### Properties
 
@@ -131,9 +133,10 @@ fcm.addEventListener('didReceiveMessage', function(e) {
     Ti.API.info('Message', e.message);
 });
 
-//For configuring custom sounds and importance for the generated system notifications when app is in the background
-fcm.createNotificationChannel({
-    sound: 'warm_sound',
+// Android-only: For configuring custom sounds and importance for the generated system 
+// notifications when app is in the background
+OS_ANDROID && fcm.createNotificationChannel({
+    sound: 'warn_sound',
     channelId: 'general',
     channelName: 'General Notifications',
     importance: 'high' //will pop in from the top and make a sound

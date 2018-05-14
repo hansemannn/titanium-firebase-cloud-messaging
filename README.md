@@ -49,7 +49,7 @@ Ti.App.iOS.registerUserNotificationSettings({
 
 Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
 
-The module sets the notification tray icon taking it from `/platform/android/res/drawable-*/notification-icon.png`.
+The module sets the notification tray icon taking it from `/platform/android/res/drawable-*/notification_icon.png`.
 
 It should be flat (no gradients), white and face-on perspective.
 
@@ -63,23 +63,23 @@ It should be flat (no gradients), white and face-on perspective.
 88 × 88 area in 96 × 96 (xxxhdpi)
 ```
 
-You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notification-icon.png`.
+You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notification_icon.png`.
 
 ```sh
 #!/bin/sh
 
-ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notification-icon.png"
+ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notification_icon.png"
 if [ -f "$ICON_SOURCE" ]; then
 	mkdir -p "app/platform/android/res/drawable-xxhdpi"
 	mkdir -p "app/platform/android/res/drawable-xhdpi"
 	mkdir -p "app/platform/android/res/drawable-hdpi"
 	mkdir -p "app/platform/android/res/drawable-mdpi"
-	convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notification-icon.png"
-	convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notification-icon.png"
-	convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notification-icon.png"
-	convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notification-icon.png"
+	convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notification_icon.png"
+	convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notification_icon.png"
+	convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notification_icon.png"
+	convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notification_icon.png"
 else
-	echo "No 'notification-icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
+	echo "No 'notification_icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
 fi
 ```
 

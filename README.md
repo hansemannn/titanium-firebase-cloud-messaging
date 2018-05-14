@@ -45,14 +45,15 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
-## Setting the Notification Icon
-Same as the way [ti.goosh](https://github.com/caffeinalab/ti.goosh) does it. From their docs:
+## Android: Setting the Notification Icon
 
-The module sets the notification tray icon taking it from `/platform/android/res/drawable-*/notificationicon.png`.
+Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
+
+The module sets the notification tray icon taking it from `/platform/android/res/drawable-*/notification-icon.png`.
 
 It should be flat (no gradients), white and face-on perspective.
 
-**NB: You have to generate the icon with all resolutions.**
+> **Note**: You should generate the icon for all resolutions.
 
 ```
 22 × 22 area in 24 × 24 (mdpi)
@@ -62,23 +63,23 @@ It should be flat (no gradients), white and face-on perspective.
 88 × 88 area in 96 × 96 (xxxhdpi)
 ```
 
-You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notificationicon.png`.
+You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notification-icon.png`.
 
 ```sh
 #!/bin/sh
 
-ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notificationicon.png"
+ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notification-icon.png"
 if [ -f "$ICON_SOURCE" ]; then
 	mkdir -p "app/platform/android/res/drawable-xxhdpi"
 	mkdir -p "app/platform/android/res/drawable-xhdpi"
 	mkdir -p "app/platform/android/res/drawable-hdpi"
 	mkdir -p "app/platform/android/res/drawable-mdpi"
-	convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notificationicon.png"
-	convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notificationicon.png"
-	convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notificationicon.png"
-	convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notificationicon.png"
+	convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notification-icon.png"
+	convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notification-icon.png"
+	convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notification-icon.png"
+	convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notification-icon.png"
 else
-	echo "No notificationicon.png found"
+	echo "No 'notification-icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
 fi
 ```
 

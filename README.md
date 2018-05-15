@@ -56,7 +56,9 @@ If you add this attribute within the `<application/>` section of your `tiapp.xml
            android:resource="@drawable/notification_icon"/>
 ```
 
-Then FCM will set the notification tray icon taking it from `/platform/android/res/drawable-*/notification_icon.png`.
+Then FCM will set the notification tray icon taking it from `[app*]/platform/android/res/drawable-*/notification_icon.png`.
+
+**\*** = Alloy
 
 It should be flat (no gradients), white and face-on perspective.
 

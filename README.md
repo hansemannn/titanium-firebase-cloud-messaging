@@ -45,6 +45,53 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
+## Android: Setting the Notification Icon
+
+Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
+
+If you add this attribute within the `<application/>` section of your `tiapp.xml`:
+
+```xml
+<meta-data android:name="com.google.firebase.messaging.default_notification_icon"
+           android:resource="@drawable/notification_icon"/>
+```
+
+Then FCM will set the notification tray icon taking it from `[app*]/platform/android/res/drawable-*/notification_icon.png`.
+
+**\*** = Alloy
+
+It should be flat (no gradients), white and face-on perspective.
+
+> **Note**: You should generate the icon for all resolutions.
+
+```
+22 × 22 area in 24 × 24 (mdpi)
+33 × 33 area in 36 × 36 (hdpi)
+44 × 44 area in 48 × 48 (xhdpi)
+66 × 66 area in 72 × 72 (xxhdpi)
+88 × 88 area in 96 × 96 (xxxhdpi)
+```
+
+You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notification_icon.png`.
+
+```sh
+#!/bin/sh
+
+ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notification_icon.png"
+if [ -f "$ICON_SOURCE" ]; then
+	mkdir -p "app/platform/android/res/drawable-xxhdpi"
+	mkdir -p "app/platform/android/res/drawable-xhdpi"
+	mkdir -p "app/platform/android/res/drawable-hdpi"
+	mkdir -p "app/platform/android/res/drawable-mdpi"
+	convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notification_icon.png"
+	convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notification_icon.png"
+	convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notification_icon.png"
+	convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notification_icon.png"
+else
+	echo "No 'notification_icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
+fi
+```
+
 ## API's
 
 ### `FirebaseCloudMessaging`

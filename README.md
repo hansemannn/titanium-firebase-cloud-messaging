@@ -49,7 +49,14 @@ Ti.App.iOS.registerUserNotificationSettings({
 
 Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
 
-The module sets the notification tray icon taking it from `/platform/android/res/drawable-*/notification_icon.png`.
+If you add this attribute within the `<application/>` section of your `tiapp.xml`:
+
+```xml
+<meta-data android:name="com.google.firebase.messaging.default_notification_icon"
+           android:resource="@drawable/notification_icon"/>
+```
+
+Then FCM will set the notification tray icon taking it from `/platform/android/res/drawable-*/notification_icon.png`.
 
 It should be flat (no gradients), white and face-on perspective.
 

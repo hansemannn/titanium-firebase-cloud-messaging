@@ -75,9 +75,8 @@ so receive the `gcm.message_id` key from the notification payload instead.
 ##### `createNotificationChannel(parameters)` - Android-only
 
   - `parameters` (Object)
-    - `sound` (String) - refers to a sound file (without extension) at `platform/android/res/raw`
-    either this or channelId is required. If sound == "default" or not passed in, will use the default sound. If sound == "silent" the channel will have no sound
-    - `channelId` (String)
+    - `sound` (String) optional, refers to a sound file (without extension) at `platform/android/res/raw`. If sound == "default" or not passed in, will use the default sound. If sound == "silent" the channel will have no sound
+    - `channelId` (String) optional, defaults to "default"
     - `channelName` (String) optional, defaults to `channelId`
     - `importance` (String) optional
     

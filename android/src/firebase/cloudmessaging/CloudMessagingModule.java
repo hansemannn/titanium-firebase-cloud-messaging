@@ -122,44 +122,47 @@ public class CloudMessagingModule extends KrollModule
 		}
 	}
 
-    @Kroll.method
+	@Kroll.method
 	public void createNotificationChannel(KrollDict options)
-    {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
-        }
-        Log.d(LCAT, "createNotificationChannel " + options.toString());
-        Context context = Utils.getApplicationContext();
-        String sound = (String) Utils.getOrDefault(options, "sound", "default");
-        String importance = (String) Utils.getOrDefault(options, "importance", "default");
-        String channelId = (String) Utils.getOrDefault(options, "channelId", sound);
-        String channelName = (String) Utils.getOrDefault(options, "channelName", channelId);
-        int importanceVal = NotificationManager.IMPORTANCE_DEFAULT;
-        if (importance.equals("low")) {
-            importanceVal = NotificationManager.IMPORTANCE_LOW;
-        } else if (importance.equals("high")) {
-            importanceVal = NotificationManager.IMPORTANCE_HIGH;
-        }
-        
-        Uri soundUri = null;
-        if ("default".equals(sound)) {
-            soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        } else if (!"silent".equals(sound)){
-            String path = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + Utils.getResourceIdentifier("raw", sound);
-            Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + path);
-            soundUri = Uri.parse(path);
-        }
-        
-        NotificationChannel channel = new NotificationChannel(channelId, channelName, importanceVal);
-        if (soundUri != null) {
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE).build();
-            channel.setSound(soundUri, audioAttributes);
-        }
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.createNotificationChannel(channel);
-    }
+	{
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+			return;
+		}
+		Log.d(LCAT, "createNotificationChannel " + options.toString());
+		Context context = Utils.getApplicationContext();
+		String sound = (String) options.optString("sound", "default");
+		String importance = (String) options.optString("importance", "default");
+		String channelId = (String) options.optString("channelId", "default");
+		String channelName = (String) options.optString("channelName", channelId);
+		int importanceVal = NotificationManager.IMPORTANCE_DEFAULT;
+		if (importance.equals("low")) {
+			importanceVal = NotificationManager.IMPORTANCE_LOW;
+		} else if (importance.equals("high")) {
+			importanceVal = NotificationManager.IMPORTANCE_HIGH;
+		}
+
+		Uri soundUri = null;
+		if (sound.equals("default")) {
+			soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		} else if (!sound.equals("silent")) {
+			String path = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/"
+						  + Utils.getResourceIdentifier("raw", sound);
+			Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + path);
+			soundUri = Uri.parse(path);
+		}
+
+		NotificationChannel channel = new NotificationChannel(channelId, channelName, importanceVal);
+		if (soundUri != null) {
+			AudioAttributes audioAttributes = new AudioAttributes.Builder()
+												  .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+												  .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+												  .build();
+			channel.setSound(soundUri, audioAttributes);
+		}
+		NotificationManager notificationManager =
+			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.createNotificationChannel(channel);
+	}
 
 	@Kroll.getProperty
 	public String fcmToken()

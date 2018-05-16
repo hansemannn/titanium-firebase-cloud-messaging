@@ -131,7 +131,7 @@ public class CloudMessagingModule extends KrollModule
 		Log.d(LCAT, "createNotificationChannel " + options.toString());
 		Context context = Utils.getApplicationContext();
 		String sound = (String) options.optString("sound", "default");
-		String importance = (String) options.optString("importance", "default");
+		String importance = (String) options.optString("importance", sound.equals("silent") ? "low" : "default");
 		String channelId = (String) options.optString("channelId", "default");
 		String channelName = (String) options.optString("channelName", channelId);
 		int importanceVal = NotificationManager.IMPORTANCE_DEFAULT;

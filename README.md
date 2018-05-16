@@ -228,14 +228,16 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 
 ```js
 cd ios
-appc ti build -p ios --build-only
+appc run -p ios --build-only
 ```
 
 ### Android
 
+> **Note**: When building for Android, make sure you have the [firebase.core](https://github.com/hansemannn/titanium-firebase-core) module installed globally (`~/Library/Application Support/Titanium/modules/android/firebase.core`). Otherwise, the firebase-iid library will not be referenced properly.
+
 ```js
 cd android
-appc ti build -p android --build-only
+appc run -p android --build-only
 ```
 
 ## Legal

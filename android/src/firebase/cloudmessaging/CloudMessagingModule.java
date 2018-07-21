@@ -178,6 +178,9 @@ public class CloudMessagingModule extends KrollModule
 
 	public static CloudMessagingModule getInstance()
 	{
-		return instance;
+		if (instance != null)
+			return instance;
+		else
+			return new CloudMessagingModule();
 	}
 }

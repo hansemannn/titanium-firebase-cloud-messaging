@@ -24,6 +24,8 @@
 						<category android:name="${tiapp.properties['id']}"/>
 					</intent-filter>
 				</receiver>
+
+				<activity android:name="firebase.cloudmessaging.PushHandlerActivity" android:exported="true"></activity>
 			</application>
 		</manifest>
 	</android>

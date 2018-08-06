@@ -14,6 +14,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -53,24 +54,30 @@ public class CloudMessagingModule extends KrollModule
 		// put module init code that needs to run when the application is created
 	}
 
-	@Override
-	public void onResume(Activity activity) 
-	{
-		Bundle extras = activity.getIntent().getExtras();
-		
-		if (extras != null) {
-			if (hasListeners("didReceiveNotificationBackground")) {
-				KrollDict data = new KrollDict();
+	@Kroll.method
+	private KrollDict getLastData() {
+		KrollDict data = new KrollDict();
 
-				for (String key : extras.keySet()) {
-        			data.put(key, extras.get(key));
- 				}
+		try {
+			Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
+			Bundle extras = intent.getExtras();
 
-				fireEvent("didReceiveNotificationBackground", data);
+			if (extras != null) {
+				if (extras.getString("google.message_id") != null) {
+					for (String key : extras.keySet()) {
+						data.put(key, extras.get(key));
+					}
+
+					data.put("inBackground", true);
+				}
+			} else {
+				Log.d(LCAT, "Empty extras in Intent");
 			}
+		} catch (Exception ex) {
+			Log.e(LCAT, "getLastData" + ex);
 		}
 
-		super.onResume(activity);
+		return data;
 	}
 
 	// Methods
@@ -98,6 +105,7 @@ public class CloudMessagingModule extends KrollModule
 	public void appDidReceiveMessage(KrollDict opt)
 	{
 		// empty
+		Log.d(LCAT, "::appDidReceiveMessage::");
 	}
 
 	@Kroll.method

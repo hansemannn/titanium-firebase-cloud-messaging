@@ -45,7 +45,15 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
-## Android: Setting the Notification Icon
+## Android:
+
+<img src="example/android_big_image.png"/><br/>
+_Big image notification with colored icon/appname_
+
+<img src="example/android_big_text.png"/><br/>
+_Big text notification with colored icon/appname_
+
+### Setting the Notification Icon
 
 Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
 
@@ -91,6 +99,26 @@ else
 	echo "No 'notification_icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
 fi
 ```
+
+### Data / Notification messages
+
+On Android there are two different messages that the phone can process: `Notification messages` and `Data messages`. A `Notification message` is processed by the system, the `Data message` is handeled by `showNotification()` in `TiFirebaseMessagingService`. Using the `notification` block inside the POSTFIELDS will send a `Notification message`.
+
+Supported data fields:
+* "title" => "string"
+* "message" => "string"
+* "big_text" => "string"
+* "big_text_summary" => "string"
+* "icon" => "Remote URL"
+* "image" => "Remote URL"
+* "force_show_in_foreground" => "Boolean" (show notification even app is in foreground)
+* "id" => "int"
+* "color" => will tint the app name and the small icon next to it
+
+Supported notification fields:
+* "title" => "string"
+* "body" => "string"
+
 
 ## API's
 
@@ -241,26 +269,7 @@ To test your app you can use this PHP script to send messages to the device/topi
 
 Run it locally with `php filelane.php` or put it on a webserver where you can execute PHP files.
 
-### Android
-
-On Android there are two different messages that the phone can process: `Notification messages` and `Data messages`. A `Notification message` is processed by the system, the `Data message` is handeled by `showNotification()` in `TiFirebaseMessagingService`. Using the `notification` block inside the POSTFIELDS will send a `Notification message`.
-
-Supported data fields:
-* "title" => "string"
-* "message" => "string"
-* "big_text" => "string"
-* "big_text_summary" => "string"
-* "icon" => "Remote URL"
-* "image" => "Remote URL"
-* "force_show_in_foreground" => "Boolean" (show notification even app is in foreground)
-* "id" => "int"
-* "color" => will tint the app name and the small icon next to it
-
-Supported notification fields:
-* "title" => "string"
-* "body" => "string"
-
-#### Example
+### Android example
 ```php
 <?php $url = 'https://fcm.googleapis.com/fcm/send';
 

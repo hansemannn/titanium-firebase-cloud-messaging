@@ -12,7 +12,7 @@ The options `googleAppID` and `GCMSenderID` are required for Android, or `file` 
 - [x] [Stable release](https://github.com/hansemannn/titanium-firebase-cloud-messaging/releases)
 - [x] [![gitTio](http://hans-knoechel.de/shields/shield-gittio.svg)](http://gitt.io/component/firebase.cloudmessaging)
 
-## iOS notes
+## iOS notes:
 
 To register for push notifications on iOS, first register for notification settings, then for the push notifications
 and finally for the Firebase messaging (thanks to [@garycrook](https://github.com/garycrook) for the snippet):

@@ -20,24 +20,18 @@ public class PushHandlerActivity extends Activity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		try {
-			Log.d(LCAT, "started");
 			super.onCreate(savedInstanceState);
 			finish();
 
 			CloudMessagingModule module = CloudMessagingModule.getInstance();
 			Context context = getApplicationContext();
-			String notification = getIntent().getStringExtra("fcm_extra");
+			String notification = getIntent().getStringExtra("fcm_data");
+			String data = getIntent().getStringExtra("data");
 
 			Intent launcherIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
 			launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 			launcherIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-			// if (module.hasMessageCallback()
-			// 	&& KrollRuntime.getInstance().getRuntimeState() != KrollRuntime.State.DISPOSED) {
-			// 	module.sendMessage(notification, true);
-			// } else {
-			launcherIntent.putExtra("fcm_extra", notification);
-			// }
+			launcherIntent.putExtra("fcm_data", notification);
 
 			startActivity(launcherIntent);
 

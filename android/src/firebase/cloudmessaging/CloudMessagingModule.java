@@ -31,6 +31,7 @@ import org.appcelerator.kroll.common.Log;
 import java.util.HashMap;
 import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
+import android.content.Intent;
 
 @Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
 public class CloudMessagingModule extends KrollModule
@@ -56,6 +57,7 @@ public class CloudMessagingModule extends KrollModule
 	public void registerForPushNotifications()
 	{
 		FirebaseInstanceId.getInstance().getToken();
+		parseBootIntent();
 	}
 
 	@Kroll.method
@@ -115,10 +117,14 @@ public class CloudMessagingModule extends KrollModule
 
 	public void onMessageReceived(HashMap message)
 	{
-		if (hasListeners("didReceiveMessage")) {
-			KrollDict data = new KrollDict();
-			data.put("message", new KrollDict(message));
-			fireEvent("didReceiveMessage", data);
+		try {
+			if (hasListeners("didReceiveMessage")) {
+				KrollDict data = new KrollDict();
+				data.put("message", new KrollDict(message));
+				fireEvent("didReceiveMessage", data);
+			}
+		} catch (Exception e) {
+			Log.e(LCAT, "" + e);
 		}
 	}
 
@@ -182,5 +188,23 @@ public class CloudMessagingModule extends KrollModule
 			return instance;
 		else
 			return new CloudMessagingModule();
+	}
+
+	public void parseBootIntent()
+	{
+		try {
+			Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
+			String notification = intent.getStringExtra("fcm_data");
+			if (notification != null) {
+				HashMap<String, Object> msg = new HashMap<String, Object>();
+				msg.put("data", notification);
+				onMessageReceived(msg);
+				intent.removeExtra("fcm_data");
+			} else {
+				Log.d(LCAT, "Empty notification in Intent");
+			}
+		} catch (Exception ex) {
+			Log.e(LCAT, "parseBootIntent" + ex);
+		}
 	}
 }

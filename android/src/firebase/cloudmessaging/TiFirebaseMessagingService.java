@@ -49,16 +49,20 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 	public void onMessageReceived(RemoteMessage remoteMessage)
 	{
 		HashMap<String, Object> msg = new HashMap<String, Object>();
+		CloudMessagingModule module = CloudMessagingModule.getInstance();
+		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
+		Boolean isVisibile = true;
 
 		if (remoteMessage.getData().size() > 0) {
 			// data message
-			showNotification(remoteMessage);
+			isVisibile = showNotification(remoteMessage);
 		}
 
 		if (remoteMessage.getNotification() != null) {
 			Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
 			msg.put("title", remoteMessage.getNotification().getTitle());
 			msg.put("body", remoteMessage.getNotification().getBody());
+			isVisibile = true;
 		} else {
 			Log.d(TAG, "Data message: " + remoteMessage.getData());
 		}
@@ -71,17 +75,19 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		msg.put("data", new KrollDict(remoteMessage.getData()));
 		msg.put("sendTime", remoteMessage.getSentTime());
 
-		if (CloudMessagingModule.getInstance() != null) {
-			CloudMessagingModule.getInstance().onMessageReceived(msg);
+		if (isVisibile || appInForeground) {
+			// app is in foreground or notification was show - send data to event receiver
+			module.onMessageReceived(msg);
 		}
 	}
 
-	private void showNotification(RemoteMessage remoteMessage)
+	private Boolean showNotification(RemoteMessage remoteMessage)
 	{
 		Map<String, String> params = remoteMessage.getData();
 		JSONObject jsonData = new JSONObject(params);
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
 		Boolean showNotification = true;
+		Context context = getApplicationContext();
 
 		if (appInForeground) {
 			showNotification = false;
@@ -91,8 +97,21 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			showNotification = TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
 		}
 
+		if (params.get("title") == null && params.get("message") == null && params.get("big_text") == null
+			&& params.get("big_text_summary") == null && params.get("ticker") == null && params.get("image") == null) {
+			// no actual content - don't show it
+			showNotification = false;
+		}
+
 		if (!showNotification) {
-			return;
+			// hidden notification - still send broadcast with data for next app start
+			Intent i = new Intent();
+			i.addCategory(Intent.CATEGORY_LAUNCHER);
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			i.putExtra("fcm_data", jsonData.toString());
+			sendBroadcast(i);
+
+			return false;
 		}
 
 		Intent notificationIntent = new Intent(this, PushHandlerActivity.class);
@@ -103,7 +122,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			PendingIntent.getActivity(this, new Random().nextInt(), notificationIntent, PendingIntent.FLAG_ONE_SHOT);
 
 		// Start building notification
-		Context context = getApplicationContext();
+
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
 		int builder_defaults = 0;
 		builder.setContentIntent(contentIntent);
@@ -133,6 +152,16 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			}
 		} catch (Exception ex) {
 			Log.e(TAG, "Smallicon exception: " + ex.getMessage());
+		}
+
+		if (params.get("color") != null && params.get("color") != "") {
+			try {
+				int color = TiConvert.toColor(params.get("color"));
+				builder.setColor(color);
+				builder.setColorized(true);
+			} catch (Exception ex) {
+				Log.e(TAG, "Color exception: " + ex.getMessage());
+			}
 		}
 
 		// Large icon
@@ -171,6 +200,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Send
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(null, id, builder.build());
+		return true;
 	}
 
 	private Bitmap getBitmapFromURL(String src) throws Exception

@@ -3,7 +3,7 @@
 Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
 ## Requirements
-- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module. 
+- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module.
 The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
 - [x] iOS: Titanium SDK 6.3.0+
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
@@ -23,14 +23,14 @@ var FirebaseCloud = require('firebase.cloudmessaging');
 Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
   // Remove the event again to prevent duplicate calls through the Firebase API
   Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
-  
+
   // Register for push notifications
   Ti.Network.registerForPushNotifications({
     success: function () { ... },
     error: function () { ... },
     callback: function () { ... } // Fired for all kind of notifications (foreground, background & closed)
   });
-  
+
   // Register for Firebase Cloud Messaging
 	FirebaseCloud.registerForPushNotifications();
 });
@@ -126,7 +126,7 @@ so receive the `gcm.message_id` key from the notification payload instead.
     - `channelId` (String) optional, defaults to "default"
     - `channelName` (String) optional, defaults to `channelId`
     - `importance` (String) optional, either "low", "high", "default". Defaults to "default", unless sound == "silent", then defaults to "low".
-    
+
 Read more in the [official Android docs](https://developer.android.com/reference/android/app/NotificationChannel).
 
 #### Properties
@@ -143,7 +143,7 @@ Read more in the [official Android docs](https://developer.android.com/reference
   - `message` (Object)
 
 iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
-are still delivered via the Titanium notification events, e.g. 
+are still delivered via the Titanium notification events, e.g.
 ```js
 Ti.App.iOS.addEventListener('notification', function(event) {
   // Handle foreground notification
@@ -179,7 +179,7 @@ fcm.addEventListener('didReceiveMessage', function(e) {
     Ti.API.info('Message', e.message);
 });
 
-// Android-only: For configuring custom sounds and importance for the generated system 
+// Android-only: For configuring custom sounds and importance for the generated system
 // notifications when app is in the background
 OS_ANDROID && fcm.createNotificationChannel({
     sound: 'warn_sound',
@@ -240,6 +240,25 @@ To test your app you can use this PHP script to send messages to the device/topi
 ```
 
 Run it locally with `php filelane.php` or put it on a webserver where you can execute PHP files.
+
+### Android
+
+On Android there are two different messages that the phone can process: `Notification messages` and `Data messages`. A `Notification message` is processed by the system, the `Data message` is handeled by `showNotification()` in `TiFirebaseMessagingService`. Using the `notification` block inside the POSTFIELDS will send a `Notification message`.
+
+Supported data fields:
+* "title" => "string"
+* "message" => "string"
+* "big_text" => "string"
+* "big_text_summary" => "string"
+* "icon" => "Remote URL"
+* "image" => "Remote URL"
+* "force_show_in_foreground" => "Boolean" (show notification even app is in foreground)
+* "id" => "int"
+
+Supported notification fields:
+* "title" => "string"
+* "body" => "string"
+
 
 ## Build
 

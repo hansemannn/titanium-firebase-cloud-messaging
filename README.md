@@ -254,10 +254,57 @@ Supported data fields:
 * "image" => "Remote URL"
 * "force_show_in_foreground" => "Boolean" (show notification even app is in foreground)
 * "id" => "int"
+* "color" => will tint the app name and the small icon next to it
 
 Supported notification fields:
 * "title" => "string"
 * "body" => "string"
+
+#### Example
+```php
+<?php $url = 'https://fcm.googleapis.com/fcm/send';
+
+	$fields = array (
+			'to' => "TOKEN_ID",
+			// 'to' => "/topics/test",
+			/* 'notification' => array (
+			 		"title" => "TiFirebaseMessaging",
+			 		"body" => "Message received 📱😂",
+			 		"timestamp"=>date('Y-m-d G:i:s'),
+			),*/
+			'data' => array(
+				"test1" => "value1",
+				"test2" => "value2",
+				"timestamp"=>date('Y-m-d G:i:s'),
+				"title" => "title",
+				"message" => "message",
+				"big_text"=>"big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text ",
+				"big_text_summary"=>"big_text_summary",
+				"icon" => "http://via.placeholder.com/150x150",
+				"image" => "http://via.placeholder.com/350x150",	// won't show the big_text
+				"force_show_in_foreground"=> true,
+				"color" => "#ff6600"
+			)
+	);
+
+	$headers = array (
+			'Authorization: key=API_KEY',
+			'Content-Type: application/json'
+	);
+
+	$ch = curl_init ();
+	curl_setopt ( $ch, CURLOPT_URL, $url );
+	curl_setopt ( $ch, CURLOPT_POST, true );
+	curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
+	curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
+	curl_setopt ( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
+
+	$result = curl_exec ( $ch );
+	echo $result."\n";
+	curl_close ( $ch );
+?>
+
+```
 
 
 ## Build

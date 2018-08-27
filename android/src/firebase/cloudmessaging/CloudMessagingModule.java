@@ -124,7 +124,7 @@ public class CloudMessagingModule extends KrollModule
 				fireEvent("didReceiveMessage", data);
 			}
 		} catch (Exception e) {
-			Log.e(LCAT, "" + e);
+			Log.e(LCAT, "Message exception: " + e.getMessage());
 		}
 	}
 

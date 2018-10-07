@@ -45,7 +45,47 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
-## Android: Setting the Notification Icon
+## Android Notes
+
+### Updates to the Manifest
+
+Merge the following keys to the `<android>` section of the tiapp.xml in order to use GCM.
+
+```xml
+<android xmlns:android="http://schemas.android.com/apk/res/android">
+	<manifest>
+		<application>
+			<service android:name="MY_PACKAGE_NAME.gcm.RegistrationIntentService" android:exported="false" />
+
+			<receiver android:name="com.google.android.gms.measurement.AppMeasurementReceiver" android:enabled="true">
+			   <intent-filter>
+				  <action android:name="com.google.android.gms.measurement.UPLOAD" />
+			   </intent-filter>
+			</receiver>  
+	
+			<service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
+			   <intent-filter>
+				  <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+			   </intent-filter>
+			</service>
+
+			<service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
+			   <intent-filter>
+				  <action android:name="com.google.android.c2dm.intent.SEND" />
+			   </intent-filter>
+			</service>
+
+			<service android:name="MY_PACKAGE_NAME.gcm.GcmIDListenerService" android:exported="false">
+			   <intent-filter>
+				  <action android:name="com.google.android.gms.iid.InstanceID" />
+			   </intent-filter>
+			</service>
+		</application>
+	</manifest>
+</android>   
+```
+
+### Setting the Notification Icon
 
 Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
 

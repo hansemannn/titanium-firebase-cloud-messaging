@@ -3,7 +3,7 @@
 Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
 ## Requirements
-- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module. 
+- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module.
 The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
 - [x] iOS: Titanium SDK 6.3.0+
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
@@ -12,7 +12,7 @@ The options `googleAppID` and `GCMSenderID` are required for Android, or `file` 
 - [x] [Stable release](https://github.com/hansemannn/titanium-firebase-cloud-messaging/releases)
 - [x] [![gitTio](http://hans-knoechel.de/shields/shield-gittio.svg)](http://gitt.io/component/firebase.cloudmessaging)
 
-## iOS Notes
+## iOS notes:
 
 To register for push notifications on iOS, first register for notification settings, then for the push notifications
 and finally for the Firebase messaging (thanks to [@garycrook](https://github.com/garycrook) for the snippet):
@@ -23,14 +23,14 @@ var FirebaseCloud = require('firebase.cloudmessaging');
 Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
   // Remove the event again to prevent duplicate calls through the Firebase API
   Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
-  
+
   // Register for push notifications
   Ti.Network.registerForPushNotifications({
     success: function () { ... },
     error: function () { ... },
     callback: function () { ... } // Fired for all kind of notifications (foreground, background & closed)
   });
-  
+
   // Register for Firebase Cloud Messaging
 	FirebaseCloud.registerForPushNotifications();
 });
@@ -45,7 +45,16 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
-## Android Notes
+
+## Android notes:
+
+<img src="example/android_big_image.png"/><br/>
+_Big image notification with colored icon/appname_
+
+<img src="example/android_big_text.png"/><br/>
+_Big text notification with colored icon/appname_
+
+
 
 ### Updates to the Manifest
 
@@ -132,6 +141,26 @@ else
 fi
 ```
 
+### Data / Notification messages
+
+On Android there are two different messages that the phone can process: `Notification messages` and `Data messages`. A `Notification message` is processed by the system, the `Data message` is handeled by `showNotification()` in `TiFirebaseMessagingService`. Using the `notification` block inside the POSTFIELDS will send a `Notification message`.
+
+Supported data fields:
+* "title" => "string"
+* "message" => "string"
+* "big_text" => "string"
+* "big_text_summary" => "string"
+* "icon" => "Remote URL"
+* "image" => "Remote URL"
+* "force_show_in_foreground" => "Boolean" (show notification even app is in foreground)
+* "id" => "int"
+* "color" => will tint the app name and the small icon next to it
+
+Supported notification fields:
+* "title" => "string"
+* "body" => "string"
+
+
 ## API's
 
 ### `FirebaseCloudMessaging`
@@ -166,7 +195,7 @@ so receive the `gcm.message_id` key from the notification payload instead.
     - `channelId` (String) optional, defaults to "default"
     - `channelName` (String) optional, defaults to `channelId`
     - `importance` (String) optional, either "low", "high", "default". Defaults to "default", unless sound == "silent", then defaults to "low".
-    
+
 Read more in the [official Android docs](https://developer.android.com/reference/android/app/NotificationChannel).
 
 #### Properties
@@ -183,7 +212,7 @@ Read more in the [official Android docs](https://developer.android.com/reference
   - `message` (Object)
 
 iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
-are still delivered via the Titanium notification events, e.g. 
+are still delivered via the Titanium notification events, e.g.
 ```js
 Ti.App.iOS.addEventListener('notification', function(event) {
   // Handle foreground notification
@@ -219,7 +248,7 @@ fcm.addEventListener('didReceiveMessage', function(e) {
     Ti.API.info('Message', e.message);
 });
 
-// Android-only: For configuring custom sounds and importance for the generated system 
+// Android-only: For configuring custom sounds and importance for the generated system
 // notifications when app is in the background
 OS_ANDROID && fcm.createNotificationChannel({
     sound: 'warn_sound',
@@ -280,6 +309,53 @@ To test your app you can use this PHP script to send messages to the device/topi
 ```
 
 Run it locally with `php filelane.php` or put it on a webserver where you can execute PHP files.
+
+### Android example
+```php
+<?php $url = 'https://fcm.googleapis.com/fcm/send';
+
+	$fields = array (
+			'to' => "TOKEN_ID",
+			// 'to' => "/topics/test",
+			/* 'notification' => array (
+			 		"title" => "TiFirebaseMessaging",
+			 		"body" => "Message received 📱😂",
+			 		"timestamp"=>date('Y-m-d G:i:s'),
+			),*/
+			'data' => array(
+				"test1" => "value1",
+				"test2" => "value2",
+				"timestamp"=>date('Y-m-d G:i:s'),
+				"title" => "title",
+				"message" => "message",
+				"big_text"=>"big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text ",
+				"big_text_summary"=>"big_text_summary",
+				"icon" => "http://via.placeholder.com/150x150",
+				"image" => "http://via.placeholder.com/350x150",	// won't show the big_text
+				"force_show_in_foreground"=> true,
+				"color" => "#ff6600"
+			)
+	);
+
+	$headers = array (
+			'Authorization: key=API_KEY',
+			'Content-Type: application/json'
+	);
+
+	$ch = curl_init ();
+	curl_setopt ( $ch, CURLOPT_URL, $url );
+	curl_setopt ( $ch, CURLOPT_POST, true );
+	curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
+	curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
+	curl_setopt ( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
+
+	$result = curl_exec ( $ch );
+	echo $result."\n";
+	curl_close ( $ch );
+?>
+
+```
+
 
 ## Build
 

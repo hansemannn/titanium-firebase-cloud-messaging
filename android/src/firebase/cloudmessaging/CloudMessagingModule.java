@@ -105,7 +105,6 @@ public class CloudMessagingModule extends KrollModule
 	public void appDidReceiveMessage(KrollDict opt)
 	{
 		// empty
-		Log.d(LCAT, "::appDidReceiveMessage::");
 	}
 
 	@Kroll.method

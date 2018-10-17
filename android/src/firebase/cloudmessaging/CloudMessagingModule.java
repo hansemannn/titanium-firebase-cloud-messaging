@@ -80,15 +80,6 @@ public class CloudMessagingModule extends KrollModule
 		return data;
 	}
 
-	@Kroll.method
-	private void clearLastData() {
-		try {
-			TiApplication.getAppRootOrCurrentActivity().getIntent().replaceExtras(new Bundle());
-		} catch (Exception ex) {
-			Log.e(LCAT, "clearLastData" + ex);
-		}
-	}
-
 	// Methods
 	@Kroll.method
 	public void registerForPushNotifications()

@@ -55,7 +55,9 @@ public class CloudMessagingModule extends KrollModule
 	}
 
 	@Kroll.method
-	private KrollDict getLastData() {
+	@Kroll.getProperty
+	private KrollDict getLastData()
+	{
 		KrollDict data = new KrollDict();
 
 		try {

@@ -160,7 +160,6 @@ Supported notification fields:
 * "title" => "string"
 * "body" => "string"
 
-
 ## API's
 
 ### `FirebaseCloudMessaging`
@@ -169,7 +168,7 @@ Supported notification fields:
 
 ##### `registerForPushNotifications()`
 
-##### `appDidReceiveMessage(parameters)`  - iOS only
+##### `appDidReceiveMessage(parameters)` - iOS only
   - `parameters` (Object)
 
 Note: Only call this method if method swizzling is disabled (enabled by default). Messages are received via the native delegates instead,
@@ -200,11 +199,13 @@ Read more in the [official Android docs](https://developer.android.com/reference
 
 #### Properties
 
+##### `shouldEstablishDirectChannel` (Number, get/set)
+
 ##### `fcmToken` (String, get)
 
 ##### `apnsToken` (String, set) - iOS only
 
-##### `shouldEstablishDirectChannel` (Number, get/set)
+##### `lastData` (Object) - Android only
 
 #### Events
 

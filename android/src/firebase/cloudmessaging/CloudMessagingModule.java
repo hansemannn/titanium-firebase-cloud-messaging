@@ -9,13 +9,16 @@
 package firebase.cloudmessaging;
 
 import android.os.Build;
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.KrollObject;
 import org.appcelerator.kroll.annotations.Kroll;
@@ -50,6 +53,34 @@ public class CloudMessagingModule extends KrollModule
 	public static void onAppCreate(TiApplication app)
 	{
 		// put module init code that needs to run when the application is created
+	}
+
+	@Kroll.method
+	@Kroll.getProperty
+	private KrollDict getLastData()
+	{
+		KrollDict data = new KrollDict();
+
+		try {
+			Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
+			Bundle extras = intent.getExtras();
+
+			if (extras != null) {
+				if (extras.getString("google.message_id") != null) {
+					for (String key : extras.keySet()) {
+						data.put(key, extras.get(key));
+					}
+
+					data.put("inBackground", true);
+				}
+			} else {
+				Log.d(LCAT, "Empty extras in Intent");
+			}
+		} catch (Exception ex) {
+			Log.e(LCAT, "getLastData" + ex);
+		}
+
+		return data;
 	}
 
 	// Methods

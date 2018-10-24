@@ -55,10 +55,11 @@ public class CloudMessagingModule extends KrollModule
 		// put module init code that needs to run when the application is created
 	}
 
-	@Kroll
-		.method
-		@Kroll.getProperty
-		private KrollDict getLastData()
+	// clang-format off
+	@Kroll.method
+	@Kroll.getProperty
+	private KrollDict getLastData()
+	// clang-format on
 	{
 		KrollDict data = new KrollDict();
 

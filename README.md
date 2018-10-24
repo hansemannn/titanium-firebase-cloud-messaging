@@ -71,7 +71,7 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
 				  <action android:name="com.google.android.gms.measurement.UPLOAD" />
 			   </intent-filter>
 			</receiver>  
-	
+
 			<service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
 			   <intent-filter>
 				  <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -96,8 +96,14 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
 
 ### Setting the Notification Icon
 
-Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
+You have to place a notification icon "notificationicon.png" into the following folder:
+ '[application_name]/app/platform/android/res/drawable/'
 
+Otherwise the default icon will be used.
+
+#### Alternative
+
+Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
 If you add this attribute within the `<application/>` section of your `tiapp.xml`:
 
 ```xml
@@ -206,6 +212,7 @@ Read more in the [official Android docs](https://developer.android.com/reference
 ##### `apnsToken` (String, set) - iOS only
 
 ##### `lastData` (Object) - Android only
+The propery `lastData` will contain the data part when you send a notification push message (so both nodes are visible inside the push payload).
 
 #### Events
 

@@ -55,9 +55,10 @@ public class CloudMessagingModule extends KrollModule
 		// put module init code that needs to run when the application is created
 	}
 
-	@Kroll.method
-	@Kroll.getProperty
-	private KrollDict getLastData()
+	@Kroll
+		.method
+		@Kroll.getProperty
+		private KrollDict getLastData()
 	{
 		KrollDict data = new KrollDict();
 
@@ -139,10 +140,14 @@ public class CloudMessagingModule extends KrollModule
 
 	public void onTokenRefresh(String token)
 	{
-		if (hasListeners("didRefreshRegistrationToken")) {
-			KrollDict data = new KrollDict();
-			data.put("fcmToken", token);
-			fireEvent("didRefreshRegistrationToken", data);
+		try {
+			if (hasListeners("didRefreshRegistrationToken")) {
+				KrollDict data = new KrollDict();
+				data.put("fcmToken", token);
+				fireEvent("didRefreshRegistrationToken", data);
+			}
+		} catch (Exception e) {
+			Log.e(LCAT, "Can't refresh token: " + e.getMessage());
 		}
 	}
 

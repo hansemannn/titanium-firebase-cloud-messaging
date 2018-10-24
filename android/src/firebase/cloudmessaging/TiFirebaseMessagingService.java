@@ -149,6 +149,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			int smallIcon = this.getResource("drawable", "notificationicon");
 			if (smallIcon > 0) {
 				builder.setSmallIcon(smallIcon);
+			} else {
+				builder.setSmallIcon(android.R.drawable.stat_sys_warning);
 			}
 		} catch (Exception ex) {
 			Log.e(TAG, "Smallicon exception: " + ex.getMessage());

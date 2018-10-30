@@ -15,6 +15,8 @@ public class TiFirebaseInstanceIDService extends FirebaseInstanceIdService
 		// Get updated InstanceID token.
 		String refreshedToken = FirebaseInstanceId.getInstance().getToken();
 		Log.d(TAG, "Refreshed token: " + refreshedToken);
-		CloudMessagingModule.getInstance().onTokenRefresh(refreshedToken);
+		if (CloudMessagingModule.getInstance() != null) {
+			CloudMessagingModule.getInstance().onTokenRefresh(refreshedToken);
+		}
 	}
 }

@@ -132,7 +132,11 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		builder.setContentText(params.get("message"));
 		builder.setTicker(params.get("ticker"));
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			builder.setChannelId(params.get("channelId"));
+			if (params.get("channelId") != null && params.get("channelId") != "") {
+				builder.setChannelId(params.get("channelId"));
+			} else {
+				builder.setChannelId("default");
+			}
 		}
 
 		// BigText

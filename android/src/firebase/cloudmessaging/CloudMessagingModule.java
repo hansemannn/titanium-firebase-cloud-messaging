@@ -35,6 +35,7 @@ import java.util.HashMap;
 import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
 import android.content.Intent;
+import org.json.JSONObject;
 
 @Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
 public class CloudMessagingModule extends KrollModule
@@ -42,6 +43,7 @@ public class CloudMessagingModule extends KrollModule
 
 	private static final String LCAT = "FirebaseCloudMessaging";
 	private static CloudMessagingModule instance = null;
+	private String notificationData = "";
 
 	public CloudMessagingModule()
 	{
@@ -68,15 +70,17 @@ public class CloudMessagingModule extends KrollModule
 			Bundle extras = intent.getExtras();
 
 			if (extras != null) {
-				if (extras.getString("google.message_id") != null) {
-					for (String key : extras.keySet()) {
-						data.put(key, extras.get(key));
-					}
-
-					data.put("inBackground", true);
+				for (String key : extras.keySet()) {
+					data.put(key, extras.get(key));
 				}
+
+				data.put("inBackground", true);
 			} else {
 				Log.d(LCAT, "Empty extras in Intent");
+				if (notificationData != "") {
+					data = new KrollDict(new JSONObject(notificationData));
+					data.put("inBackground", true);
+				}
 			}
 		} catch (Exception ex) {
 			Log.e(LCAT, "getLastData" + ex);
@@ -225,6 +229,11 @@ public class CloudMessagingModule extends KrollModule
 			return instance;
 		else
 			return new CloudMessagingModule();
+	}
+
+	public void setNotificationData(String data)
+	{
+		notificationData = data;
 	}
 
 	public void parseBootIntent()

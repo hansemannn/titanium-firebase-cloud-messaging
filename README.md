@@ -341,7 +341,8 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 				"icon" => "http://via.placeholder.com/150x150",
 				"image" => "http://via.placeholder.com/350x150",	// won't show the big_text
 				"force_show_in_foreground"=> true,
-				"color" => "#ff6600"
+				"color" => "#ff6600",
+				"channelId" => "default"	// or a different channel
 			)
 	);
 

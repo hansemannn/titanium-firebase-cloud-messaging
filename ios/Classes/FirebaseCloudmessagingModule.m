@@ -51,19 +51,22 @@
 
 - (void)registerForPushNotifications:(id)arguments
 {
-  if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_9_x_Max) {
+  if ([TiUtils isIOSVersionOrGreater:@"10.0"]) {
+    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+    [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions:authOptions
+                                                                        completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                                                                          DebugLog(@"[DEBUG] Push authorization granted: %lu", granted);
+                                                                          if (error != nil) {
+                                                                            DebugLog(@"[DEBUG] Push authorization error: %@", error.localizedDescription);
+                                                                          }
+    }];
+  } else {
     UIUserNotificationType allNotificationTypes =
     (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
     UIUserNotificationSettings *settings =
     [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
     [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-  } else {
-#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
-    [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError * _Nullable error) {
-    }];
-#endif
   }
   
   [[UIApplication sharedApplication] registerForRemoteNotifications];
@@ -82,7 +85,7 @@
 
 - (NSNumber *)shouldEstablishDirectChannel
 {
-  return NUMBOOL([[FIRMessaging messaging] shouldEstablishDirectChannel]);
+  return @([[FIRMessaging messaging] shouldEstablishDirectChannel]);
 }
 
 - (void)appDidReceiveMessage:(id)arguments

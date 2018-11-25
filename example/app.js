@@ -11,8 +11,6 @@ fcm.addEventListener('didRefreshRegistrationToken', onToken);
 // Called when direct messages arrive. Note that these are different from push notifications
 fcm.addEventListener('didReceiveMessage', onMessage);
 
-fcm.registerForPushNotifications();
-
 function onToken(e) {
     Ti.API.info('Token', e.fcmToken);
 }
@@ -23,12 +21,36 @@ function onMessage(e) {
 
 // Android: For configuring custom sounds and importance for the generated system 
 // notifications when app is in the background
-isAndroid && fcm.createNotificationChannel({
-  sound: 'warn_sound',
-  channelId: 'general',
-  channelName: 'General Notifications',
-  importance: 'high' //will pop in from the top and make a sound
-});
+if (isAndroid) {
+    fcm.createNotificationChannel({
+        sound: 'warn_sound',
+        channelId: 'general',
+        channelName: 'General Notifications',
+        importance: 'high' //will pop in from the top and make a sound
+    });
+    fcm.registerForPushNotifications();
+} else {
+    Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
+        // Remove the event again to prevent duplicate calls through the Firebase API
+        Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
+      
+        // Register for push notifications
+        Ti.Network.registerForPushNotifications({
+            success: function () { },
+            error: function () { },
+            callback: function () { } // Fired for all kind of notifications (foreground, background & closed)
+        });
+    });
+      
+    // Register for the notification settings event
+    Ti.App.iOS.registerUserNotificationSettings({
+        types: [
+            Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT,
+            Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND,
+            Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE
+        ]
+    });
+}
 
 // check if token is already available
 if (fcm.fcmToken !== null) {

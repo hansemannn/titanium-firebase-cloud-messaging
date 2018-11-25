@@ -14,11 +14,8 @@ The options `googleAppID` and `GCMSenderID` are required for Android, or `file` 
 
 ## iOS notes:
 
-To register for push notifications on iOS, first register for notification settings, then for the push notifications
-and finally for the Firebase messaging (thanks to [@garycrook](https://github.com/garycrook) for the snippet):
+To register for push notifications on iOS, startin in 2.0.0, you only need to call the Titanium related methods as the following:
 ```js
-var FirebaseCloud = require('firebase.cloudmessaging');
-
 // Listen to the notification settings event
 Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
   // Remove the event again to prevent duplicate calls through the Firebase API
@@ -30,9 +27,6 @@ Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotifi
     error: function () { ... },
     callback: function () { ... } // Fired for all kind of notifications (foreground, background & closed)
   });
-
-  // Register for Firebase Cloud Messaging
-	FirebaseCloud.registerForPushNotifications();
 });
 
 // Register for the notification settings event
@@ -45,7 +39,6 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
-
 ## Android notes:
 
 <img src="example/android_big_image.png"/><br/>
@@ -53,8 +46,6 @@ _Big image notification with colored icon/appname_
 
 <img src="example/android_big_text.png"/><br/>
 _Big text notification with colored icon/appname_
-
-
 
 ### Updates to the Manifest
 

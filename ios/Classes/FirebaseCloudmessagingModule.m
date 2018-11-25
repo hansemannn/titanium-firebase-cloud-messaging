@@ -27,16 +27,25 @@
 
 #pragma mark Lifecycle
 
-- (void)startup
+- (id)_initWithPageContext:(id<TiEvaluator>)context
 {
-  [super startup];
-  NSLog(@"[DEBUG] %@ loaded", self);
+  if (self = [super _initWithPageContext:context]) {
+    [[FIRMessaging messaging] setDelegate:self];
+  }
+  
+  return self;
 }
 
 - (void)_configure
 {
   [super _configure];
   [[TiApp app] registerApplicationDelegate:self];
+}
+
+- (void)startup
+{
+  [super startup];
+  NSLog(@"[DEBUG] %@ loaded", self);
 }
 
 #pragma Public APIs
@@ -115,13 +124,9 @@
   }
 }
 
-#pragma mark UIApplicationDelegate
-
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
-  [[FIRMessaging messaging] setDelegate:self];
-
-  return YES;
+  [[FIRMessaging messaging] setAPNSToken:deviceToken];
 }
 
 @end

@@ -19,7 +19,7 @@ function onMessage(e) {
     Ti.API.info('Message', e.message);
 }
 
-// Android: For configuring custom sounds and importance for the generated system 
+// Android: For configuring custom sounds and importance for the generated system
 // notifications when app is in the background
 if (isAndroid) {
     fcm.createNotificationChannel({
@@ -29,11 +29,13 @@ if (isAndroid) {
         importance: 'high' //will pop in from the top and make a sound
     });
     fcm.registerForPushNotifications();
+
+	Ti.API.info("Last data: " + fcm.lastData);
 } else {
     Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
         // Remove the event again to prevent duplicate calls through the Firebase API
         Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
-      
+
         // Register for push notifications
         Ti.Network.registerForPushNotifications({
             success: function () { },
@@ -41,7 +43,7 @@ if (isAndroid) {
             callback: function () { } // Fired for all kind of notifications (foreground, background & closed)
         });
     });
-      
+
     // Register for the notification settings event
     Ti.App.iOS.registerUserNotificationSettings({
         types: [

@@ -85,6 +85,14 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
 </android>   
 ```
 
+Add the google_app_id to `/app/platform/android/res/values/strings.xml`:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string name="google_app_id">1:11111111111:android:aaaaaaaaa</string>
+</resources>
+```
+
 ### Setting the Notification Icon
 
 You have to place a notification icon "notificationicon.png" into the following folder:
@@ -268,6 +276,11 @@ if (fcm.fcmToken) {
 
 // Subscribe to a topic.
 fcm.subscribeToTopic('testTopic');
+
+if (OS_ANDROID){
+	// display last data:
+	Ti.API.info("Last data: " + fcm.lastData);
+}
 ```
 
 ## Send FCM messages with PHP

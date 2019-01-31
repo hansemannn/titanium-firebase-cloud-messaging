@@ -94,7 +94,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		}
 
 		if (params.get("force_show_in_foreground") != null && params.get("force_show_in_foreground") != "") {
-			showNotification = TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
+			showNotification = showNotification || TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
 		}
 
 		if (params.get("title") == null && params.get("message") == null && params.get("big_text") == null

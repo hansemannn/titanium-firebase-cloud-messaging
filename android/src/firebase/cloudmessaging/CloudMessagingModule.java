@@ -243,7 +243,7 @@ public class CloudMessagingModule extends KrollModule
 			String notification = intent.getStringExtra("fcm_data");
 			if (notification != null) {
 				HashMap<String, Object> msg = new HashMap<String, Object>();
-				msg.put("data", notification);
+				msg.put("data", new KrollDict(new JSONObject(notification)));
 				onMessageReceived(msg);
 				intent.removeExtra("fcm_data");
 			} else {

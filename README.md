@@ -126,7 +126,8 @@ It should be flat (no gradients), white and face-on perspective.
 88 × 88 area in 96 × 96 (xxxhdpi)
 ```
 
-You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notification_icon.png`.
+You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notification_icon.png` and have
+Image Magick installed. On macOS, you can install it using `brew install imagemagick`, on Windows you can download it [here](https://imagemagick.org/script/download.php).
 
 ```sh
 #!/bin/sh

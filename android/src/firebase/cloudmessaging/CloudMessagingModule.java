@@ -93,7 +93,7 @@ public class CloudMessagingModule extends KrollModule
 	@Kroll.method
 	public void registerForPushNotifications()
 	{
-		FirebaseInstanceId.getInstance().getToken();
+		// FirebaseInstanceId.getInstance().getToken();
 		parseBootIntent();
 	}
 

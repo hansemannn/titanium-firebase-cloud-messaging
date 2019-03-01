@@ -1,12 +1,10 @@
 package firebase.cloudmessaging;
 
-import android.app.NotificationChannel;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -26,6 +24,8 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.TiApplication;
+import android.net.Uri;
+import android.media.RingtoneManager;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
 {
@@ -88,6 +88,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
 		Boolean showNotification = true;
 		Context context = getApplicationContext();
+		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
 		if (appInForeground) {
 			showNotification = false;
@@ -124,13 +125,14 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Start building notification
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-		int builder_defaults = 0;
 		builder.setContentIntent(contentIntent);
 		builder.setAutoCancel(true);
-		builder.setPriority(2);
+		builder.setPriority(Notification.PRIORITY_MAX);
 		builder.setContentTitle(params.get("title"));
 		builder.setContentText(params.get("message"));
 		builder.setTicker(params.get("ticker"));
+		builder.setSound(defaultSoundUri);
+		builder.setDefaults(Notification.DEFAULT_ALL);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			if (params.get("channelId") != null && params.get("channelId") != "") {
 				builder.setChannelId(params.get("channelId"));
@@ -208,7 +210,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		// Send
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(null, id, builder.build());
+		notificationManager.notify(id, builder.build());
 		return true;
 	}
 

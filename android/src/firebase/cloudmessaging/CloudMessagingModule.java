@@ -199,6 +199,9 @@ public class CloudMessagingModule extends KrollModule
 		}
 
 		NotificationChannel channel = new NotificationChannel(channelId, channelName, importanceVal);
+		channel.enableVibration(true);
+		channel.enableLights(true);
+		channel.setShowBadge(true);
 		if (soundUri != null) {
 			AudioAttributes audioAttributes = new AudioAttributes.Builder()
 												  .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)

@@ -165,6 +165,8 @@ Supported data fields:
 Supported notification fields:
 * "title" => "string"
 * "body" => "string"
+* "color" => "#00ff00",
+* "tag" => "custom_notification_tag",   // push with the same tag will replace each other
 
 ## API's
 

@@ -26,6 +26,7 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.TiApplication;
 import android.net.Uri;
 import android.media.RingtoneManager;
+import android.content.ContentResolver;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
 {
@@ -89,6 +90,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Boolean showNotification = true;
 		Context context = getApplicationContext();
 		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		int priority = Notification.PRIORITY_MAX;
 
 		if (appInForeground) {
 			showNotification = false;
@@ -104,6 +106,29 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			showNotification = false;
 		}
 
+		if (params.get("priority") != null && params.get("priority") != "") {
+			if (params.get("priority").toLowerCase() == "low") {
+				priority = Notification.PRIORITY_LOW;
+			} else if (params.get("priority").toLowerCase() == "min") {
+				priority = Notification.PRIORITY_MIN;
+			} else if (params.get("priority").toLowerCase() == "max") {
+				priority = Notification.PRIORITY_MAX;
+			} else if (params.get("priority").toLowerCase() == "default") {
+				priority = Notification.PRIORITY_DEFAULT;
+			} else if (params.get("priority").toLowerCase() == "high") {
+				priority = Notification.PRIORITY_HIGH;
+			} else {
+				priority = TiConvert.toInt(params.get("priority"), 1);
+			}
+		}
+
+		if (params.get("sound") != null && params.get("sound") != "") {
+			String path = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/"
+						  + Utils.getResourceIdentifier("raw", params.get("sound"));
+			defaultSoundUri = Uri.parse(path);
+		}
+		Log.d(TAG, "sound: " + defaultSoundUri);
+
 		if (!showNotification) {
 			// hidden notification - still send broadcast with data for next app start
 			Intent i = new Intent();
@@ -111,7 +136,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			i.putExtra("fcm_data", jsonData.toString());
 			sendBroadcast(i);
-
 			return false;
 		}
 
@@ -127,7 +151,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
 		builder.setContentIntent(contentIntent);
 		builder.setAutoCancel(true);
-		builder.setPriority(Notification.PRIORITY_MAX);
+		builder.setPriority(priority);
 		builder.setContentTitle(params.get("title"));
 		builder.setContentText(params.get("message"));
 		builder.setTicker(params.get("ticker"));

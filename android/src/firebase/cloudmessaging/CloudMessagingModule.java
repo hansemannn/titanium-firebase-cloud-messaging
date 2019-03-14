@@ -30,11 +30,9 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import org.appcelerator.kroll.KrollDict;
-import org.appcelerator.kroll.common.Log;
 import java.util.HashMap;
 import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
-import android.content.Intent;
 import org.json.JSONObject;
 
 @Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
@@ -117,6 +115,7 @@ public class CloudMessagingModule extends KrollModule
 		// empty
 	}
 
+	@SuppressWarnings("unchecked")
 	@Kroll.method
 	public void sendMessage(KrollDict obj)
 	{
@@ -131,6 +130,7 @@ public class CloudMessagingModule extends KrollModule
 		rm.setTtl(ttl);
 
 		// add custom data
+		@SuppressWarnings("rawtypes")
 		Map<String, String> data = (HashMap) obj.get("data");
 		for (Object o : data.keySet()) {
 			rm.addData((String) o, data.get(o));

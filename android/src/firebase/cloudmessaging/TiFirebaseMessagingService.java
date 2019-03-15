@@ -91,6 +91,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Context context = getApplicationContext();
 		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		int priority = Notification.PRIORITY_MAX;
+		int builder_defaults = 0;
 
 		if (appInForeground) {
 			showNotification = false;
@@ -98,6 +99,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		if (params.get("force_show_in_foreground") != null && params.get("force_show_in_foreground") != "") {
 			showNotification = showNotification || TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
+		}
+
+		if (TiConvert.toBoolean(params.get("vibrate"), false)) {
+			builder_defaults |= Notification.DEFAULT_VIBRATE;
 		}
 
 		if (params.get("title") == null && params.get("message") == null && params.get("big_text") == null
@@ -123,11 +128,12 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		}
 
 		if (params.get("sound") != null && params.get("sound") != "") {
-			String path = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/"
-						  + Utils.getResourceIdentifier("raw", params.get("sound"));
-			defaultSoundUri = Uri.parse(path);
+			int resource = getResource("raw", params.get("sound"));
+			defaultSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resource);
+			Log.d(TAG, "custom sound: " + defaultSoundUri);
+		} else {
+			builder_defaults |= Notification.DEFAULT_SOUND;
 		}
-		Log.d(TAG, "sound: " + defaultSoundUri);
 
 		if (!showNotification) {
 			// hidden notification - still send broadcast with data for next app start
@@ -153,10 +159,15 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		builder.setAutoCancel(true);
 		builder.setPriority(priority);
 		builder.setContentTitle(params.get("title"));
-		builder.setContentText(params.get("message"));
+		if (TiConvert.toString(params.get("alert"), "") != "") {
+			// OneSignal uses alert for the message
+			builder.setContentText(params.get("alert"));
+		} else {
+			builder.setContentText(params.get("message"));
+		}
 		builder.setTicker(params.get("ticker"));
+		builder.setDefaults(builder_defaults);
 		builder.setSound(defaultSoundUri);
-		builder.setDefaults(Notification.DEFAULT_ALL);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			if (params.get("channelId") != null && params.get("channelId") != "") {
 				builder.setChannelId(params.get("channelId"));
@@ -180,9 +191,15 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Icons
 		try {
 			int smallIcon = this.getResource("drawable", "notificationicon");
+			int smallAppIcon = this.getResource("drawable", "appicon");
 			if (smallIcon > 0) {
+				// use custom icon
 				builder.setSmallIcon(smallIcon);
+			} else if (smallAppIcon > 0) {
+				// use app icon
+				builder.setSmallIcon(smallAppIcon);
 			} else {
+				// fallback
 				builder.setSmallIcon(android.R.drawable.stat_sys_warning);
 			}
 		} catch (Exception ex) {

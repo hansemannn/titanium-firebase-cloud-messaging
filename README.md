@@ -85,7 +85,8 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
 </android>   
 ```
 
-Add the google_app_id to `/app/platform/android/res/values/strings.xml`:
+#### Optional:
+In rare cases you need to add the google_app_id to `/app/platform/android/res/values/strings.xml`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
@@ -161,12 +162,15 @@ Supported data fields:
 * "force_show_in_foreground" => "Boolean" (show notification even app is in foreground)
 * "id" => "int"
 * "color" => will tint the app name and the small icon next to it
+* "vibrate" => "boolean"
+* "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
 Supported notification fields:
 * "title" => "string"
 * "body" => "string"
 * "color" => "#00ff00",
 * "tag" => "custom_notification_tag",   // push with the same tag will replace each other
+* "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
 ## API's
 

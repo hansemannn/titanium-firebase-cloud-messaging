@@ -39,7 +39,7 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
-## Android notes:
+## Android Notes:
 
 <img src="example/android_big_image.png"/><br/>
 _Big image notification with colored icon/appname_
@@ -85,7 +85,8 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
 </android>   
 ```
 
-#### Optional:
+#### Optional
+
 In rare cases you need to add the google_app_id to `/app/platform/android/res/values/strings.xml`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

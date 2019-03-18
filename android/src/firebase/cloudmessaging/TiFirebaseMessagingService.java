@@ -159,7 +159,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		builder.setAutoCancel(true);
 		builder.setPriority(priority);
 		builder.setContentTitle(params.get("title"));
-		if (TiConvert.toString(params.get("alert"), "") != "") {
+		if (params.get("alert") != null) {
 			// OneSignal uses alert for the message
 			builder.setContentText(params.get("alert"));
 		} else {

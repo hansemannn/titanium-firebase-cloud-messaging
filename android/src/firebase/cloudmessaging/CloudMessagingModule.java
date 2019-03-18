@@ -36,6 +36,8 @@ import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
 import android.content.Intent;
 import org.json.JSONObject;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 @Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
 public class CloudMessagingModule extends KrollModule
@@ -252,5 +254,26 @@ public class CloudMessagingModule extends KrollModule
 		} catch (Exception ex) {
 			Log.e(LCAT, "parseBootIntent" + ex);
 		}
+	}
+
+	private static final String FORCE_SHOW_NOTIFICATION_WHILE_FOREGROUND_KEY = "titanium.firebase.cloudmessaging.key" ;
+
+	@Kroll.setProperty
+	public void setForceShowNotificationWhileInForeground(final Boolean forceShowNotificationWhileInForeground)
+	{
+		Context context = Utils.getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean(FORCE_SHOW_NOTIFICATION_WHILE_FOREGROUND_KEY, forceShowNotificationWhileInForeground);
+		editor.commit();
+	}
+
+	@Kroll.getProperty
+	public Boolean getForceShowNotificationWhileInForeground()
+	{
+		Context context = Utils.getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getBoolean(FORCE_SHOW_NOTIFICATION_WHILE_FOREGROUND_KEY, false);
 	}
 }

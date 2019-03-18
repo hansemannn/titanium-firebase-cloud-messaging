@@ -88,6 +88,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
 		Boolean showNotification = true;
 		Context context = getApplicationContext();
+		CloudMessagingModule module = CloudMessagingModule.getInstance();
 
 		if (appInForeground) {
 			showNotification = false;
@@ -95,12 +96,16 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		if (params.get("force_show_in_foreground") != null && params.get("force_show_in_foreground") != "") {
 			showNotification = showNotification || TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
-		}
+		} 
 
 		if (params.get("title") == null && params.get("message") == null && params.get("big_text") == null
 			&& params.get("big_text_summary") == null && params.get("ticker") == null && params.get("image") == null) {
 			// no actual content - don't show it
 			showNotification = false;
+		}
+
+		if (module.getForceShowNotificationWhileInForeground()) {
+			showNotification = module.getForceShowNotificationWhileInForeground();
 		}
 
 		if (!showNotification) {

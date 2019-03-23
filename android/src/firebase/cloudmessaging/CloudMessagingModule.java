@@ -30,11 +30,9 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import org.appcelerator.kroll.KrollDict;
-import org.appcelerator.kroll.common.Log;
 import java.util.HashMap;
 import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
-import android.content.Intent;
 import org.json.JSONObject;
 
 @Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
@@ -93,7 +91,6 @@ public class CloudMessagingModule extends KrollModule
 	@Kroll.method
 	public void registerForPushNotifications()
 	{
-		FirebaseInstanceId.getInstance().getToken();
 		parseBootIntent();
 	}
 

@@ -1,12 +1,10 @@
 package firebase.cloudmessaging;
 
-import android.app.NotificationChannel;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -26,6 +24,9 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.TiApplication;
+import android.net.Uri;
+import android.media.RingtoneManager;
+import android.content.ContentResolver;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
 {
@@ -83,11 +84,15 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 	private Boolean showNotification(RemoteMessage remoteMessage)
 	{
+		CloudMessagingModule module = CloudMessagingModule.getInstance();
 		Map<String, String> params = remoteMessage.getData();
 		JSONObject jsonData = new JSONObject(params);
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
 		Boolean showNotification = true;
 		Context context = getApplicationContext();
+		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		int priority = Notification.PRIORITY_MAX;
+		int builder_defaults = 0;
 
 		if (appInForeground) {
 			showNotification = false;
@@ -97,10 +102,42 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			showNotification = showNotification || TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
 		}
 
+		if (module.forceShowInForeground()) {
+			showNotification = module.forceShowInForeground();
+		}
+
+		if (TiConvert.toBoolean(params.get("vibrate"), false)) {
+			builder_defaults |= Notification.DEFAULT_VIBRATE;
+		}
+
 		if (params.get("title") == null && params.get("message") == null && params.get("big_text") == null
 			&& params.get("big_text_summary") == null && params.get("ticker") == null && params.get("image") == null) {
 			// no actual content - don't show it
 			showNotification = false;
+		}
+
+		if (params.get("priority") != null && params.get("priority") != "") {
+			if (params.get("priority").toLowerCase() == "low") {
+				priority = Notification.PRIORITY_LOW;
+			} else if (params.get("priority").toLowerCase() == "min") {
+				priority = Notification.PRIORITY_MIN;
+			} else if (params.get("priority").toLowerCase() == "max") {
+				priority = Notification.PRIORITY_MAX;
+			} else if (params.get("priority").toLowerCase() == "default") {
+				priority = Notification.PRIORITY_DEFAULT;
+			} else if (params.get("priority").toLowerCase() == "high") {
+				priority = Notification.PRIORITY_HIGH;
+			} else {
+				priority = TiConvert.toInt(params.get("priority"), 1);
+			}
+		}
+
+		if (params.get("sound") != null && params.get("sound") != "") {
+			int resource = getResource("raw", params.get("sound"));
+			defaultSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resource);
+			Log.d(TAG, "custom sound: " + defaultSoundUri);
+		} else {
+			builder_defaults |= Notification.DEFAULT_SOUND;
 		}
 
 		if (!showNotification) {
@@ -110,7 +147,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			i.putExtra("fcm_data", jsonData.toString());
 			sendBroadcast(i);
-
 			return false;
 		}
 
@@ -124,13 +160,19 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Start building notification
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-		int builder_defaults = 0;
 		builder.setContentIntent(contentIntent);
 		builder.setAutoCancel(true);
-		builder.setPriority(2);
+		builder.setPriority(priority);
 		builder.setContentTitle(params.get("title"));
-		builder.setContentText(params.get("message"));
+		if (params.get("alert") != null) {
+			// OneSignal uses alert for the message
+			builder.setContentText(params.get("alert"));
+		} else {
+			builder.setContentText(params.get("message"));
+		}
 		builder.setTicker(params.get("ticker"));
+		builder.setDefaults(builder_defaults);
+		builder.setSound(defaultSoundUri);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			if (params.get("channelId") != null && params.get("channelId") != "") {
 				builder.setChannelId(params.get("channelId"));
@@ -154,9 +196,15 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Icons
 		try {
 			int smallIcon = this.getResource("drawable", "notificationicon");
+			int smallAppIcon = this.getResource("drawable", "appicon");
 			if (smallIcon > 0) {
+				// use custom icon
 				builder.setSmallIcon(smallIcon);
+			} else if (smallAppIcon > 0) {
+				// use app icon
+				builder.setSmallIcon(smallAppIcon);
 			} else {
+				// fallback
 				builder.setSmallIcon(android.R.drawable.stat_sys_warning);
 			}
 		} catch (Exception ex) {
@@ -208,7 +256,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		// Send
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(null, id, builder.build());
+		notificationManager.notify(id, builder.build());
 		return true;
 	}
 

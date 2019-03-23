@@ -4,6 +4,7 @@
 	<android xmlns:android="http://schemas.android.com/apk/res/android">
 		<manifest package="firebase.cloudmessaging">
 			<uses-permission android:name="android.permission.WAKE_LOCK"/>
+			<uses-permission android:name="android.permission.VIBRATE"/>
 			<application>
 				<service android:name="firebase.cloudmessaging.TiFirebaseMessagingService" android:exported="false">
 					<intent-filter>
@@ -34,6 +35,6 @@
 		<module>firebase.core</module>
 
 		<!-- Require Ti.PlayServices (https://github.com/appcelerator-modules/ti.playservices) -->
-		<module platform="android">ti.playservices</module>
+		<module platform="android" version="11.0.40">ti.playservices</module>
 	</modules>
 </ti:module>

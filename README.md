@@ -7,7 +7,7 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 * [Download](#download)
 * [iOS notes](#ios-notes)
 * [Android Notes](#android-notes)
-* [API: Methods, Properties, Events](#api-s)
+* [API: Methods, Properties, Events](#api)
 * [Example](#example)
 * [Build from source](#build)
 
@@ -182,7 +182,7 @@ Supported notification fields:
 * "tag" => "custom_notification_tag",   // push with the same tag will replace each other
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
-## API's
+## API
 
 ### `FirebaseCloudMessaging`
 

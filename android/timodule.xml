@@ -6,26 +6,11 @@
 			<uses-permission android:name="android.permission.WAKE_LOCK"/>
 			<uses-permission android:name="android.permission.VIBRATE"/>
 			<application>
-				<service android:name="firebase.cloudmessaging.TiFirebaseMessagingService" android:exported="false" android:stopWithTask="false">
+				<service android:name="firebase.cloudmessaging.TiFirebaseMessagingService" >
 					<intent-filter>
 						<action android:name="com.google.firebase.MESSAGING_EVENT"/>
 					</intent-filter>
 				</service>
-				<service android:name="firebase.cloudmessaging.TiFirebaseMessagingService" android:exported="false">
-					<intent-filter>
-						<action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-					</intent-filter>
-				</service>
-
-				<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdInternalReceiver" android:exported="false"/>
-				<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
-					<intent-filter>
-						<action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-						<action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
-						<category android:name="${tiapp.properties['id']}"/>
-					</intent-filter>
-				</receiver>
-
 				<activity android:name="firebase.cloudmessaging.PushHandlerActivity" android:exported="true"></activity>
 			</application>
 		</manifest>

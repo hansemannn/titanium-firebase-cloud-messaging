@@ -2,6 +2,15 @@
 
 Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
+## Topics
+* [Requirements](#requirements)
+* [Download](#download)
+* [iOS notes](#ios-notes)
+* [Android Notes](#android-notes)
+* [API: Methods, Properties, Events](#api-s)
+* [Example](#example)
+* [Build from source](#build)
+
 ## Requirements
 - [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module.
 The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
@@ -53,35 +62,35 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
 
 ```xml
 <android xmlns:android="http://schemas.android.com/apk/res/android">
-	<manifest>
-		<application>
-			<service android:name="MY_PACKAGE_NAME.gcm.RegistrationIntentService" android:exported="false" />
+    <manifest>
+    <application>
+    <service android:name="MY_PACKAGE_NAME.gcm.RegistrationIntentService" android:exported="false" />
 
-			<receiver android:name="com.google.android.gms.measurement.AppMeasurementReceiver" android:enabled="true">
-			   <intent-filter>
-				  <action android:name="com.google.android.gms.measurement.UPLOAD" />
-			   </intent-filter>
-			</receiver>  
+    <receiver android:name="com.google.android.gms.measurement.AppMeasurementReceiver" android:enabled="true">
+       <intent-filter>
+      <action android:name="com.google.android.gms.measurement.UPLOAD" />
+       </intent-filter>
+    </receiver>  
 
-			<service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
-			   <intent-filter>
-				  <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-			   </intent-filter>
-			</service>
+    <service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
+       <intent-filter>
+      <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+       </intent-filter>
+    </service>
 
-			<service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
-			   <intent-filter>
-				  <action android:name="com.google.android.c2dm.intent.SEND" />
-			   </intent-filter>
-			</service>
+    <service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
+       <intent-filter>
+      <action android:name="com.google.android.c2dm.intent.SEND" />
+       </intent-filter>
+    </service>
 
-			<service android:name="MY_PACKAGE_NAME.gcm.GcmIDListenerService" android:exported="false">
-			   <intent-filter>
-				  <action android:name="com.google.android.gms.iid.InstanceID" />
-			   </intent-filter>
-			</service>
-		</application>
-	</manifest>
+    <service android:name="MY_PACKAGE_NAME.gcm.GcmIDListenerService" android:exported="false">
+       <intent-filter>
+      <action android:name="com.google.android.gms.iid.InstanceID" />
+       </intent-filter>
+    </service>
+    </application>
+    </manifest>
 </android>   
 ```
 
@@ -91,7 +100,7 @@ In rare cases you need to add the google_app_id to `/app/platform/android/res/va
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-	<string name="google_app_id">1:11111111111:android:aaaaaaaaa</string>
+    <string name="google_app_id">1:11111111111:android:aaaaaaaaa</string>
 </resources>
 ```
 
@@ -136,16 +145,16 @@ Image Magick installed. On macOS, you can install it using `brew install imagema
 
 ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notification_icon.png"
 if [ -f "$ICON_SOURCE" ]; then
-	mkdir -p "app/platform/android/res/drawable-xxhdpi"
-	mkdir -p "app/platform/android/res/drawable-xhdpi"
-	mkdir -p "app/platform/android/res/drawable-hdpi"
-	mkdir -p "app/platform/android/res/drawable-mdpi"
-	convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notification_icon.png"
-	convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notification_icon.png"
-	convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notification_icon.png"
-	convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notification_icon.png"
+    mkdir -p "app/platform/android/res/drawable-xxhdpi"
+    mkdir -p "app/platform/android/res/drawable-xhdpi"
+    mkdir -p "app/platform/android/res/drawable-hdpi"
+    mkdir -p "app/platform/android/res/drawable-mdpi"
+    convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notification_icon.png"
+    convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notification_icon.png"
+    convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notification_icon.png"
+    convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notification_icon.png"
 else
-	echo "No 'notification_icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
+    echo "No 'notification_icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
 fi
 ```
 
@@ -200,15 +209,27 @@ so receive the `gcm.message_id` key from the notification payload instead.
 ##### `unsubscribeFromTopic(topic)`
   - `topic` (String)
 
+##### `setNotificationChannel(channel)` - Android-only
+  - `channel` (NotificationChannel Object) Use `Ti.Android.NotificationManager.createNotificationChannel()` to create the channel and pass it to the function. See [Titanium.Android.NotificationChannel](https://docs.appcelerator.com/platform/latest/#!/api/Titanium.Android.NotificationChannel)
+
+  _Prefered way_ to set a channel. As an alternative you can use `createNotificationChannel()`
+
 ##### `createNotificationChannel(parameters)` - Android-only
 
-  - `parameters` (Object)
-    - `sound` (String) optional, refers to a sound file (without extension) at `platform/android/res/raw`. If sound == "default" or not passed in, will use the default sound. If sound == "silent" the channel will have no sound
-    - `channelId` (String) optional, defaults to "default"
-    - `channelName` (String) optional, defaults to `channelId`
-    - `importance` (String) optional, either "low", "high", "default". Defaults to "default", unless sound == "silent", then defaults to "low".
+- `parameters` (Object)
+  - `sound` (String) optional, refers to a sound file (without extension) at `platform/android/res/raw`. If sound == "default" or not passed in, will use the default sound. If sound == "silent" the channel will have no sound
+  - `channelId` (String) optional, defaults to "default"
+  - `channelName` (String) optional, defaults to `channelId`
+  - `importance` (String) optional, either "low", "high", "default". Defaults to "default", unless sound == "silent", then defaults to "low".
+  - `lights` (Boolean) optional, defaults to `false`
+  - `showBadge` (Boolean) optional, defaults to `false`
 
-Read more in the [official Android docs](https://developer.android.com/reference/android/app/NotificationChannel).
+  Read more in the [official Android docs](https://developer.android.com/reference/android/app/NotificationChannel).
+
+##### `setForceShowInForeground(showInForeground)` - Android-only
+  - `showInForeground` (Boolean) Force the notifications to be shown in foreground.
+
+
 
 #### Properties
 
@@ -265,12 +286,24 @@ fcm.addEventListener('didReceiveMessage', function(e) {
 
 // Android-only: For configuring custom sounds and importance for the generated system
 // notifications when app is in the background
-OS_ANDROID && fcm.createNotificationChannel({
-    sound: 'warn_sound',
-    channelId: 'general',
-    channelName: 'General Notifications',
-    importance: 'high' //will pop in from the top and make a sound
-})
+if (OS_ANDROID) {
+    // fcm.createNotificationChannel({
+    //     sound: 'warn_sound',
+    //     channelId: 'general',
+    //     channelName: 'General Notifications',
+    //     importance: 'high'
+    // })
+
+    var channel = Ti.Android.NotificationManager.createNotificationChannel({
+        id: 'my_channel',
+        name: 'TEST CHANNEL',
+        importance: Ti.Android.IMPORTANCE_DEFAULT,
+        enableLights: true,
+        enableVibration: true,
+        showBadge: true
+    });
+    fcm.notificationChannel = channel;
+}
 
 // Register the device with the FCM service.
 fcm.registerForPushNotifications();
@@ -286,8 +319,8 @@ if (fcm.fcmToken) {
 fcm.subscribeToTopic('testTopic');
 
 if (OS_ANDROID){
-	// display last data:
-	Ti.API.info("Last data: " + fcm.lastData);
+    // display last data:
+    Ti.API.info("Last data: " + fcm.lastData);
 }
 ```
 
@@ -334,45 +367,45 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 ```php
 <?php $url = 'https://fcm.googleapis.com/fcm/send';
 
-	$fields = array (
-			'to' => "TOKEN_ID",
-			// 'to' => "/topics/test",
-			/* 'notification' => array (
-			 		"title" => "TiFirebaseMessaging",
-			 		"body" => "Message received 📱😂",
-			 		"timestamp"=>date('Y-m-d G:i:s'),
-			),*/
-			'data' => array(
-				"test1" => "value1",
-				"test2" => "value2",
-				"timestamp"=>date('Y-m-d G:i:s'),
-				"title" => "title",
-				"message" => "message",
-				"big_text"=>"big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text ",
-				"big_text_summary"=>"big_text_summary",
-				"icon" => "http://via.placeholder.com/150x150",
-				"image" => "http://via.placeholder.com/350x150",	// won't show the big_text
-				"force_show_in_foreground"=> true,
-				"color" => "#ff6600",
-				"channelId" => "default"	// or a different channel
-			)
-	);
+    $fields = array (
+    'to' => "TOKEN_ID",
+    // 'to' => "/topics/test",
+    /* 'notification' => array (
+     		"title" => "TiFirebaseMessaging",
+     		"body" => "Message received 📱😂",
+     		"timestamp"=>date('Y-m-d G:i:s'),
+    ),*/
+    'data' => array(
+    "test1" => "value1",
+    "test2" => "value2",
+    "timestamp"=>date('Y-m-d G:i:s'),
+    "title" => "title",
+    "message" => "message",
+    "big_text"=>"big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text ",
+    "big_text_summary"=>"big_text_summary",
+    "icon" => "http://via.placeholder.com/150x150",
+    "image" => "http://via.placeholder.com/350x150",	// won't show the big_text
+    "force_show_in_foreground"=> true,
+    "color" => "#ff6600",
+    "channelId" => "default"	// or a different channel
+    )
+    );
 
-	$headers = array (
-			'Authorization: key=API_KEY',
-			'Content-Type: application/json'
-	);
+    $headers = array (
+    'Authorization: key=API_KEY',
+    'Content-Type: application/json'
+    );
 
-	$ch = curl_init ();
-	curl_setopt ( $ch, CURLOPT_URL, $url );
-	curl_setopt ( $ch, CURLOPT_POST, true );
-	curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
-	curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-	curl_setopt ( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
+    $ch = curl_init ();
+    curl_setopt ( $ch, CURLOPT_URL, $url );
+    curl_setopt ( $ch, CURLOPT_POST, true );
+    curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
+    curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
+    curl_setopt ( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
 
-	$result = curl_exec ( $ch );
-	echo $result."\n";
-	curl_close ( $ch );
+    $result = curl_exec ( $ch );
+    echo $result."\n";
+    curl_close ( $ch );
 ?>
 
 ```

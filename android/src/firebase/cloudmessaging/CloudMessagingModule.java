@@ -19,6 +19,8 @@ import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.KrollObject;
 import org.appcelerator.kroll.annotations.Kroll;
@@ -44,6 +46,7 @@ public class CloudMessagingModule extends KrollModule
 
 	private static final String LCAT = "FirebaseCloudMessaging";
 	private static CloudMessagingModule instance = null;
+	private static final String FORCE_SHOW_IN_FOREGROUND = "titanium.firebase.cloudmessaging.key";
 	private String notificationData = "";
 
 	public CloudMessagingModule()
@@ -245,6 +248,28 @@ public class CloudMessagingModule extends KrollModule
 		NotificationManager notificationManager =
 			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.createNotificationChannel(channelProxy.getNotificationChannel());
+	}
+
+	// clang-format off
+	@Kroll.setProperty
+	@Kroll.method
+	public void setForceShowInForeground(final Boolean showInForeground)
+	// clang-format on
+	{
+		Context context = Utils.getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean(FORCE_SHOW_IN_FOREGROUND, showInForeground);
+		editor.commit();
+	}
+
+	@Kroll.getProperty
+	public Boolean forceShowInForeground()
+	{
+		Context context = Utils.getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getBoolean(FORCE_SHOW_IN_FOREGROUND, false);
 	}
 
 	public static CloudMessagingModule getInstance()

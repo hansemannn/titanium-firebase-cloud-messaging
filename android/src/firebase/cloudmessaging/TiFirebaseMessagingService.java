@@ -84,6 +84,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 	private Boolean showNotification(RemoteMessage remoteMessage)
 	{
+		CloudMessagingModule module = CloudMessagingModule.getInstance();
 		Map<String, String> params = remoteMessage.getData();
 		JSONObject jsonData = new JSONObject(params);
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
@@ -99,6 +100,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		if (params.get("force_show_in_foreground") != null && params.get("force_show_in_foreground") != "") {
 			showNotification = showNotification || TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
+		}
+
+		if (module.forceShowInForeground()) {
+			showNotification = module.forceShowInForeground();
 		}
 
 		if (TiConvert.toBoolean(params.get("vibrate"), false)) {

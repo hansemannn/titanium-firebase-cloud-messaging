@@ -35,6 +35,16 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 	private static final AtomicInteger atomic = new AtomicInteger(0);
 
 	@Override
+	public void onNewToken(String s) {
+		super.onNewToken(s);
+		CloudMessagingModule module = CloudMessagingModule.getInstance();
+		if (module != null) {
+			module.onTokenRefresh(s);
+		}
+		Log.d(TAG, "New token: " + s);
+	}
+
+	@Override
 	public void onMessageSent(String msgID)
 	{
 		Log.d(TAG, "Message sent: " + msgID);

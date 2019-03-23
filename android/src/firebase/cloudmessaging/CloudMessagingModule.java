@@ -36,6 +36,7 @@ import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
 import android.content.Intent;
 import org.json.JSONObject;
+import ti.modules.titanium.android.notificationmanager.NotificationChannelProxy;
 
 @Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
 public class CloudMessagingModule extends KrollModule
@@ -181,6 +182,9 @@ public class CloudMessagingModule extends KrollModule
 		String importance = (String) options.optString("importance", sound.equals("silent") ? "low" : "default");
 		String channelId = (String) options.optString("channelId", "default");
 		String channelName = (String) options.optString("channelName", channelId);
+		Boolean vibration = (Boolean) options.optBoolean("vibrate", false);
+		Boolean lights = (Boolean) options.optBoolean("lights", false);
+		Boolean showBadge = (Boolean) options.optBoolean("showBadge", false);
 		int importanceVal = NotificationManager.IMPORTANCE_DEFAULT;
 		if (importance.equals("low")) {
 			importanceVal = NotificationManager.IMPORTANCE_LOW;
@@ -199,9 +203,9 @@ public class CloudMessagingModule extends KrollModule
 		}
 
 		NotificationChannel channel = new NotificationChannel(channelId, channelName, importanceVal);
-		channel.enableVibration(true);
-		channel.enableLights(true);
-		channel.setShowBadge(true);
+		channel.enableVibration(vibration);
+		channel.enableLights(lights);
+		channel.setShowBadge(showBadge);
 		if (soundUri != null) {
 			AudioAttributes audioAttributes = new AudioAttributes.Builder()
 												  .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -224,6 +228,23 @@ public class CloudMessagingModule extends KrollModule
 	public void apnsToken(String str)
 	{
 		// empty
+	}
+
+	// clang-format off
+	@Kroll.setProperty
+	@Kroll.method
+	public void setNotificationChannel(Object channel)
+	// clang-format on
+	{
+		if (!(channel instanceof NotificationChannelProxy)) {
+			return;
+		}
+
+		Context context = Utils.getApplicationContext();
+		NotificationChannelProxy channelProxy = (NotificationChannelProxy) channel;
+		NotificationManager notificationManager =
+			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.createNotificationChannel(channelProxy.getNotificationChannel());
 	}
 
 	public static CloudMessagingModule getInstance()

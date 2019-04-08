@@ -26,7 +26,6 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.TiApplication;
 import android.net.Uri;
 import android.media.RingtoneManager;
-import android.content.ContentResolver;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
 {
@@ -101,7 +100,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Boolean showNotification = true;
 		Context context = getApplicationContext();
 		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		int priority = Notification.PRIORITY_MAX;
+		int priority = NotificationManager.IMPORTANCE_MAX;
 		int builder_defaults = 0;
 
 		if (appInForeground) {
@@ -128,15 +127,15 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		if (params.get("priority") != null && params.get("priority") != "") {
 			if (params.get("priority").toLowerCase() == "low") {
-				priority = Notification.PRIORITY_LOW;
+				priority = NotificationManager.IMPORTANCE_LOW;
 			} else if (params.get("priority").toLowerCase() == "min") {
-				priority = Notification.PRIORITY_MIN;
+				priority = NotificationManager.IMPORTANCE_MIN;
 			} else if (params.get("priority").toLowerCase() == "max") {
-				priority = Notification.PRIORITY_MAX;
+				priority = NotificationManager.IMPORTANCE_MAX;
 			} else if (params.get("priority").toLowerCase() == "default") {
-				priority = Notification.PRIORITY_DEFAULT;
+				priority = NotificationManager.IMPORTANCE_DEFAULT;
 			} else if (params.get("priority").toLowerCase() == "high") {
-				priority = Notification.PRIORITY_HIGH;
+				priority = NotificationManager.IMPORTANCE_HIGH;
 			} else {
 				priority = TiConvert.toInt(params.get("priority"), 1);
 			}

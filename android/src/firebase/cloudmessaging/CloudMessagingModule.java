@@ -9,7 +9,6 @@
 package firebase.cloudmessaging;
 
 import android.os.Build;
-import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
@@ -22,20 +21,18 @@ import android.os.Bundle;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import org.appcelerator.kroll.KrollModule;
-import org.appcelerator.kroll.KrollObject;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
-import org.appcelerator.kroll.common.TiConfig;
 import org.appcelerator.titanium.util.TiConvert;
+
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.firebase.iid.InstanceIdResult;
-import com.google.android.gms.tasks.OnSuccessListener;
 import org.appcelerator.kroll.KrollDict;
 import java.util.HashMap;
-import org.appcelerator.kroll.KrollFunction;
 import java.util.Map;
 import org.json.JSONObject;
 import ti.modules.titanium.android.notificationmanager.NotificationChannelProxy;

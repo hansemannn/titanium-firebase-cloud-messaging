@@ -11,7 +11,7 @@
 						<action android:name="com.google.firebase.MESSAGING_EVENT"/>
 					</intent-filter>
 				</service>
-				<activity android:name="firebase.cloudmessaging.PushHandlerActivity" android:exported="true"></activity>
+				<activity android:name="firebase.cloudmessaging.PushHandlerActivity" android:exported="true"/>
 			</application>
 		</manifest>
 	</android>

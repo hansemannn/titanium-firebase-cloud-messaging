@@ -1,15 +1,10 @@
 package firebase.cloudmessaging;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
-
-import org.appcelerator.titanium.TiApplication;
-import org.appcelerator.kroll.KrollRuntime;
 
 public class PushHandlerActivity extends Activity
 {

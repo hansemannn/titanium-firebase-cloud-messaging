@@ -1,7 +1,6 @@
 package firebase.cloudmessaging;
 
 import android.content.Context;
-import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.titanium.TiApplication;
 
 public final class Utils

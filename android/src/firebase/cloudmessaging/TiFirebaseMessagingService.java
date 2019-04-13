@@ -253,8 +253,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		}
 
 		// Badge number
-		if (params.get("showBadge") != null && params.get("showBadge") != "") {
-			builder.setNumber(TiConvert.toInt(params.get("showBadge"), 1));
+		if (params.get("badge") != null && params.get("badge") != "") {
+			builder.setNumber(TiConvert.toInt(params.get("badge"), 1));
 		}
 
 		int id = 0;

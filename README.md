@@ -174,7 +174,7 @@ Supported data fields:
 * "color" => will tint the app name and the small icon next to it
 * "vibrate" => "boolean"
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
-* "showBadge" => "int"
+* "badge" => "int" (if supported by the phone it will show a badge with this number)
 
 Supported notification fields:
 * "title" => "string"

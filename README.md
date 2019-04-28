@@ -58,7 +58,7 @@ _Big text notification with colored icon/appname_
 
 ### Updates to the Manifest
 
-Merge the following keys to the `<android>` section of the tiapp.xml in order to use GCM.
+Merge the following keys to the `<android>` section of the tiapp.xml in order to use GCM (not needed for FCM).
 
 ```xml
 <android xmlns:android="http://schemas.android.com/apk/res/android">
@@ -106,24 +106,20 @@ In rare cases you need to add the google_app_id to `/app/platform/android/res/va
 
 ### Setting the Notification Icon
 
-You have to place a notification icon "notificationicon.png" into the following folder:
- '[application_name]/app/platform/android/res/drawable/'
+For a `data notification` you have to place a notification icon "notificationicon.png" into the following folder:
+ `[application_name]/[app*]/platform/android/res/drawable/`
+ or
+ `[application_name]/[app*]/platform/android/res/drawable-*` (if you use custom dpi folders)
 
-Otherwise the default icon will be used.
+<small>**\*** = Alloy</small>
 
-#### Alternative
-
-Taken over from [ti.goosh](https://github.com/caffeinalab/ti.goosh):
-If you add this attribute within the `<application/>` section of your `tiapp.xml`:
+To use a custom icon for a `notification message` you need to add this attribute within the `<application/>` section of your `tiapp.xml`:
 
 ```xml
-<meta-data android:name="com.google.firebase.messaging.default_notification_icon"
-           android:resource="@drawable/notification_icon"/>
+<meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/notificationicon"/>
 ```
 
-Then FCM will set the notification tray icon taking it from `[app*]/platform/android/res/drawable-*/notification_icon.png`.
-
-**\*** = Alloy
+Otherwise the default icon will be used.
 
 It should be flat (no gradients), white and face-on perspective.
 
@@ -174,6 +170,7 @@ Supported data fields:
 * "color" => will tint the app name and the small icon next to it
 * "vibrate" => "boolean"
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
+* "badge" => "int" (if supported by the phone it will show a badge with this number)
 
 Supported notification fields:
 * "title" => "string"

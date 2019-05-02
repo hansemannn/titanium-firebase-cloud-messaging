@@ -2,8 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="android/src"/>
 	<classpathentry kind="lib" path="/Users/maf/Library/Android/sdk/platforms/android-27/android.jar"/>
-	<classpathentry kind="lib" path="android/build/intermediates/exploded-aar/firebase-messaging-17.5.0/classes.jar"/>
-	<classpathentry kind="lib" path="android/build/intermediates/exploded-aar/firebase-iid-17.1.1/classes.jar"/>
 	<classpathentry kind="lib" path="android/build/intermediates/exploded-aar/play-services-tasks-16.0.1/classes.jar"/>
 	<classpathentry kind="lib" path="/Users/maf/Library/Application Support/Titanium/mobilesdk/osx/7.5.2.GA/android/titanium.jar"/>
 	<classpathentry kind="lib" path="/Users/maf/Library/Application Support/Titanium/mobilesdk/osx/7.5.2.GA/android/android-support-v7-appcompat.jar"/>
@@ -13,5 +11,8 @@
 	<classpathentry kind="lib" path="/Users/maf/Library/Application Support/Titanium/mobilesdk/osx/7.5.2.GA/android/kroll-v8.jar"/>
 	<classpathentry kind="lib" path="/Users/maf/Library/Application Support/Titanium/mobilesdk/osx/7.5.2.GA/android/kroll-common.jar"/>
 	<classpathentry kind="lib" path="/Users/maf/Library/Application Support/Titanium/mobilesdk/osx/7.5.2.GA/android/kroll-apt.jar"/>
+	<classpathentry kind="lib" path="android/lib/firebase-iid-17.1.2.aar"/>
+	<classpathentry kind="lib" path="android/build/intermediates/exploded-aar/firebase-iid-17.1.2/classes.jar"/>
+	<classpathentry kind="lib" path="android/build/intermediates/exploded-aar/firebase-messaging-17.6.0/classes.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

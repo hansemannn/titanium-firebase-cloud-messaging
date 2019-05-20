@@ -44,6 +44,7 @@ public class CloudMessagingModule extends KrollModule
 	private static final String LCAT = "FirebaseCloudMessaging";
 	private static CloudMessagingModule instance = null;
 	private static final String FORCE_SHOW_IN_FOREGROUND = "titanium.firebase.cloudmessaging.key";
+	private static String fcmToken = null;
 	private String notificationData = "";
 
 	public CloudMessagingModule()
@@ -99,8 +100,8 @@ public class CloudMessagingModule extends KrollModule
 				@Override
 				public void onSuccess(InstanceIdResult instanceIdResult)
 				{
-					String newToken = instanceIdResult.getToken();
-					onTokenRefresh(newToken);
+					fcmToken = instanceIdResult.getToken();
+					onTokenRefresh(fcmToken);
 				}
 		});
 		parseBootIntent();
@@ -159,6 +160,7 @@ public class CloudMessagingModule extends KrollModule
 				KrollDict data = new KrollDict();
 				data.put("fcmToken", token);
 				fireEvent("didRefreshRegistrationToken", data);
+				fcmToken = token;
 			}
 		} catch (Exception e) {
 			Log.e(LCAT, "Can't refresh token: " + e.getMessage());
@@ -229,7 +231,12 @@ public class CloudMessagingModule extends KrollModule
 	@Kroll.getProperty
 	public String fcmToken()
 	{
-		return FirebaseInstanceId.getInstance().getToken();
+		if (fcmToken != null) {
+			return fcmToken;
+		} else {
+			registerForPushNotifications();
+			return null;
+		}
 	}
 
 	@Kroll.setProperty

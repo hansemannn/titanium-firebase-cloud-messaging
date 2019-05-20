@@ -26,6 +26,7 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.TiApplication;
 import android.net.Uri;
 import android.media.RingtoneManager;
+import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
 {
@@ -254,7 +255,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		// Badge number
 		if (params.get("badge") != null && params.get("badge") != "") {
-			builder.setNumber(TiConvert.toInt(params.get("badge"), 1));
+			ShortcutBadger.applyCount(context, TiConvert.toInt(params.get("badge"), 1));
 		}
 
 		int id = 0;

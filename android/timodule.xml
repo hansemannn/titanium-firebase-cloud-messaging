@@ -20,6 +20,6 @@
 		<module>firebase.core</module>
 
 		<!-- Require Ti.PlayServices (https://github.com/appcelerator-modules/ti.playservices) -->
-		<module platform="android" version="16.1.2">ti.playservices</module>
+		<module platform="android">ti.playservices</module>
 	</modules>
 </ti:module>

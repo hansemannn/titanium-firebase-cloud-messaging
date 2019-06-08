@@ -261,7 +261,7 @@ Ti.App.iOS.addEventListener('remotenotificationaction', function(event) {
 ## Example
 ```js
 var core = require('firebase.core');
-var fcm = require('firebase.cloudmessaging');
+// var fcm = require('firebase.cloudmessaging'); // should only be included AFTER var core has been configured (for IOS)
 
 // Configure core module (required for all Firebase modules).
 core.configure({
@@ -269,6 +269,8 @@ core.configure({
     googleAppID: '...', // Differs between Android and iOS.
     // file: 'GoogleService-Info.plist' // If using a plist (iOS only).
 });
+
+var fcm = require('firebase.cloudmessaging');
 
 // Called when the Firebase token is registered or refreshed.
 fcm.addEventListener('didRefreshRegistrationToken', function(e) {

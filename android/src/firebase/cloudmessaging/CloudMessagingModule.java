@@ -103,7 +103,7 @@ public class CloudMessagingModule extends KrollModule
 					fcmToken = instanceIdResult.getToken();
 					onTokenRefresh(fcmToken);
 				}
-		});
+			});
 		parseBootIntent();
 	}
 

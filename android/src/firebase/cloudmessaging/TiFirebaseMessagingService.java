@@ -34,7 +34,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 	private static final AtomicInteger atomic = new AtomicInteger(0);
 
 	@Override
-	public void onNewToken(String s) {
+	public void onNewToken(String s)
+	{
 		super.onNewToken(s);
 		CloudMessagingModule module = CloudMessagingModule.getInstance();
 		if (module != null) {
@@ -234,15 +235,11 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		if (params.get("icon") != null && params.get("icon") != "") {
 			try {
 				Bitmap icon = this.getBitmapFromURL(params.get("icon"));
-
-				if(params.get("icon_as_circle") != null && params.get("icon_as_circle") != "") {
-					try {
-						//Converting the icon Bitmap to a circle shaped Bitmap
-						boolean circle = Boolean.parseBoolean(params.get("icon_as_circle"));
-						if (circle) icon = Utils.getCircleBitmap(icon);
-					} catch (Exception ex) {
-						Log.e(TAG, "Icon as circle exception: " + ex.getMessage());
-					}
+				//Check if the icon should be displayed as a circle
+				if (params.get("rounded_large_icon") != null
+					&& Boolean.parseBoolean(params.get("rounded_large_icon"))) {
+					//Converting the icon Bitmap to a circle shaped Bitmap
+					icon = Utils.getCircleBitmap(icon);
 				}
 
 				builder.setLargeIcon(icon);

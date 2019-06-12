@@ -165,6 +165,7 @@ Supported data fields:
 * "big_text_summary" => "string"
 * "icon" => "Remote URL"
 * "image" => "Remote URL"
+* "rounded_large_icon" => "Boolean" (to display the largeIcon as a rounded image when the icon field is present)
 * "force_show_in_foreground" => "Boolean" (show notification even app is in foreground)
 * "id" => "int"
 * "color" => will tint the app name and the small icon next to it

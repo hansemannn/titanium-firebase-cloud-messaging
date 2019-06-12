@@ -241,7 +241,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 					//Converting the icon Bitmap to a circle shaped Bitmap
 					icon = Utils.getCircleBitmap(icon);
 				}
-
 				builder.setLargeIcon(icon);
 			} catch (Exception ex) {
 				Log.e(TAG, "Icon exception: " + ex.getMessage());

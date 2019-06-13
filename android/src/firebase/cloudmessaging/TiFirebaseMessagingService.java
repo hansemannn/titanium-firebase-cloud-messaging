@@ -236,8 +236,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			try {
 				Bitmap icon = this.getBitmapFromURL(params.get("icon"));
 				//Check if the icon should be displayed as a circle
-				if (params.get("rounded_large_icon") != null
-					&& Boolean.parseBoolean(params.get("rounded_large_icon"))) {
+				if (jsonData.optBoolean("rounded_large_icon")) {
 					//Converting the icon Bitmap to a circle shaped Bitmap
 					icon = Utils.getCircleBitmap(icon);
 				}

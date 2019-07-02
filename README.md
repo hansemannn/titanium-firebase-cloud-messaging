@@ -94,6 +94,16 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
 </android>   
 ```
 
+If you run into errors in combination with firebase.analytics e.g. `Error: Attempt to invoke virtual method 'getInstanceId()' on a null object reference` you can add:
+
+```xml
+<service android:name="com.google.firebase.components.ComponentDiscoveryService" >
+	<meta-data android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+		android:value="com.google.firebase.components.ComponentRegistrar" />
+</service>
+```
+to the tiapp.xml
+
 #### Optional
 
 In rare cases you need to add the google_app_id to `/app/platform/android/res/values/strings.xml`:

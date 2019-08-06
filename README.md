@@ -14,7 +14,7 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 ## Requirements
 - [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module.
 The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
-- [x] iOS: Titanium SDK 6.3.0+
+- [x] iOS: Titanium SDK 7.3.0+ (if you use SDK < 7.3.0, please use Ti.FirebaseCloudMessaging v1.1.0)
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 
 ## Download

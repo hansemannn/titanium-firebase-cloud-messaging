@@ -8,32 +8,32 @@
  */
 package firebase.cloudmessaging;
 
-import android.os.Build;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import org.appcelerator.kroll.KrollModule;
-import org.appcelerator.kroll.annotations.Kroll;
-import org.appcelerator.titanium.TiApplication;
-import org.appcelerator.kroll.common.Log;
-import org.appcelerator.titanium.util.TiConvert;
-
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
-import org.appcelerator.kroll.KrollDict;
 import java.util.HashMap;
 import java.util.Map;
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.KrollModule;
+import org.appcelerator.kroll.annotations.Kroll;
+import org.appcelerator.kroll.common.Log;
+import org.appcelerator.titanium.TiApplication;
+import org.appcelerator.titanium.util.TiConvert;
 import org.json.JSONObject;
 import ti.modules.titanium.android.notificationmanager.NotificationChannelProxy;
 
@@ -95,15 +95,25 @@ public class CloudMessagingModule extends KrollModule
 	@Kroll.method
 	public void registerForPushNotifications()
 	{
-		FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(
-			TiApplication.getAppRootOrCurrentActivity(), new OnSuccessListener<InstanceIdResult>() {
-				@Override
-				public void onSuccess(InstanceIdResult instanceIdResult)
+		FirebaseInstanceId.getInstance()
+			.getInstanceId()
+			.addOnSuccessListener(TiApplication.getAppRootOrCurrentActivity(),
+								  new OnSuccessListener<InstanceIdResult>() {
+									  @Override
+									  public void onSuccess(InstanceIdResult instanceIdResult)
+									  {
+										  fcmToken = instanceIdResult.getToken();
+										  onTokenRefresh(fcmToken);
+									  }
+								  })
+			.addOnFailureListener(new OnFailureListener() {
+				public void onFailure(Exception e)
 				{
-					fcmToken = instanceIdResult.getToken();
-					onTokenRefresh(fcmToken);
+					KrollDict data = new KrollDict();
+					data.put("error", e.getMessage());
+					fireEvent("error", data);
 				}
-		});
+			});
 		parseBootIntent();
 	}
 
@@ -203,7 +213,7 @@ public class CloudMessagingModule extends KrollModule
 		}
 
 		Uri soundUri = null;
-		if (sound.equals("default")) {
+		if (sound.equals("default") || sound.equals("")) {
 			soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		} else if (!sound.equals("silent")) {
 			String path = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/"

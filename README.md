@@ -14,7 +14,7 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 ## Requirements
 - [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module.
 The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
-- [x] iOS: Titanium SDK 6.3.0+
+- [x] iOS: Titanium SDK 7.3.0+ (if you use SDK < 7.3.0, please use Ti.FirebaseCloudMessaging v1.1.0)
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 
 ## Download
@@ -93,6 +93,16 @@ Merge the following keys to the `<android>` section of the tiapp.xml in order to
     </manifest>
 </android>   
 ```
+
+If you run into errors in combination with firebase.analytics e.g. `Error: Attempt to invoke virtual method 'getInstanceId()' on a null object reference` you can add:
+
+```xml
+<service android:name="com.google.firebase.components.ComponentDiscoveryService" >
+	<meta-data android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+		android:value="com.google.firebase.components.ComponentRegistrar" />
+</service>
+```
+to the tiapp.xml
 
 #### Optional
 
@@ -261,8 +271,8 @@ Ti.App.iOS.addEventListener('remotenotificationaction', function(event) {
 
 ## Example
 ```js
+// Import core module
 var core = require('firebase.core');
-var fcm = require('firebase.cloudmessaging');
 
 // Configure core module (required for all Firebase modules).
 core.configure({
@@ -270,6 +280,10 @@ core.configure({
     googleAppID: '...', // Differs between Android and iOS.
     // file: 'GoogleService-Info.plist' // If using a plist (iOS only).
 });
+
+// Important: The cloud messaging module has to imported after (!) the configure()
+// method of the core module is called
+var fcm = require('firebase.cloudmessaging');
 
 // Called when the Firebase token is registered or refreshed.
 fcm.addEventListener('didRefreshRegistrationToken', function(e) {

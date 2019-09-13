@@ -290,7 +290,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			try {
 				icon = TiRHelper.getApplicationResource(type + "." + name);
 			} catch (TiRHelper.ResourceNotFoundException ex) {
-				Log.e(TAG, type + "." + name + " not found; make sure it's in platform/android/res/" + type);
+				Log.w(TAG, type + "." + name + " not found; make sure it's in platform/android/res/" + type);
 			}
 		}
 

@@ -5,28 +5,28 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import java.util.HashMap;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import org.appcelerator.kroll.KrollDict;
-import java.util.concurrent.atomic.AtomicInteger;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import java.util.Random;
+import java.io.BufferedInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.io.BufferedInputStream;
-import org.appcelerator.titanium.util.TiRHelper;
+import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
-import org.appcelerator.titanium.util.TiConvert;
-import org.appcelerator.titanium.TiApplication;
-import android.net.Uri;
-import android.media.RingtoneManager;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import me.leolin.shortcutbadger.ShortcutBadger;
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.titanium.TiApplication;
+import org.appcelerator.titanium.util.TiConvert;
+import org.appcelerator.titanium.util.TiRHelper;
+import org.json.JSONObject;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
 {
@@ -143,10 +143,15 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			}
 		}
 
-		if (params.get("sound") != null && params.get("sound") != "") {
+		if (params.get("sound") != null && params.get("sound") != "" && !params.get("sound").isEmpty()) {
 			int resource = getResource("raw", params.get("sound"));
-			defaultSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resource);
-			Log.d(TAG, "custom sound: " + defaultSoundUri);
+			if (resource != 0) {
+				defaultSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resource);
+				Log.d(TAG, "custom sound: " + defaultSoundUri);
+			} else {
+				Log.d(TAG, "custom sound not found");
+				builder_defaults |= Notification.DEFAULT_SOUND;
+			}
 		} else {
 			builder_defaults |= Notification.DEFAULT_SOUND;
 		}

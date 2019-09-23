@@ -16,6 +16,8 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
 - [x] iOS: Titanium SDK 7.3.0+ (if you use SDK < 7.3.0, please use Ti.FirebaseCloudMessaging v1.1.0)
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
+- [x] Read the [Firebase-Core](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
+
 
 ## Download
 - [x] [Stable release](https://github.com/hansemannn/titanium-firebase-cloud-messaging/releases)
@@ -104,9 +106,9 @@ If you run into errors in combination with firebase.analytics e.g. `Error: Attem
 ```
 to the tiapp.xml
 
-#### Optional
+#### XML
 
-In rare cases you need to add the google_app_id to `/app/platform/android/res/values/strings.xml`:
+You need to add the google_app_id to `/app/platform/android/res/values/strings.xml`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
@@ -196,33 +198,33 @@ Supported notification fields:
 
 #### Methods
 
-##### `registerForPushNotifications()`
+`registerForPushNotifications()`
 
-##### `appDidReceiveMessage(parameters)` - iOS only
+`appDidReceiveMessage(parameters)` (iOS only)
   - `parameters` (Object)
 
 Note: Only call this method if method swizzling is disabled (enabled by default). Messages are received via the native delegates instead,
 so receive the `gcm.message_id` key from the notification payload instead.
 
-##### `sendMessage(parameters)`
+`sendMessage(parameters)`
   - `parameters` (Object)
     - `messageID` (String)
     - `to` (String)
     - `timeToLive` (Number)
     - `data` (Object)
 
-##### `subscribeToTopic(topic)`
+`subscribeToTopic(topic)`
   - `topic` (String)
 
-##### `unsubscribeFromTopic(topic)`
+`unsubscribeFromTopic(topic)`
   - `topic` (String)
 
-##### `setNotificationChannel(channel)` - Android-only
+`setNotificationChannel(channel)` - Android-only
   - `channel` (NotificationChannel Object) Use `Ti.Android.NotificationManager.createNotificationChannel()` to create the channel and pass it to the function. See [Titanium.Android.NotificationChannel](https://docs.appcelerator.com/platform/latest/#!/api/Titanium.Android.NotificationChannel)
 
   _Prefered way_ to set a channel. As an alternative you can use `createNotificationChannel()`
 
-##### `createNotificationChannel(parameters)` - Android-only
+`createNotificationChannel(parameters)` - Android-only
 
 - `parameters` (Object)
   - `sound` (String) optional, refers to a sound file (without extension) at `platform/android/res/raw`. If sound == "default" or not passed in, will use the default sound. If sound == "silent" the channel will have no sound
@@ -234,41 +236,44 @@ so receive the `gcm.message_id` key from the notification payload instead.
 
   Read more in the [official Android docs](https://developer.android.com/reference/android/app/NotificationChannel).
 
-##### `setForceShowInForeground(showInForeground)` - Android-only
+`setForceShowInForeground(showInForeground)` - Android-only
   - `showInForeground` (Boolean) Force the notifications to be shown in foreground.
 
 
 
 #### Properties
 
-##### `shouldEstablishDirectChannel` (Number, get/set)
+`shouldEstablishDirectChannel` (Number, get/set)
 
-##### `fcmToken` (String, get)
+`fcmToken` (String, get)
 
-##### `apnsToken` (String, set) - iOS only
+`apnsToken` (String, set) (iOS only)
 
-##### `lastData` (Object) - Android only
+`lastData` (Object) (Android only)
 The propery `lastData` will contain the data part when you send a notification push message (so both nodes are visible inside the push payload).
 
 #### Events
 
-##### `didReceiveMessage`
+`didReceiveMessage`
   - `message` (Object)
 
-iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
-are still delivered via the Titanium notification events, e.g.
-```js
-Ti.App.iOS.addEventListener('notification', function(event) {
-  // Handle foreground notification
-});
+	iOS Note: This method is only called on iOS 10+ and only for direct messages sent by Firebase. Normal Firebase push notifications
+	are still delivered via the Titanium notification events, e.g.
+	```js
+	Ti.App.iOS.addEventListener('notification', function(event) {
+	  // Handle foreground notification
+	});
 
-Ti.App.iOS.addEventListener('remotenotificationaction', function(event) {
-  // Handle background notification action click
-});
-```
+	Ti.App.iOS.addEventListener('remotenotificationaction', function(event) {
+	  // Handle background notification action click
+	});
+	```
 
-##### `didRefreshRegistrationToken`
+`didRefreshRegistrationToken`
   - `fcmToken` (String)
+
+`error` (Android only)
+  - `error` (String): Error during token registration
 
 ## Example
 ```js

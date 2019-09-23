@@ -175,7 +175,16 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		// Start building notification
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+		NotificationCompat.Builder builder;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			String channelId = "default";
+			if (params.get("channelId") != null && params.get("channelId") != "") {
+				channelId = params.get("channelId");
+			}
+			builder = new NotificationCompat.Builder(context, channelId);
+		} else {
+			builder = new NotificationCompat.Builder(context);
+		}
 		builder.setContentIntent(contentIntent);
 		builder.setAutoCancel(true);
 		builder.setPriority(priority);
@@ -189,13 +198,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		builder.setTicker(params.get("ticker"));
 		builder.setDefaults(builder_defaults);
 		builder.setSound(defaultSoundUri);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			if (params.get("channelId") != null && params.get("channelId") != "") {
-				builder.setChannelId(params.get("channelId"));
-			} else {
-				builder.setChannelId("default");
-			}
-		}
 
 		// BigText
 		if (params.get("big_text") != null && params.get("big_text") != "") {
@@ -305,7 +307,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			try {
 				icon = TiRHelper.getApplicationResource(type + "." + name);
 			} catch (TiRHelper.ResourceNotFoundException ex) {
-				Log.e(TAG, type + "." + name + " not found; make sure it's in platform/android/res/" + type);
+				Log.w(TAG, type + "." + name + " not found; make sure it's in platform/android/res/" + type);
 			}
 		}
 

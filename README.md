@@ -306,19 +306,21 @@ fcm.addEventListener('didReceiveMessage', function(e) {
 if (OS_ANDROID) {
     // fcm.createNotificationChannel({
     //     sound: 'warn_sound',
-    //     channelId: 'general',
+    //     channelId: 'default',
     //     channelName: 'General Notifications',
     //     importance: 'high'
     // })
 
     var channel = Ti.Android.NotificationManager.createNotificationChannel({
-        id: 'my_channel',
-        name: 'TEST CHANNEL',
+        id: 'default',
+        name: 'Default channel',
         importance: Ti.Android.IMPORTANCE_DEFAULT,
         enableLights: true,
         enableVibration: true,
         showBadge: true
     });
+    // if you use a custom id you have to set the same to the `channelId` in you php send script!
+    
     fcm.notificationChannel = channel;
 }
 

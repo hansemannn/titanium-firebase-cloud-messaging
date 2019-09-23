@@ -1,9 +1,11 @@
 var core = require('firebase.core');
-var fcm = require('firebase.cloudmessaging');
 var isAndroid = Ti.Platform.osname === 'android';
 
 // Configure core module (required for all Firebase modules)
 core.configure();
+
+// Important: Include cloud messaging module after the initial configure()
+var fcm = require('firebase.cloudmessaging');
 
 // Called when the Firebase token is ready
 fcm.addEventListener('didRefreshRegistrationToken', onToken);

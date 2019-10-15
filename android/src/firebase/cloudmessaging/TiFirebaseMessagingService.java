@@ -64,6 +64,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		CloudMessagingModule module = CloudMessagingModule.getInstance();
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
 		Boolean isVisibile = true;
+		Log.d(TAG, "onMessageReceived " + remoteMessage.getData());
 
 		if (remoteMessage.getData().size() > 0) {
 			// data message
@@ -105,6 +106,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		int priority = NotificationManager.IMPORTANCE_MAX;
 		int builder_defaults = 0;
 
+        Log.d(TAG, "TiFirebaseMessagingService.showNotification " + appInForeground);
+
 		if (appInForeground) {
 			showNotification = false;
 		}
@@ -144,8 +147,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		}
 
 		if (params.get("sound") != null && params.get("sound") != "" && !params.get("sound").isEmpty()) {
-			int resource = getResource("raw", params.get("sound"));
-			if (resource != 0) {
+			String resource = "raw/" + params.get("sound");
+			if (resource != null) {
 				defaultSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resource);
 				Log.d(TAG, "custom sound: " + defaultSoundUri);
 			} else {

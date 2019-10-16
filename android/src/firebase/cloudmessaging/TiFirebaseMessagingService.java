@@ -64,7 +64,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		CloudMessagingModule module = CloudMessagingModule.getInstance();
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
 		Boolean isVisibile = true;
-		Log.d(TAG, "onMessageReceived " + remoteMessage.getData());
 
 		if (remoteMessage.getData().size() > 0) {
 			// data message
@@ -105,8 +104,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		int priority = NotificationManager.IMPORTANCE_MAX;
 		int builder_defaults = 0;
-
-		Log.d(TAG, "TiFirebaseMessagingService.showNotification " + appInForeground);
 
 		if (appInForeground) {
 			showNotification = false;

@@ -219,12 +219,7 @@ public class CloudMessagingModule extends KrollModule
 			Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + soundUri.toString());
 		}
 
-		NotificationManager notificationManager =
-			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
-		if (channel == null) {
-			channel = new NotificationChannel(channelId, channelName, importanceVal);
-		}
+		NotificationChannel channel = new NotificationChannel(channelId, channelName, importanceVal);
 		channel.enableVibration(vibration);
 		channel.enableLights(lights);
 		channel.setShowBadge(showBadge);
@@ -235,6 +230,8 @@ public class CloudMessagingModule extends KrollModule
 												  .build();
 			channel.setSound(soundUri, audioAttributes);
 		}
+		NotificationManager notificationManager =
+			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.createNotificationChannel(channel);
 	}
 
@@ -324,11 +321,9 @@ public class CloudMessagingModule extends KrollModule
 	public void parseBootIntent()
 	{
 		try {
-			Log.d(LCAT, "parseBootIntent");
 			Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
 			String notification = intent.getStringExtra("fcm_data");
 			if (notification != null) {
-				Log.d(LCAT, "parseBootIntent has notification " + notification);
 				HashMap<String, Object> msg = new HashMap<String, Object>();
 				msg.put("data", new KrollDict(new JSONObject(notification)));
 				onMessageReceived(msg);

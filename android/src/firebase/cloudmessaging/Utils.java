@@ -1,6 +1,7 @@
 package firebase.cloudmessaging;
 
 import android.content.Context;
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.net.Uri;
 import org.appcelerator.titanium.TiApplication;
 
 public final class Utils
@@ -34,6 +36,17 @@ public final class Utils
 
 		return icon;
 	}
+
+	public static Uri getSoundUri(String name)
+    {
+        Context context = getApplicationContext();
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(context.getPackageName())
+                .appendPath("raw")
+                .appendPath(name)
+                .build();
+    }
 
 	public static Context getApplicationContext()
 	{

@@ -106,7 +106,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		int priority = NotificationManager.IMPORTANCE_MAX;
 		int builder_defaults = 0;
 
-        Log.d(TAG, "TiFirebaseMessagingService.showNotification " + appInForeground);
+		Log.d(TAG, "TiFirebaseMessagingService.showNotification " + appInForeground);
 
 		if (appInForeground) {
 			showNotification = false;
@@ -147,8 +147,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		}
 
 		if (params.get("sound") != null && params.get("sound") != "" && !params.get("sound").isEmpty()) {
-		    defaultSoundUri = Utils.getSoundUri(params.get("sound"));
-            Log.d(TAG, "showNotification custom sound: " + defaultSoundUri);
+			defaultSoundUri = Utils.getSoundUri(params.get("sound"));
+			Log.d(TAG, "showNotification custom sound: " + defaultSoundUri);
 		} else {
 			builder_defaults |= Notification.DEFAULT_SOUND;
 		}

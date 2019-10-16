@@ -216,15 +216,15 @@ public class CloudMessagingModule extends KrollModule
 			soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		} else if (!sound.equals("silent")) {
 			soundUri = Utils.getSoundUri(sound);
-            Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + soundUri.toString());
+			Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + soundUri.toString());
 		}
 
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationManager notificationManager =
+			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
 		if (channel == null) {
-		    channel = new NotificationChannel(channelId, channelName, importanceVal);
-        }
+			channel = new NotificationChannel(channelId, channelName, importanceVal);
+		}
 		channel.enableVibration(vibration);
 		channel.enableLights(lights);
 		channel.setShowBadge(showBadge);
@@ -239,18 +239,18 @@ public class CloudMessagingModule extends KrollModule
 	}
 
 	@Kroll.method
-    public void deleteNotificationChannel(String channelId)
-    {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
-        }
-        Log.d(LCAT, "deleteNotificationChannel " + channelId);
+	public void deleteNotificationChannel(String channelId)
+	{
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+			return;
+		}
+		Log.d(LCAT, "deleteNotificationChannel " + channelId);
 
-        Context context = Utils.getApplicationContext();
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.deleteNotificationChannel(channelId);
-    }
+		Context context = Utils.getApplicationContext();
+		NotificationManager notificationManager =
+			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.deleteNotificationChannel(channelId);
+	}
 
 	@Kroll.getProperty
 	public String fcmToken()
@@ -324,11 +324,11 @@ public class CloudMessagingModule extends KrollModule
 	public void parseBootIntent()
 	{
 		try {
-		    Log.d(LCAT, "parseBootIntent");
+			Log.d(LCAT, "parseBootIntent");
 			Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
 			String notification = intent.getStringExtra("fcm_data");
 			if (notification != null) {
-			    Log.d(LCAT, "parseBootIntent has notification " + notification);
+				Log.d(LCAT, "parseBootIntent has notification " + notification);
 				HashMap<String, Object> msg = new HashMap<String, Object>();
 				msg.put("data", new KrollDict(new JSONObject(notification)));
 				onMessageReceived(msg);

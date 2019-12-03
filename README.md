@@ -192,6 +192,9 @@ Supported notification fields:
 * "tag" => "custom_notification_tag",   // push with the same tag will replace each other
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
+### Android: Note about custom sounds
+To use a custom sound > Android O you need to create a second channel. The default channel will always use the default notification sound on the device! 
+
 ### Android: Note for switching between v<=v2.0.2 and >=v2.0.3 if you use notification channels with custom sounds
 With versions prior to 2.0.3 of this module, FirebaseCloudMessaging.createNotificationChannel would create the notification sound uri using the resource id of the sound file in the `res/raw` directory. However, as described in this [android issue](https://issuetracker.google.com/issues/131303134), those resource ids can change to reference different files (or no file) between app versions, and  that happens the notification channel may play a different or no sound than originally intended.
 With version 2.0.3 and later, we now create the uri's using the string filename so that it will not change if resource ids change. So if you are on version <=2.0.2 and are switching to version >=2.0.3, you will want to check if this is a problem for you by installing a test app using version >= 2.0.3 as an upgrade to a previous test app using version <= 2.0.2. Note that you should not uninstall the first app before installing the second app; nor should you reset user data.

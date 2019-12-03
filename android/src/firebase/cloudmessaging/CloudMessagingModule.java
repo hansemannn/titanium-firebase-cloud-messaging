@@ -10,7 +10,6 @@ package firebase.cloudmessaging;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -216,10 +215,8 @@ public class CloudMessagingModule extends KrollModule
 		if (sound.equals("default") || sound.equals("")) {
 			soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		} else if (!sound.equals("silent")) {
-			String path = ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/"
-						  + Utils.getResourceIdentifier("raw", sound);
-			Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + path);
-			soundUri = Uri.parse(path);
+			soundUri = Utils.getSoundUri(sound);
+			Log.d(LCAT, "createNotificationChannel with sound " + sound + " at " + soundUri.toString());
 		}
 
 		NotificationChannel channel = new NotificationChannel(channelId, channelName, importanceVal);
@@ -236,6 +233,20 @@ public class CloudMessagingModule extends KrollModule
 		NotificationManager notificationManager =
 			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.createNotificationChannel(channel);
+	}
+
+	@Kroll.method
+	public void deleteNotificationChannel(String channelId)
+	{
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+			return;
+		}
+		Log.d(LCAT, "deleteNotificationChannel " + channelId);
+
+		Context context = Utils.getApplicationContext();
+		NotificationManager notificationManager =
+			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.deleteNotificationChannel(channelId);
 	}
 
 	@Kroll.getProperty

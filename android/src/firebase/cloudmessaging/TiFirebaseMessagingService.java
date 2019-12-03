@@ -144,14 +144,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		}
 
 		if (params.get("sound") != null && params.get("sound") != "" && !params.get("sound").isEmpty()) {
-			int resource = getResource("raw", params.get("sound"));
-			if (resource != 0) {
-				defaultSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resource);
-				Log.d(TAG, "custom sound: " + defaultSoundUri);
-			} else {
-				Log.d(TAG, "custom sound not found");
-				builder_defaults |= Notification.DEFAULT_SOUND;
-			}
+			defaultSoundUri = Utils.getSoundUri(params.get("sound"));
+			Log.d(TAG, "showNotification custom sound: " + defaultSoundUri);
 		} else {
 			builder_defaults |= Notification.DEFAULT_SOUND;
 		}

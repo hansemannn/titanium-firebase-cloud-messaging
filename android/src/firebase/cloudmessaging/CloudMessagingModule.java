@@ -344,5 +344,9 @@ public class CloudMessagingModule extends KrollModule
 		} catch (Exception ex) {
 			Log.e(LCAT, "parseBootIntent" + ex);
 		}
+
+		SharedPreferences preferences = Utils.getApplicationContext().getSharedPreferences(
+			"fcm_data", Utils.getApplicationContext().MODE_PRIVATE);
+		preferences.edit().clear().commit();
 	}
 }

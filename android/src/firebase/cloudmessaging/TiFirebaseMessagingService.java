@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -151,7 +152,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			builder_defaults |= Notification.DEFAULT_SOUND;
 		}
 
-		SharedPreferences preferences = getSharedPreferences("fcm_data", getApplicationContext().MODE_PRIVATE);
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor editor = preferences.edit();
 		editor.putString("titanium.firebase.cloudmessaging.message", jsonData.toString());
 		editor.commit();

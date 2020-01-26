@@ -193,7 +193,7 @@ Supported notification fields:
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
 ### Android: Note about custom sounds
-To use a custom sound > Android O you need to create a second channel. The default channel will always use the default notification sound on the device! 
+To use a custom sound > Android O you need to create a second channel. The default channel will always use the default notification sound on the device!
 
 ### Android: Note for switching between v<=v2.0.2 and >=v2.0.3 if you use notification channels with custom sounds
 With versions prior to 2.0.3 of this module, FirebaseCloudMessaging.createNotificationChannel would create the notification sound uri using the resource id of the sound file in the `res/raw` directory. However, as described in this [android issue](https://issuetracker.google.com/issues/131303134), those resource ids can change to reference different files (or no file) between app versions, and  that happens the notification channel may play a different or no sound than originally intended.
@@ -261,7 +261,7 @@ so receive the `gcm.message_id` key from the notification payload instead.
 `apnsToken` (String, set) (iOS only)
 
 `lastData` (Object) (Android only)
-The propery `lastData` will contain the data part when you send a notification push message (so both nodes are visible inside the push payload).
+The propery `lastData` will contain the data part when you send a notification push message (so both nodes are visible inside the push payload). Read before calling `registerForPushNotifications()`.
 
 #### Events
 
@@ -331,8 +331,14 @@ if (OS_ANDROID) {
         showBadge: true
     });
     // if you use a custom id you have to set the same to the `channelId` in you php send script!
-    
+
     fcm.notificationChannel = channel;
+}
+
+
+if (OS_ANDROID){
+    // display last data:
+    Ti.API.info("Last data: " + fcm.lastData);
 }
 
 // Register the device with the FCM service.
@@ -347,11 +353,6 @@ if (fcm.fcmToken) {
 
 // Subscribe to a topic.
 fcm.subscribeToTopic('testTopic');
-
-if (OS_ANDROID){
-    // display last data:
-    Ti.API.info("Last data: " + fcm.lastData);
-}
 ```
 
 ## Send FCM messages with PHP

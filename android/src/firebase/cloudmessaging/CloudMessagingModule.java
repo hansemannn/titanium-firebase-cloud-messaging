@@ -85,8 +85,8 @@ public class CloudMessagingModule extends KrollModule
 			}
 
 			if (data.get("message") == null) {
-				SharedPreferences preferences = Utils.getApplicationContext().getSharedPreferences(
-					"fcm_data", Utils.getApplicationContext().MODE_PRIVATE);
+				SharedPreferences preferences =
+					PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
 				String prefMessage = preferences.getString("titanium.firebase.cloudmessaging.message", null);
 				if (prefMessage != null) {
 					data.put("message", new KrollDict(new JSONObject(prefMessage)));
@@ -345,8 +345,7 @@ public class CloudMessagingModule extends KrollModule
 			Log.e(LCAT, "parseBootIntent" + ex);
 		}
 
-		SharedPreferences preferences = Utils.getApplicationContext().getSharedPreferences(
-			"fcm_data", Utils.getApplicationContext().MODE_PRIVATE);
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
 		preferences.edit().clear().commit();
 	}
 }

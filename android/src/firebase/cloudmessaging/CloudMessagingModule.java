@@ -87,7 +87,7 @@ public class CloudMessagingModule extends KrollModule
 			if (data.get("message") == null) {
 				SharedPreferences preferences = Utils.getApplicationContext().getSharedPreferences(
 					"fcm_data", Utils.getApplicationContext().MODE_PRIVATE);
-				String prefMessage = preferences.getString("message", null);
+				String prefMessage = preferences.getString("titanium.firebase.cloudmessaging.message", null);
 				if (prefMessage != null) {
 					data.put("message", new KrollDict(new JSONObject(prefMessage)));
 				}

@@ -153,7 +153,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		SharedPreferences preferences = getSharedPreferences("fcm_data", getApplicationContext().MODE_PRIVATE);
 		SharedPreferences.Editor editor = preferences.edit();
-		editor.putString("message", jsonData.toString());
+		editor.putString("titanium.firebase.cloudmessaging.message", jsonData.toString());
 		editor.commit();
 
 		if (!showNotification) {

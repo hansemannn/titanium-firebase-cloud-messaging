@@ -83,6 +83,16 @@ public class CloudMessagingModule extends KrollModule
 					data.put("inBackground", true);
 				}
 			}
+
+			if (data.get("message") == null) {
+				SharedPreferences preferences = Utils.getApplicationContext().getSharedPreferences(
+					"fcm_data", Utils.getApplicationContext().MODE_PRIVATE);
+				String prefMessage = preferences.getString("message", null);
+				if (prefMessage != null) {
+					data.put("message", new KrollDict(new JSONObject(prefMessage)));
+				}
+				preferences.edit().clear().commit();
+			}
 		} catch (Exception ex) {
 			Log.e(LCAT, "getLastData" + ex);
 		}

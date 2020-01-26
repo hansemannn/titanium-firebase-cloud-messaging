@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
@@ -149,6 +150,11 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		} else {
 			builder_defaults |= Notification.DEFAULT_SOUND;
 		}
+
+		SharedPreferences preferences = getSharedPreferences("fcm_data", getApplicationContext().MODE_PRIVATE);
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.putString("message", jsonData.toString());
+		editor.commit();
 
 		if (!showNotification) {
 			// hidden notification - still send broadcast with data for next app start

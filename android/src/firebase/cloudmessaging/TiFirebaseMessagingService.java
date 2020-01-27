@@ -5,11 +5,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -149,6 +151,11 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		} else {
 			builder_defaults |= Notification.DEFAULT_SOUND;
 		}
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.putString("titanium.firebase.cloudmessaging.message", jsonData.toString());
+		editor.commit();
 
 		if (!showNotification) {
 			// hidden notification - still send broadcast with data for next app start

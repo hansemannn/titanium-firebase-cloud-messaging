@@ -83,6 +83,16 @@ public class CloudMessagingModule extends KrollModule
 					data.put("inBackground", true);
 				}
 			}
+
+			if (data.get("message") == null) {
+				SharedPreferences preferences =
+					PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
+				String prefMessage = preferences.getString("titanium.firebase.cloudmessaging.message", null);
+				if (prefMessage != null) {
+					data.put("message", new KrollDict(new JSONObject(prefMessage)));
+				}
+				preferences.edit().clear().commit();
+			}
 		} catch (Exception ex) {
 			Log.e(LCAT, "getLastData" + ex);
 		}
@@ -334,5 +344,8 @@ public class CloudMessagingModule extends KrollModule
 		} catch (Exception ex) {
 			Log.e(LCAT, "parseBootIntent" + ex);
 		}
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
+		preferences.edit().clear().commit();
 	}
 }

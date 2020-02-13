@@ -40,10 +40,18 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 	public void onNewToken(String s)
 	{
 		super.onNewToken(s);
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
 		CloudMessagingModule module = CloudMessagingModule.getInstance();
+
 		if (module != null) {
 			module.onTokenRefresh(s);
+			preferences.edit().clear().commit();
+		} else {
+			preferences.setString("titanium.firebase.cloudmessaging.cached_token", s);
+			preferences.edit().commit();
 		}
+
 		Log.d(TAG, "New token: " + s);
 	}
 

@@ -55,7 +55,15 @@ public class CloudMessagingModule extends KrollModule
 	@Kroll.onAppCreate
 	public static void onAppCreate(TiApplication app)
 	{
-		// put module init code that needs to run when the application is created
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
+		CloudMessagingModule module = CloudMessagingModule.getInstance();
+
+		String cachedToken = preferences.getString("titanium.firebase.cloudmessaging.cached_token", null);
+
+		if (cachedToken != null) {
+			instance.onTokenRefresh(cachedToken);
+			preferences.edit().clear().commit();
+		}
 	}
 
 	// clang-format off
@@ -317,10 +325,7 @@ public class CloudMessagingModule extends KrollModule
 
 	public static CloudMessagingModule getInstance()
 	{
-		if (instance != null)
-			return instance;
-		else
-			return new CloudMessagingModule();
+		return instance;
 	}
 
 	public void setNotificationData(String data)

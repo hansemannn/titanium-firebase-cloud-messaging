@@ -153,17 +153,18 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1130;
 			};
 			buildConfigurationList = 1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "titanium-firebase-cloud-messaging" */;
 			compatibilityVersion = "Xcode 8.0";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
-				English,
-				Japanese,
-				French,
-				German,
+				fr,
+				ja,
+				en,
+				Base,
+				de,
 			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* titanium-firebase-cloud-messaging */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;

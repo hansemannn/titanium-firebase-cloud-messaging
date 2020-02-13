@@ -2,7 +2,7 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 2.0.1
+version: 3.0.0
 apiversion: 2
 architectures: armv7 arm64 i386 x86_64
 description: titanium-firebase-cloud-messaging
@@ -15,4 +15,4 @@ name: titanium-firebase-cloud-messaging
 moduleid: firebase.cloudmessaging
 guid: 36052f2b-8ddc-4177-b5a1-82c6b948f83d
 platform: iphone
-minsdk: 7.3.0
+minsdk: 8.0.0

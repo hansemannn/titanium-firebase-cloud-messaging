@@ -93,6 +93,20 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			// app is in foreground or notification was show - send data to event receiver
 			module.onMessageReceived(msg);
 		}
+
+		Context context = Utils.getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		String serviceName = prefs.getString(CloudMessagingModule.SERVICE_NAME, "");
+		if (serviceName != "") {
+			Intent si = new Intent();
+			si.setClassName(TiApplication.getInstance().getApplicationContext(), serviceName);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				TiApplication.getInstance().getApplicationContext().startForegroundService(si);
+			} else {
+				TiApplication.getInstance().getApplicationContext().startService(si);
+			}
+		}
 	}
 
 	private Boolean showNotification(RemoteMessage remoteMessage)

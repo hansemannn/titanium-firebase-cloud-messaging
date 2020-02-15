@@ -106,6 +106,26 @@ If you run into errors in combination with firebase.analytics e.g. `Error: Attem
 ```
 to the tiapp.xml
 
+#### Service
+
+If you want to start an Android Titanium service when you receive a push you can add add a service to your tiapp.xml file:
+```xml
+<android xmlns:android="http://schemas.android.com/apk/res/android">
+    <manifest>
+		<!-- YOUR MANIFEST CODES HERE -->
+    </manifest>
+    <services>
+        <service type="interval" url="myService.js"/>
+    </services>
+</android>
+```
+
+and then set the `service` property to the full service name. Check `/build/android/AndroidManifest.xml` for something like `com.myproject.MyServiceService`.
+
+```javascript
+fcm.service = "com.myproject.MyServiceService";
+```
+
 #### XML
 
 You need to add the google_app_id to `/app/platform/android/res/values/strings.xml`:
@@ -259,6 +279,8 @@ so receive the `gcm.message_id` key from the notification payload instead.
 `fcmToken` (String, get)
 
 `apnsToken` (String, set) (iOS only)
+
+`service` (String, get/set) (Android only)
 
 `lastData` (Object) (Android only)
 The propery `lastData` will contain the data part when you send a notification push message (so both nodes are visible inside the push payload). Read before calling `registerForPushNotifications()`.

@@ -123,8 +123,15 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			builder_defaults |= Notification.DEFAULT_VIBRATE;
 		}
 
-		if (params.get("title") == null && params.get("message") == null && params.get("big_text") == null
-			&& params.get("big_text_summary") == null && params.get("ticker") == null && params.get("image") == null) {
+		if (
+			params.get("title") == null &&
+			params.get("message") == null &&
+			params.get("alert") == null &&
+			params.get("big_text") == null &&
+			params.get("big_text_summary") == null &&
+			params.get("ticker") == null &&
+			params.get("image") == null
+		) {
 			// no actual content - don't show it
 			showNotification = false;
 		}

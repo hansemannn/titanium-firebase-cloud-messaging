@@ -23,6 +23,8 @@ libs/
 android/clean
 android/ant_clean
 android/.classpath
+android/.gradle
+android/gradle/
 android/.settings
 android/dist/
 android/launch-*

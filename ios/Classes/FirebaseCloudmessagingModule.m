@@ -67,11 +67,15 @@
 
 - (void)setShouldEstablishDirectChannel:(NSNumber *)shouldEstablishDirectChannel
 {
+  DEPRECATED_REMOVED(@"Firebase.CloudMessaging.shouldEstablishDirectChannel (use APNs channel for downstream messaging)", @"3.0.0", @"4.0.0");
+
   [[FIRMessaging messaging] setShouldEstablishDirectChannel:[TiUtils boolValue:shouldEstablishDirectChannel]];
 }
 
 - (NSNumber *)shouldEstablishDirectChannel
 {
+  DEPRECATED_REMOVED(@"Firebase.CloudMessaging.shouldEstablishDirectChannel (use APNs channel for downstream messaging)", @"3.0.0", @"4.0.0");
+
   return @([[FIRMessaging messaging] shouldEstablishDirectChannel]);
 }
 
@@ -83,6 +87,7 @@
 
 - (void)sendMessage:(id)arguments
 {
+  DEPRECATED_REMOVED(@"Firebase.CloudMessaging.sendMessage", @"3.0.0", @"4.0.0");
   ENSURE_SINGLE_ARG(arguments, NSDictionary);
   
   NSDictionary *message = [arguments objectForKey:@"message"];

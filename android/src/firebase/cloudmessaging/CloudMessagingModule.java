@@ -92,7 +92,7 @@ public class CloudMessagingModule extends KrollModule
 				if (prefMessage != null) {
 					data.put("message", new KrollDict(new JSONObject(prefMessage)));
 				}
-				preferences.edit().clear().commit();
+				preferences.edit().remove("titanium.firebase.cloudmessaging.message").commit();
 			}
 		} catch (Exception ex) {
 			Log.e(LCAT, "getLastData" + ex);
@@ -343,6 +343,6 @@ public class CloudMessagingModule extends KrollModule
 		}
 
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
-		preferences.edit().clear().commit();
+		preferences.edit().remove("titanium.firebase.cloudmessaging.message").commit();
 	}
 }

@@ -271,6 +271,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Badge number
 		if (params.get("badge") != null && params.get("badge") != "") {
 			ShortcutBadger.applyCount(context, TiConvert.toInt(params.get("badge"), 1));
+			builder.setNumber(TiConvert.toInt(params.get("badge"), 1));
 		}
 
 		int id = 0;

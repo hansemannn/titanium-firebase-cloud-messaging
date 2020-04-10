@@ -334,12 +334,32 @@ if (OS_ANDROID) {
     // if you use a custom id you have to set the same to the `channelId` in you php send script!
 
     fcm.notificationChannel = channel;
-}
 
-
-if (OS_ANDROID){
     // display last data:
     Ti.API.info("Last data: " + fcm.lastData);
+} else {
+	// iOS
+	// Listen to the notification settings event
+	Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
+	  // Remove the event again to prevent duplicate calls through the Firebase API
+	  Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
+
+	  // Register for push notifications
+	  Ti.Network.registerForPushNotifications({
+	    success: function () { ... },
+	    error: function () { ... },
+	    callback: function () { ... } // Fired for all kind of notifications (foreground, background & closed)
+	  });
+	});
+
+	// Register for the notification settings event
+	Ti.App.iOS.registerUserNotificationSettings({
+	  types: [
+	    Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT,
+	    Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND,
+	    Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE
+	  ]
+	});
 }
 
 // Register the device with the FCM service.

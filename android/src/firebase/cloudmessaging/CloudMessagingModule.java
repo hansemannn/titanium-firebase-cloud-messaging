@@ -111,7 +111,7 @@ public class CloudMessagingModule extends KrollModule
 				public void onComplete(@NonNull Task<InstanceIdResult> task)
 				{
 					if (!task.isSuccessful()) {
-						Log.w(LCAT, "getInstanceId failed: " + task.getException());
+						Log.w(LCAT, "getInstanceId failed: ", task.getException());
 						return;
 					}
 

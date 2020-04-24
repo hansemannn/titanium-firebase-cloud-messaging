@@ -11,9 +11,9 @@ import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import java.io.BufferedInputStream;
@@ -123,8 +123,9 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			builder_defaults |= Notification.DEFAULT_VIBRATE;
 		}
 
-		if (params.get("title") == null && params.get("message") == null && params.get("big_text") == null
-			&& params.get("big_text_summary") == null && params.get("ticker") == null && params.get("image") == null) {
+		if (params.get("title") == null && params.get("alert") == null && params.get("message") == null
+			&& params.get("big_text") == null && params.get("big_text_summary") == null && params.get("ticker") == null
+			&& params.get("image") == null) {
 			// no actual content - don't show it
 			showNotification = false;
 		}
@@ -270,6 +271,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Badge number
 		if (params.get("badge") != null && params.get("badge") != "") {
 			ShortcutBadger.applyCount(context, TiConvert.toInt(params.get("badge"), 1));
+			builder.setNumber(TiConvert.toInt(params.get("badge"), 1));
 		}
 
 		int id = 0;

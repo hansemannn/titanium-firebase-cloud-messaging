@@ -9,6 +9,7 @@ Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is 
 * [Android Notes](#android-notes)
 * [API: Methods, Properties, Events](#api)
 * [Example](#example)
+* [Sending push messages](#sending-push-messages)
 * [Build from source](#build)
 
 ## Requirements
@@ -333,12 +334,32 @@ if (OS_ANDROID) {
     // if you use a custom id you have to set the same to the `channelId` in you php send script!
 
     fcm.notificationChannel = channel;
-}
 
-
-if (OS_ANDROID){
     // display last data:
     Ti.API.info("Last data: " + fcm.lastData);
+} else {
+	// iOS
+	// Listen to the notification settings event
+	Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
+	  // Remove the event again to prevent duplicate calls through the Firebase API
+	  Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
+
+	  // Register for push notifications
+	  Ti.Network.registerForPushNotifications({
+	    success: function () { ... },
+	    error: function () { ... },
+	    callback: function () { ... } // Fired for all kind of notifications (foreground, background & closed)
+	  });
+	});
+
+	// Register for the notification settings event
+	Ti.App.iOS.registerUserNotificationSettings({
+	  types: [
+	    Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT,
+	    Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND,
+	    Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE
+	  ]
+	});
 }
 
 // Register the device with the FCM service.
@@ -355,7 +376,27 @@ if (fcm.fcmToken) {
 fcm.subscribeToTopic('testTopic');
 ```
 
-## Send FCM messages with PHP
+## Sending push messages
+
+### using curl
+
+Data message:
+```
+curl -i -H 'Content-type: application/json' -H 'Authorization: key=#####KEY#####' -XPOST https://fcm.googleapis.com/fcm/send -d '{
+  "registration_ids":["####DEVICE_ID#####"],
+  "data": {"title":"Push Title", "message":"Push content", "name1":"value1", "badge":"150"}
+}'
+```
+
+Notification message:
+```
+curl -i -H 'Content-type: application/json' -H 'Authorization: key=#####KEY#####' -XPOST https://fcm.googleapis.com/fcm/send -d '{
+  "registration_ids":["####DEVICE_ID#####"],
+  "notification": {"title":"Push Title", "body":"Push content"}
+}'
+```
+
+###  using PHP
 To test your app you can use this PHP script to send messages to the device/topic:
 
 ```php
@@ -394,7 +435,7 @@ To test your app you can use this PHP script to send messages to the device/topi
 
 Run it locally with `php filelane.php` or put it on a webserver where you can execute PHP files.
 
-### Android example
+### extended PHP Android example
 ```php
 <?php $url = 'https://fcm.googleapis.com/fcm/send';
 

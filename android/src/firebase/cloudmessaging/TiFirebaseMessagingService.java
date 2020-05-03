@@ -12,6 +12,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -23,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-import me.leolin.shortcutbadger.ShortcutBadger;
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
@@ -32,7 +32,6 @@ import org.json.JSONObject;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
 {
-
 	private static final String TAG = "FirebaseMsgService";
 	private static final AtomicInteger atomic = new AtomicInteger(0);
 
@@ -270,7 +269,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		// Badge number
 		if (params.get("badge") != null && params.get("badge") != "") {
-			ShortcutBadger.applyCount(context, TiConvert.toInt(params.get("badge"), 1));
 			builder.setNumber(TiConvert.toInt(params.get("badge"), 1));
 		}
 

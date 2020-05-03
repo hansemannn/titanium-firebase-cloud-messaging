@@ -314,10 +314,7 @@ public class CloudMessagingModule extends KrollModule
 
 	public static CloudMessagingModule getInstance()
 	{
-		if (instance != null)
-			return instance;
-		else
-			return new CloudMessagingModule();
+		return instance;
 	}
 
 	public void setNotificationData(String data)

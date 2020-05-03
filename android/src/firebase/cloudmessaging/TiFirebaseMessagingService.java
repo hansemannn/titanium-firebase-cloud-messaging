@@ -64,18 +64,18 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		CloudMessagingModule module = CloudMessagingModule.getInstance();
 		Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
-		Boolean isVisibile = true;
+		Boolean isVisible = true;
 
 		if (remoteMessage.getData().size() > 0) {
 			// data message
-			isVisibile = showNotification(remoteMessage);
+			isVisible = showNotification(remoteMessage);
 		}
 
 		if (remoteMessage.getNotification() != null) {
 			Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
 			msg.put("title", remoteMessage.getNotification().getTitle());
 			msg.put("body", remoteMessage.getNotification().getBody());
-			isVisibile = true;
+			isVisible = true;
 		} else {
 			Log.d(TAG, "Data message: " + remoteMessage.getData());
 		}
@@ -88,9 +88,11 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		msg.put("data", new KrollDict(remoteMessage.getData()));
 		msg.put("sendTime", remoteMessage.getSentTime());
 
-		if (isVisibile || appInForeground) {
+		if (isVisible || appInForeground) {
 			// app is in foreground or notification was show - send data to event receiver
-			module.onMessageReceived(msg);
+			if (module != null) {
+				module.onMessageReceived(msg);
+			}
 		}
 	}
 
@@ -103,7 +105,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Boolean showNotification = true;
 		Context context = getApplicationContext();
 		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		int priority = NotificationManager.IMPORTANCE_MAX;
 		int builder_defaults = 0;
 
 		if (appInForeground) {
@@ -114,7 +115,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			showNotification = showNotification || TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
 		}
 
-		if (module.forceShowInForeground()) {
+		if (module != null && module.forceShowInForeground()) {
 			showNotification = module.forceShowInForeground();
 		}
 
@@ -129,19 +130,22 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			showNotification = false;
 		}
 
-		if (params.get("priority") != null && params.get("priority") != "") {
-			if (params.get("priority").toLowerCase() == "low") {
+		String priorityString = params.get("priority");
+		int priority = NotificationManager.IMPORTANCE_MAX;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && priorityString != null && !priorityString.isEmpty()) {
+			if (priorityString.toLowerCase().equals("low")) {
 				priority = NotificationManager.IMPORTANCE_LOW;
-			} else if (params.get("priority").toLowerCase() == "min") {
+			} else if (priorityString.toLowerCase().equals("min")) {
 				priority = NotificationManager.IMPORTANCE_MIN;
-			} else if (params.get("priority").toLowerCase() == "max") {
+			} else if (priorityString.toLowerCase().equals("max")) {
 				priority = NotificationManager.IMPORTANCE_MAX;
-			} else if (params.get("priority").toLowerCase() == "default") {
+			} else if (priorityString.toLowerCase().equals("default")) {
 				priority = NotificationManager.IMPORTANCE_DEFAULT;
-			} else if (params.get("priority").toLowerCase() == "high") {
+			} else if (priorityString.toLowerCase().equals("high")) {
 				priority = NotificationManager.IMPORTANCE_HIGH;
 			} else {
-				priority = TiConvert.toInt(params.get("priority"), 1);
+				priority = TiConvert.toInt(priorityString, 1);
 			}
 		}
 

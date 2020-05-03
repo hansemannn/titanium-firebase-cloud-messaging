@@ -21,7 +21,11 @@ public class PushHandlerActivity extends Activity
 			CloudMessagingModule module = CloudMessagingModule.getInstance();
 			Context context = getApplicationContext();
 			String notification = getIntent().getStringExtra("fcm_data");
-			module.setNotificationData(notification);
+
+			if (module != null) {
+				module.setNotificationData(notification);
+			}
+
 			Intent launcherIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
 			launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 			launcherIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

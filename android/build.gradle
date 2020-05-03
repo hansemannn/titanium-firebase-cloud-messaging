@@ -5,6 +5,6 @@ repositories {
 
 dependencies {
 	implementation "androidx.preference:preference:1.1.0"
-	compile 'com.google.firebase:firebase-messaging:20.0.1'
+	implementation 'com.google.firebase:firebase-messaging:20.1.6'
 	implementation "me.leolin:ShortcutBadger:1.1.22@aar"
 }

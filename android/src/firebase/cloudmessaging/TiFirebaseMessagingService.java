@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import me.leolin.shortcutbadger.ShortcutBadger;
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
@@ -273,6 +274,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		// Badge number
 		if (params.get("badge") != null && params.get("badge") != "") {
+			ShortcutBadger.applyCount(context, TiConvert.toInt(params.get("badge"), 1));
 			builder.setNumber(TiConvert.toInt(params.get("badge"), 1));
 		}
 

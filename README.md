@@ -2,6 +2,12 @@
 
 Use the native Firebase SDK (iOS/Android) in Axway Titanium. This repository is part of the [Titanium Firebase](https://github.com/hansemannn/titanium-firebase) project.
 
+## Supporting this effort
+
+The whole Firebase support in Titanium is developed and maintained by the community (`@hansemannn` and `@m1ga`). To keep
+this project maintained and be able to use the latest Firebase SDK's, please see the "Sponsor" button of this repository,
+thank you!
+
 ## Topics
 * [Requirements](#requirements)
 * [Download](#download)

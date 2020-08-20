@@ -15,4 +15,4 @@ name: titanium-firebase-cloud-messaging
 moduleid: firebase.cloudmessaging
 guid: 36052f2b-8ddc-4177-b5a1-82c6b948f83d
 platform: iphone
-minsdk: 8.0.0
+minsdk: 8.3.1.GA

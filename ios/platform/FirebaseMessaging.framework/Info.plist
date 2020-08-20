@@ -5,7 +5,7 @@
 	<key>CFBundleExecutable</key>
 	<string>FirebaseMessaging</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.firebase.Firebase</string>
+	<string>com.firebase.Firebase-FirebaseMessaging</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

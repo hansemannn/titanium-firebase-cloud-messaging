@@ -44,6 +44,7 @@ public class CloudMessagingModule extends KrollModule
 	private static final String LCAT = "FirebaseCloudMessaging";
 	private static CloudMessagingModule instance = null;
 	private static final String FORCE_SHOW_IN_FOREGROUND = "titanium.firebase.cloudmessaging.key";
+	public static final String SERVICE_NAME = "titanium.firebase.cloudmessaging.serviceName";
 	private static String fcmToken = null;
 	private String notificationData = "";
 
@@ -57,6 +58,30 @@ public class CloudMessagingModule extends KrollModule
 	public static void onAppCreate(TiApplication app)
 	{
 		// put module init code that needs to run when the application is created
+	}
+
+	// clang-format off
+	@Kroll.method
+	@Kroll.setProperty
+	private void setService(String serviceName)
+	// clang-format on
+	{
+		Context context = Utils.getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(SERVICE_NAME, serviceName);
+		editor.commit();
+	}
+
+	// clang-format off
+	@Kroll.method
+	@Kroll.getProperty
+	private String getService()
+	// clang-format on
+	{
+		Context context = Utils.getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getString(SERVICE_NAME, "");
 	}
 
 	// clang-format off

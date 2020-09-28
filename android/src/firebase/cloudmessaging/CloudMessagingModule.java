@@ -126,14 +126,36 @@ public class CloudMessagingModule extends KrollModule
 	@Kroll.method
 	public void subscribeToTopic(String topic)
 	{
-		FirebaseMessaging.getInstance().subscribeToTopic(topic);
+		FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+			@Override
+			public void onComplete(@NonNull Task<Void> task) {
+				KrollDict data = new KrollDict();
+				if (!task.isSuccessful()) {
+					data.put("subscribed", false);
+				} else {
+					data.put("subscribed", true);
+				}
+				fireEvent("subscribe", data);
+			}
+		});
 		Log.d(LCAT, "subscribe to " + topic);
 	}
 
 	@Kroll.method
 	public void unsubscribeFromTopic(String topic)
 	{
-		FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
+		FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+			@Override
+			public void onComplete(@NonNull Task<Void> task) {
+				KrollDict data = new KrollDict();
+				if (!task.isSuccessful()) {
+					data.put("unsubscribed", false);
+				} else {
+					data.put("unsubscribed", true);
+				}
+				fireEvent("unsubscribe", data);
+			}
+		});
 		Log.d(LCAT, "unsubscribe from " + topic);
 	}
 

@@ -293,6 +293,12 @@ The propery `lastData` will contain the data part when you send a notification p
 `error` (Android only)
   - `error` (String): Error during token registration
 
+`subscribe` (Android only)
+  - `success` (Boolean): Successfully subscribed
+
+`unsubscribe` (Android only)
+  - `success` (Boolean): Successfully unsubscribed
+
 ## Example
 ```js
 // Import core module

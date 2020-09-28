@@ -131,9 +131,9 @@ public class CloudMessagingModule extends KrollModule
 			public void onComplete(@NonNull Task<Void> task) {
 				KrollDict data = new KrollDict();
 				if (!task.isSuccessful()) {
-					data.put("subscribed", false);
+					data.put("success", false);
 				} else {
-					data.put("subscribed", true);
+					data.put("success", true);
 				}
 				fireEvent("subscribe", data);
 			}
@@ -149,9 +149,9 @@ public class CloudMessagingModule extends KrollModule
 			public void onComplete(@NonNull Task<Void> task) {
 				KrollDict data = new KrollDict();
 				if (!task.isSuccessful()) {
-					data.put("unsubscribed", false);
+					data.put("success", false);
 				} else {
-					data.put("unsubscribed", true);
+					data.put("success", true);
 				}
 				fireEvent("unsubscribe", data);
 			}

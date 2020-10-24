@@ -257,6 +257,15 @@ so receive the `gcm.message_id` key from the notification payload instead.
 `setForceShowInForeground(showInForeground)` - Android-only
   - `showInForeground` (Boolean) Force the notifications to be shown in foreground.
 
+`clearLastData()` - Android-only
+  - Will empty the stored lastData values.
+
+`getToken()` - Android-only
+  - Returns the current FCM token.
+
+`deleteToken()` - Android-only
+  - Removes the current FCM token.
+
 
 
 #### Properties
@@ -298,6 +307,9 @@ The propery `lastData` will contain the data part when you send a notification p
 
 `unsubscribe` (Android only)
   - `success` (Boolean): Successfully unsubscribed
+
+`tokenRemoved` (Android only)
+  - `success` (Boolean): Successfully removed token
 
 ## Example
 ```js
@@ -507,6 +519,8 @@ appc run -p ios --build-only
 ### Android
 
 > **Note**: When building for Android, make sure you have the [firebase.core](https://github.com/hansemannn/titanium-firebase-core) module installed globally (`~/Library/Application Support/Titanium/modules/android/firebase.core`). Otherwise, the firebase-iid library will not be referenced properly.
+
+Find the latest library version at https://firebase.google.com/docs/android/learn-more#compare-bom-versions
 
 ```js
 cd android

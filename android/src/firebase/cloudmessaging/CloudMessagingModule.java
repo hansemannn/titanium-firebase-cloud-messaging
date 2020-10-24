@@ -28,6 +28,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
@@ -79,7 +81,7 @@ public class CloudMessagingModule extends KrollModule
 				data.put("inBackground", true);
 			} else {
 				Log.d(LCAT, "Empty extras in Intent");
-				if (notificationData != "") {
+				if (!notificationData.equals("")) {
 					data = new KrollDict(new JSONObject(notificationData));
 					data.put("inBackground", true);
 				}
@@ -92,7 +94,7 @@ public class CloudMessagingModule extends KrollModule
 				if (prefMessage != null) {
 					data.put("message", new KrollDict(new JSONObject(prefMessage)));
 				}
-				preferences.edit().remove("titanium.firebase.cloudmessaging.message").commit();
+				preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
 			}
 		} catch (Exception ex) {
 			Log.e(LCAT, "getLastData" + ex);
@@ -105,21 +107,7 @@ public class CloudMessagingModule extends KrollModule
 	@Kroll.method
 	public void registerForPushNotifications()
 	{
-		FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(
-			new OnCompleteListener<InstanceIdResult>() {
-				@Override
-				public void onComplete(@NonNull Task<InstanceIdResult> task)
-				{
-					if (!task.isSuccessful()) {
-						Log.w(LCAT, "getInstanceId failed: ", task.getException());
-						return;
-					}
-
-					// Get new Instance ID token
-					fcmToken = task.getResult().getToken();
-					onTokenRefresh(fcmToken);
-				}
-			});
+		getToken();
 		parseBootIntent();
 	}
 
@@ -166,6 +154,49 @@ public class CloudMessagingModule extends KrollModule
 	}
 
 	@Kroll.method
+	public void clearLastData()
+	{
+		SharedPreferences preferences =
+			PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
+		String prefMessage = preferences.getString("titanium.firebase.cloudmessaging.message", null);
+		preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
+	}
+
+	@Kroll.method
+	public void getToken()
+	{
+		FirebaseMessaging fm = FirebaseMessaging.getInstance();
+		fm.getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+			@Override
+			public void onComplete(@NonNull Task<String> task) {
+				KrollDict data = new KrollDict();
+				fcmToken = task.getResult();
+				data.put("fcmToken", fcmToken);
+				fireEvent("didRefreshRegistrationToken", data);
+			}
+		});
+	}
+
+	@Kroll.method
+	public void deleteToken()
+	{
+		FirebaseMessaging fm = FirebaseMessaging.getInstance();
+		fm.deleteToken().addOnCompleteListener(new OnCompleteListener<Void>() {
+			@Override
+			public void onComplete(@NonNull Task<Void> task) {
+				KrollDict data = new KrollDict();
+				if (!task.isSuccessful()) {
+					data.put("success", false);
+				} else {
+					data.put("success", true);
+					fcmToken = null;
+				}
+				fireEvent("tokenRemoved", data);
+			}
+		});
+	}
+
+	@Kroll.method
 	public void sendMessage(KrollDict obj)
 	{
 		FirebaseMessaging fm = FirebaseMessaging.getInstance();
@@ -180,11 +211,12 @@ public class CloudMessagingModule extends KrollModule
 
 		// add custom data
 		Map<String, String> data = (HashMap) obj.get("data");
+		assert data != null;
 		for (Object o : data.keySet()) {
 			rm.addData((String) o, data.get(o));
 		}
 
-		if (fireTo != "" && fireMessageId != "") {
+		if (!fireTo.equals("") && !fireMessageId.equals("")) {
 			fm.send(rm.build());
 		} else {
 			Log.e(LCAT, "Please set 'to' and 'messageId'");
@@ -261,6 +293,7 @@ public class CloudMessagingModule extends KrollModule
 		}
 		NotificationManager notificationManager =
 			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		assert notificationManager != null;
 		notificationManager.createNotificationChannel(channel);
 	}
 
@@ -275,6 +308,7 @@ public class CloudMessagingModule extends KrollModule
 		Context context = Utils.getApplicationContext();
 		NotificationManager notificationManager =
 			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		assert notificationManager != null;
 		notificationManager.deleteNotificationChannel(channelId);
 	}
 
@@ -284,7 +318,7 @@ public class CloudMessagingModule extends KrollModule
 		if (fcmToken != null) {
 			return fcmToken;
 		} else {
-			registerForPushNotifications();
+			getToken();
 			return null;
 		}
 	}
@@ -309,6 +343,7 @@ public class CloudMessagingModule extends KrollModule
 		NotificationChannelProxy channelProxy = (NotificationChannelProxy) channel;
 		NotificationManager notificationManager =
 			(NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		assert notificationManager != null;
 		notificationManager.createNotificationChannel(channelProxy.getNotificationChannel());
 	}
 
@@ -323,7 +358,7 @@ public class CloudMessagingModule extends KrollModule
 
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putBoolean(FORCE_SHOW_IN_FOREGROUND, showInForeground);
-		editor.commit();
+		editor.apply();
 	}
 
 	@Kroll.getProperty
@@ -362,6 +397,6 @@ public class CloudMessagingModule extends KrollModule
 		}
 
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
-		preferences.edit().remove("titanium.firebase.cloudmessaging.message").commit();
+		preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
 	}
 }

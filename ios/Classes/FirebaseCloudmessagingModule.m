@@ -42,17 +42,11 @@
   [[TiApp app] registerApplicationDelegate:self];
 }
 
-- (void)startup
-{
-  [super startup];
-  NSLog(@"[DEBUG] %@ loaded", self);
-}
-
 #pragma Public APIs
 
 - (NSString *)fcmToken
 {
-  return [[FIRMessaging messaging] FCMToken];
+  return NULL_IF_NIL([[FIRMessaging messaging] FCMToken]);
 }
 
 - (void)setApnsToken:(NSString *)apnsToken
@@ -77,7 +71,7 @@
 - (void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)fcmToken
 {
   if ([self _hasListeners:@"didRefreshRegistrationToken"]) {
-    [self fireEvent:@"didRefreshRegistrationToken" withObject:@{ @"fcmToken": fcmToken }];
+    [self fireEvent:@"didRefreshRegistrationToken" withObject:@{ @"fcmToken": NULL_IF_NIL(fcmToken) }];
   }
 }
 
@@ -86,29 +80,10 @@
   [[FIRMessaging messaging] setAPNSToken:deviceToken];
 }
 
-#pragma mark Deprecated / removed APIs
-
-- (void)setShouldEstablishDirectChannel:(NSNumber *)shouldEstablishDirectChannel
-{
-  DEPRECATED_REMOVED(@"Firebase.CloudMessaging.shouldEstablishDirectChannel", @"3.0.0", @"3.0.0 (FCM direct channel is deprecated, please use APNs channel for downstream message delivery.)");
-}
-
-- (NSNumber *)shouldEstablishDirectChannel
-{
-  DEPRECATED_REMOVED(@"Firebase.CloudMessaging.shouldEstablishDirectChannel", @"3.0.0", @"3.0.0 (FCM direct channel is deprecated, please use APNs channel for downstream message delivery.)");
-
-  return @(NO);
-}
-
 - (void)appDidReceiveMessage:(id)arguments
 {
   ENSURE_SINGLE_ARG(arguments, NSDictionary);
   [[FIRMessaging messaging] appDidReceiveMessage:arguments];
-}
-
-- (void)sendMessage:(id)arguments
-{
-  DEPRECATED_REMOVED(@"Firebase.CloudMessaging.sendMessage", @"3.0.0", @"3.0.0 (Upstream messaging through direct channel is deprecated. For realtime updates, use Cloud Firestore, Realtime Database, or other services.)");
 }
 
 @end

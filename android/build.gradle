@@ -8,5 +8,5 @@ dependencies {
 	implementation "me.leolin:ShortcutBadger:1.1.22@aar"
 
 	// get latest version from https://firebase.google.com/docs/android/learn-more#bom
-	implementation 'com.google.firebase:firebase-messaging:21.0.0'
+	implementation 'com.google.firebase:firebase-messaging:21.0.1'
 }

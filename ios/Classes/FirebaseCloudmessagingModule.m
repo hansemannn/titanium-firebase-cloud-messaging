@@ -66,6 +66,54 @@
   [[FIRMessaging messaging] unsubscribeFromTopic:topic];
 }
 
+- (void)fetchToken:(id)callback
+{
+  ENSURE_SINGLE_ARG_OR_NIL(callback, KrollCallback);
+  [[FIRMessaging messaging] tokenWithCompletion:^(NSString * _Nullable token, NSError * _Nullable error) {
+    [callback call:@[@{ @"token": token ?: [NSNull null], @"error": (error.localizedDescription) ?: [NSNull null] }] thisObject:self];
+  }];
+}
+
+- (void)deleteToken:(id)callback
+{
+  ENSURE_SINGLE_ARG_OR_NIL(callback, KrollCallback);
+  
+  [[FIRMessaging messaging] deleteTokenWithCompletion:^(NSError * _Nullable error) {
+    if (callback != nil) {
+      NSDictionary *dict = nil;
+      if (error != nil) {
+        dict = @{ @"success": @(NO), @"error": [error localizedDescription] };
+      } else {
+        dict = @{ @"success": @(YES) };
+      }
+      [callback call:@[dict] thisObject:nil];
+    }
+  }];
+}
+
+- (void)deleteTokenForSenderID:(id)args
+{
+  ENSURE_ARG_COUNT(args, 2);
+
+  NSString *senderID;
+  ENSURE_ARG_AT_INDEX(senderID, args, 0, NSString);
+  
+  KrollCallback *callback;
+  ENSURE_ARG_AT_INDEX(callback, args, 1, KrollCallback);
+  
+  [[FIRMessaging messaging] deleteFCMTokenForSenderID:senderID completion:^(NSError * _Nullable error) {
+    if (callback != nil) {
+      NSDictionary *dict = nil;
+      if (error != nil) {
+        dict = @{ @"success": @(NO), @"error": [error localizedDescription] };
+      } else {
+        dict = @{ @"success": @(YES) };
+      }
+      [callback call:@[dict] thisObject:nil];
+    }
+  }];
+}
+
 #pragma mark FIRMessaging Delegates
 
 - (void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)fcmToken

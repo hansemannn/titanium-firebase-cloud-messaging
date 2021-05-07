@@ -2,7 +2,7 @@
  * titanium-firebase-cloud-messaging
  *
  * Created by Hans Knoechel
- * Copyright (c) 2017 Your Company. All rights reserved.
+ * Copyright (c) 2017-present by Hans Knöchel. All rights reserved.
  */
 
 #import "TiModule.h"

@@ -32,6 +32,17 @@ The options `googleAppID` and `GCMSenderID` are required for Android, or `file` 
 
 ## iOS notes:
 
+<table>
+<tr>
+<td style="vertical-align:top;">
+<img src="example/ios_push1.jpg"/>
+</td>
+<td style="vertical-align:top;">
+<img src="example/ios_push2.jpg"/>
+</td>
+</tr>
+</table>
+
 To register for push notifications on iOS, startin in 2.0.0, you only need to call the Titanium related methods as the following:
 ```js
 // Listen to the notification settings event
@@ -59,11 +70,25 @@ Ti.App.iOS.registerUserNotificationSettings({
 
 ## Android Notes:
 
-<img src="example/android_big_image.png"/><br/>
-_Big image notification with colored icon/appname_
+<table>
+<tr>
+<td style="vertical-align:top;">
+<img src="example/android_big_image.png" valign="top"/>
+</td>
+<td style="vertical-align:top;">
+<img src="example/android_big_text.png"/>
+</td>
+</tr>
+<tr><td>
+Big image notification with colored icon/appname
+</td>
+<td>
+Big text notification with colored icon/appname
+</td>
+</tr>
+</table>
 
-<img src="example/android_big_text.png"/><br/>
-_Big text notification with colored icon/appname_
+
 
 ### Updates to the Manifest
 
@@ -317,11 +342,7 @@ The propery `lastData` will contain the data part when you send a notification p
 var core = require('firebase.core');
 
 // Configure core module (required for all Firebase modules).
-core.configure({
-    GCMSenderID: '...',
-    googleAppID: '...', // Differs between Android and iOS.
-    // file: 'GoogleService-Info.plist' // If using a plist (iOS only).
-});
+core.configure();
 
 // Important: The cloud messaging module has to imported after (!) the configure()
 // method of the core module is called
@@ -370,9 +391,18 @@ if (OS_ANDROID) {
 
 	  // Register for push notifications
 	  Ti.Network.registerForPushNotifications({
-	    success: function () { ... },
-	    error: function () { ... },
-	    callback: function () { ... } // Fired for all kind of notifications (foreground, background & closed)
+	    success: function () {
+            if (fcm != null) {
+                console.log("New token", fcm.fcmToken);
+            }
+        },
+	    error: function (e) {
+            console.error(e);
+        },
+	    callback: function (e) {
+            // Fired for all kind of notifications (foreground, background & closed)
+            console.log(e.data);
+        }
 	  });
 	});
 
@@ -387,7 +417,7 @@ if (OS_ANDROID) {
 }
 
 // Register the device with the FCM service.
-fcm.registerForPushNotifications();
+if (OS_ANDROID) fcm.registerForPushNotifications();
 
 // Check if token is already available.
 if (fcm.fcmToken) {
@@ -431,7 +461,8 @@ To test your app you can use this PHP script to send messages to the device/topi
         'to' => '/topics/testTopic', // or device token
         'notification' => [
             'title' => 'TiFirebaseMessaging',
-            'body' => 'Message received'
+            'body' => 'Message received',
+            "badge"=> 1,
         ],
         'data' => [
             'key1' => 'value1',
@@ -464,32 +495,32 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 <?php $url = 'https://fcm.googleapis.com/fcm/send';
 
     $fields = array (
-    'to' => "TOKEN_ID",
-    // 'to' => "/topics/test",
-    /* 'notification' => array (
-     		"title" => "TiFirebaseMessaging",
-     		"body" => "Message received 📱😂",
-     		"timestamp"=>date('Y-m-d G:i:s'),
-    ),*/
-    'data' => array(
-    "test1" => "value1",
-    "test2" => "value2",
-    "timestamp"=>date('Y-m-d G:i:s'),
-    "title" => "title",
-    "message" => "message",
-    "big_text"=>"big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text ",
-    "big_text_summary"=>"big_text_summary",
-    "icon" => "http://via.placeholder.com/150x150",
-    "image" => "http://via.placeholder.com/350x150",	// won't show the big_text
-    "force_show_in_foreground"=> true,
-    "color" => "#ff6600",
-    "channelId" => "default"	// or a different channel
-    )
+        'to' => "TOKEN_ID",
+        // 'to' => "/topics/test",
+        /* 'notification' => array (
+         		"title" => "TiFirebaseMessaging",
+         		"body" => "Message received 📱😂",
+         		"timestamp"=>date('Y-m-d G:i:s'),
+        ),*/
+        'data' => array(
+            "test1" => "value1",
+            "test2" => "value2",
+            "timestamp"=>date('Y-m-d G:i:s'),
+            "title" => "title",
+            "message" => "message",
+            "big_text"=>"big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text ",
+            "big_text_summary"=>"big_text_summary",
+            "icon" => "http://via.placeholder.com/150x150",
+            "image" => "http://via.placeholder.com/350x150",	// won't show the big_text
+            "force_show_in_foreground"=> true,
+            "color" => "#ff6600",
+            "channelId" => "default"	// or a different channel
+        )
     );
 
     $headers = array (
-    'Authorization: key=API_KEY',
-    'Content-Type: application/json'
+        'Authorization: key=API_KEY',
+        'Content-Type: application/json'
     );
 
     $ch = curl_init ();
@@ -511,9 +542,9 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 
 ### iOS
 
-```js
+```bash
 cd ios
-appc run -p ios --build-only
+ti build -p ios --build-only
 ```
 
 ### Android
@@ -522,9 +553,9 @@ appc run -p ios --build-only
 
 Find the latest library version at https://firebase.google.com/docs/android/learn-more#compare-bom-versions
 
-```js
+```bash
 cd android
-appc run -p android --build-only
+ti build -p android --build-only
 ```
 
 ## Legal

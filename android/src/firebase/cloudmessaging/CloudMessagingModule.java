@@ -169,10 +169,12 @@ public class CloudMessagingModule extends KrollModule
 		fm.getToken().addOnCompleteListener(new OnCompleteListener<String>() {
 			@Override
 			public void onComplete(@NonNull Task<String> task) {
-				KrollDict data = new KrollDict();
-				fcmToken = task.getResult();
-				data.put("fcmToken", fcmToken);
-				fireEvent("didRefreshRegistrationToken", data);
+				if (task.isSuccessful()) {
+					KrollDict data = new KrollDict();
+					fcmToken = task.getResult();
+					data.put("fcmToken", fcmToken);
+					fireEvent("didRefreshRegistrationToken", data);
+				}
 			}
 		});
 	}

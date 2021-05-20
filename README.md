@@ -138,15 +138,6 @@ If you run into errors in combination with firebase.analytics e.g. `Error: Attem
 ```
 to the tiapp.xml
 
-#### XML
-
-You need to add the google_app_id to `/app/platform/android/res/values/strings.xml`:
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<resources>
-    <string name="google_app_id">1:11111111111:android:aaaaaaaaa</string>
-</resources>
-```
 
 ### Setting the Notification Icon
 

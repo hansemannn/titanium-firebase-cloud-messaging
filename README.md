@@ -168,24 +168,24 @@ It should be flat (no gradients), white and face-on perspective.
 88 × 88 area in 96 × 96 (xxxhdpi)
 ```
 
-You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notification_icon.png` and have
+You can use this script to generate it **once you put** the icon in `drawable-xxxhdpi/notificationicon.png` and have
 Image Magick installed. On macOS, you can install it using `brew install imagemagick`, on Windows you can download it [here](https://imagemagick.org/script/download.php).
 
 ```sh
 #!/bin/sh
 
-ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notification_icon.png"
+ICON_SOURCE="app/platform/android/res/drawable-xxxhdpi/notificationicon.png"
 if [ -f "$ICON_SOURCE" ]; then
     mkdir -p "app/platform/android/res/drawable-xxhdpi"
     mkdir -p "app/platform/android/res/drawable-xhdpi"
     mkdir -p "app/platform/android/res/drawable-hdpi"
     mkdir -p "app/platform/android/res/drawable-mdpi"
-    convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notification_icon.png"
-    convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notification_icon.png"
-    convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notification_icon.png"
-    convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notification_icon.png"
+    convert "$ICON_SOURCE" -resize 72x72 "app/platform/android/res/drawable-xxhdpi/notificationicon.png"
+    convert "$ICON_SOURCE" -resize 48x48 "app/platform/android/res/drawable-xhdpi/notificationicon.png"
+    convert "$ICON_SOURCE" -resize 36x36 "app/platform/android/res/drawable-hdpi/notificationicon.png"
+    convert "$ICON_SOURCE" -resize 24x24 "app/platform/android/res/drawable-mdpi/notificationicon.png"
 else
-    echo "No 'notification_icon.png' file found in app/platform/android/res/drawable-xxxhdpi"
+    echo "No 'notificationicon.png' file found in app/platform/android/res/drawable-xxxhdpi"
 fi
 ```
 

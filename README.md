@@ -328,6 +328,9 @@ The propery `lastData` will contain the data part when you send a notification p
   - `success` (Boolean): Successfully removed token
 
 ## Example
+
+Full example for Android/iOS:
+
 ```js
 // Import core module
 var core = require('firebase.core');
@@ -419,6 +422,29 @@ if (fcm.fcmToken) {
 
 // Subscribe to a topic.
 fcm.subscribeToTopic('testTopic');
+```
+
+Example to get the the resume data/notification click data on Android:
+
+```javascript
+const handleNotificationData = (notifObj) => {
+	if (notifObj) {
+		notifData = JSON.parse(notifObj);
+		// ...process notification data...
+		fcm.clearLastData();
+	}
+}
+
+// Check if app was launched on notification click
+const launchIntent = Ti.Android.rootActivity.intent;
+handleNotificationData(launchIntent.getStringExtra("fcm_data"));
+
+Ti.App.addEventListener('resumed', function() {
+	// App was resumed from background on notification click
+	const currIntent = Titanium.Android.currentActivity.intent;
+	var notifData = currIntent.getStringExtra("fcm_data");
+	handleNotificationData(notifData);
+});
 ```
 
 ## Sending push messages

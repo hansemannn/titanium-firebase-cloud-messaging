@@ -19,11 +19,9 @@ thank you!
 * [Build from source](#build)
 
 ## Requirements
-- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module.
-The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
 - [x] iOS: Titanium SDK 7.3.0+ (if you use SDK < 7.3.0, please use Ti.FirebaseCloudMessaging v1.1.0)
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
-- [x] Read the [Firebase-Core](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
+- [x] Read the [Titanium-Firebase](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
 
 
 ## Download
@@ -91,42 +89,6 @@ Big text notification with colored icon/appname
 
 
 ### Updates to the Manifest
-
-Merge the following keys to the `<android>` section of the tiapp.xml in order to use GCM (not needed for FCM).
-
-```xml
-<android xmlns:android="http://schemas.android.com/apk/res/android">
-    <manifest>
-    <application>
-    <service android:name="MY_PACKAGE_NAME.gcm.RegistrationIntentService" android:exported="false" />
-
-    <receiver android:name="com.google.android.gms.measurement.AppMeasurementReceiver" android:enabled="true">
-       <intent-filter>
-      <action android:name="com.google.android.gms.measurement.UPLOAD" />
-       </intent-filter>
-    </receiver>  
-
-    <service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
-       <intent-filter>
-      <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-       </intent-filter>
-    </service>
-
-    <service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
-       <intent-filter>
-      <action android:name="com.google.android.c2dm.intent.SEND" />
-       </intent-filter>
-    </service>
-
-    <service android:name="MY_PACKAGE_NAME.gcm.GcmIDListenerService" android:exported="false">
-       <intent-filter>
-      <action android:name="com.google.android.gms.iid.InstanceID" />
-       </intent-filter>
-    </service>
-    </application>
-    </manifest>
-</android>   
-```
 
 If you run into errors in combination with firebase.analytics e.g. `Error: Attempt to invoke virtual method 'getInstanceId()' on a null object reference` you can add:
 
@@ -332,12 +294,6 @@ The propery `lastData` will contain the data part when you send a notification p
 Full example for Android/iOS:
 
 ```js
-// Import core module
-var core = require('firebase.core');
-
-// Configure core module (required for all Firebase modules).
-core.configure();
-
 // Important: The cloud messaging module has to imported after (!) the configure()
 // method of the core module is called
 var fcm = require('firebase.cloudmessaging');
@@ -565,10 +521,6 @@ ti build -p ios --build-only
 ```
 
 ### Android
-
-> **Note**: When building for Android, make sure you have the [firebase.core](https://github.com/hansemannn/titanium-firebase-core) module installed globally (`~/Library/Application Support/Titanium/modules/android/firebase.core`). Otherwise, the firebase-iid library will not be referenced properly.
-
-Find the latest library version at https://firebase.google.com/docs/android/learn-more#compare-bom-versions
 
 ```bash
 cd android

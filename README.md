@@ -19,7 +19,8 @@ thank you!
 * [Build from source](#build)
 
 ## Requirements
-- [x] iOS: Titanium SDK 7.3.0+ (if you use SDK < 7.3.0, please use Ti.FirebaseCloudMessaging v1.1.0)
+- [x] iOS: [Firebase-Core](https://github.com/hansemannn/titanium-firebase-core)
+- [x] iOS: Titanium SDK 7.3.0+
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 - [x] Read the [Titanium-Firebase](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
 
@@ -41,7 +42,7 @@ thank you!
 </tr>
 </table>
 
-To register for push notifications on iOS, startin in 2.0.0, you only need to call the Titanium related methods as the following:
+To register for push notifications on iOS, you only need to call the Titanium related methods as the following:
 ```js
 // Listen to the notification settings event
 Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
@@ -294,6 +295,12 @@ The propery `lastData` will contain the data part when you send a notification p
 Full example for Android/iOS:
 
 ```js
+
+if (OS_IOS) {
+  var fc = require("firebase.core");
+  fc.configure();
+}
+
 // Important: The cloud messaging module has to imported after (!) the configure()
 // method of the core module is called
 var fcm = require('firebase.cloudmessaging');

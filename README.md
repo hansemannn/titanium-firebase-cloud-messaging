@@ -297,35 +297,35 @@ Full example for Android/iOS:
 ```js
 
 if (OS_IOS) {
-  var fc = require("firebase.core");
+  const FirebaseCore = require('firebase.core');
   fc.configure();
 }
 
 // Important: The cloud messaging module has to imported after (!) the configure()
 // method of the core module is called
-var fcm = require('firebase.cloudmessaging');
+const FirebaseCloudMessaging = require('firebase.cloudmessaging');
 
 // Called when the Firebase token is registered or refreshed.
-fcm.addEventListener('didRefreshRegistrationToken', function(e) {
+FirebaseCloudMessaging.addEventListener('didRefreshRegistrationToken', function(e) {
     Ti.API.info('Token', e.fcmToken);
 });
 
 // Called when direct messages arrive. Note that these are different from push notifications.
-fcm.addEventListener('didReceiveMessage', function(e) {
+FirebaseCloudMessaging.addEventListener('didReceiveMessage', function(e) {
     Ti.API.info('Message', e.message);
 });
 
 // Android-only: For configuring custom sounds and importance for the generated system
 // notifications when app is in the background
 if (OS_ANDROID) {
-    // fcm.createNotificationChannel({
+    // FirebaseCloudMessaging.createNotificationChannel({
     //     sound: 'warn_sound',
     //     channelId: 'default',
     //     channelName: 'General Notifications',
     //     importance: 'high'
-    // })
+    // });
 
-    var channel = Ti.Android.NotificationManager.createNotificationChannel({
+    const channel = Ti.Android.NotificationManager.createNotificationChannel({
         id: 'default',
         name: 'Default channel',
         importance: Ti.Android.IMPORTANCE_DEFAULT,
@@ -335,10 +335,10 @@ if (OS_ANDROID) {
     });
     // if you use a custom id you have to set the same to the `channelId` in you php send script!
 
-    fcm.notificationChannel = channel;
+    FirebaseCloudMessaging.notificationChannel = channel;
 
     // display last data:
-    Ti.API.info("Last data: " + fcm.lastData);
+    Ti.API.info(`Last data: ${FirebaseCloudMessaging.lastData}`);
 } else {
 	// iOS
 	// Listen to the notification settings event
@@ -349,8 +349,8 @@ if (OS_ANDROID) {
 	  // Register for push notifications
 	  Ti.Network.registerForPushNotifications({
 	    success: function () {
-            if (fcm != null) {
-                console.log("New token", fcm.fcmToken);
+            if (!!fcm) {
+                console.log('New token', fcm.fcmToken);
             }
         },
 	    error: function (e) {
@@ -374,17 +374,19 @@ if (OS_ANDROID) {
 }
 
 // Register the device with the FCM service.
-if (OS_ANDROID) fcm.registerForPushNotifications();
+if (OS_ANDROID) {
+    FirebaseCloudMessaging.registerForPushNotifications();
+}
 
 // Check if token is already available.
-if (fcm.fcmToken) {
-    Ti.API.info('FCM-Token', fcm.fcmToken);
+if (FirebaseCloudMessaging.fcmToken) {
+    Ti.API.info('FCM-Token', FirebaseCloudMessaging.fcmToken);
 } else {
     Ti.API.info('Token is empty. Waiting for the token callback ...');
 }
 
 // Subscribe to a topic.
-fcm.subscribeToTopic('testTopic');
+FirebaseCloudMessaging.subscribeToTopic('testTopic');
 ```
 
 Example to get the the resume data/notification click data on Android:
@@ -394,7 +396,7 @@ const handleNotificationData = (notifObj) => {
 	if (notifObj) {
 		notifData = JSON.parse(notifObj);
 		// ...process notification data...
-		fcm.clearLastData();
+		FirebaseCloudMessaging.clearLastData();
 	}
 }
 
@@ -405,7 +407,7 @@ handleNotificationData(launchIntent.getStringExtra("fcm_data"));
 Ti.App.addEventListener('resumed', function() {
 	// App was resumed from background on notification click
 	const currIntent = Titanium.Android.currentActivity.intent;
-	var notifData = currIntent.getStringExtra("fcm_data");
+	const notifData = currIntent.getStringExtra("fcm_data");
 	handleNotificationData(notifData);
 });
 ```

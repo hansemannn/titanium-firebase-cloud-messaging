@@ -19,11 +19,10 @@ thank you!
 * [Build from source](#build)
 
 ## Requirements
-- [x] The [Firebase Core](https://github.com/hansemannn/titanium-firebase-core) module.
-The options `googleAppID` and `GCMSenderID` are required for Android, or `file` (e.g. `GoogleService-Info.plist`) for iOS.
-- [x] iOS: Titanium SDK 7.3.0+ (if you use SDK < 7.3.0, please use Ti.FirebaseCloudMessaging v1.1.0)
+- [x] iOS: [Firebase-Core](https://github.com/hansemannn/titanium-firebase-core)
+- [x] iOS: Titanium SDK 7.3.0+
 - [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
-- [x] Read the [Firebase-Core](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
+- [x] Read the [Titanium-Firebase](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
 
 
 ## Download
@@ -43,7 +42,7 @@ The options `googleAppID` and `GCMSenderID` are required for Android, or `file` 
 </tr>
 </table>
 
-To register for push notifications on iOS, startin in 2.0.0, you only need to call the Titanium related methods as the following:
+To register for push notifications on iOS, you only need to call the Titanium related methods as the following:
 ```js
 // Listen to the notification settings event
 Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
@@ -91,42 +90,6 @@ Big text notification with colored icon/appname
 
 
 ### Updates to the Manifest
-
-Merge the following keys to the `<android>` section of the tiapp.xml in order to use GCM (not needed for FCM).
-
-```xml
-<android xmlns:android="http://schemas.android.com/apk/res/android">
-    <manifest>
-    <application>
-    <service android:name="MY_PACKAGE_NAME.gcm.RegistrationIntentService" android:exported="false" />
-
-    <receiver android:name="com.google.android.gms.measurement.AppMeasurementReceiver" android:enabled="true">
-       <intent-filter>
-      <action android:name="com.google.android.gms.measurement.UPLOAD" />
-       </intent-filter>
-    </receiver>  
-
-    <service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
-       <intent-filter>
-      <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-       </intent-filter>
-    </service>
-
-    <service android:name="MY_PACKAGE_NAME.gcm.GcmIntentService" android:exported="false">
-       <intent-filter>
-      <action android:name="com.google.android.c2dm.intent.SEND" />
-       </intent-filter>
-    </service>
-
-    <service android:name="MY_PACKAGE_NAME.gcm.GcmIDListenerService" android:exported="false">
-       <intent-filter>
-      <action android:name="com.google.android.gms.iid.InstanceID" />
-       </intent-filter>
-    </service>
-    </application>
-    </manifest>
-</android>   
-```
 
 If you run into errors in combination with firebase.analytics e.g. `Error: Attempt to invoke virtual method 'getInstanceId()' on a null object reference` you can add:
 
@@ -332,37 +295,37 @@ The propery `lastData` will contain the data part when you send a notification p
 Full example for Android/iOS:
 
 ```js
-// Import core module
-var core = require('firebase.core');
 
-// Configure core module (required for all Firebase modules).
-core.configure();
+if (OS_IOS) {
+  const FirebaseCore = require('firebase.core');
+  fc.configure();
+}
 
 // Important: The cloud messaging module has to imported after (!) the configure()
 // method of the core module is called
-var fcm = require('firebase.cloudmessaging');
+const FirebaseCloudMessaging = require('firebase.cloudmessaging');
 
 // Called when the Firebase token is registered or refreshed.
-fcm.addEventListener('didRefreshRegistrationToken', function(e) {
+FirebaseCloudMessaging.addEventListener('didRefreshRegistrationToken', function(e) {
     Ti.API.info('Token', e.fcmToken);
 });
 
 // Called when direct messages arrive. Note that these are different from push notifications.
-fcm.addEventListener('didReceiveMessage', function(e) {
+FirebaseCloudMessaging.addEventListener('didReceiveMessage', function(e) {
     Ti.API.info('Message', e.message);
 });
 
 // Android-only: For configuring custom sounds and importance for the generated system
 // notifications when app is in the background
 if (OS_ANDROID) {
-    // fcm.createNotificationChannel({
+    // FirebaseCloudMessaging.createNotificationChannel({
     //     sound: 'warn_sound',
     //     channelId: 'default',
     //     channelName: 'General Notifications',
     //     importance: 'high'
-    // })
+    // });
 
-    var channel = Ti.Android.NotificationManager.createNotificationChannel({
+    const channel = Ti.Android.NotificationManager.createNotificationChannel({
         id: 'default',
         name: 'Default channel',
         importance: Ti.Android.IMPORTANCE_DEFAULT,
@@ -372,10 +335,10 @@ if (OS_ANDROID) {
     });
     // if you use a custom id you have to set the same to the `channelId` in you php send script!
 
-    fcm.notificationChannel = channel;
+    FirebaseCloudMessaging.notificationChannel = channel;
 
     // display last data:
-    Ti.API.info("Last data: " + fcm.lastData);
+    Ti.API.info(`Last data: ${FirebaseCloudMessaging.lastData}`);
 } else {
 	// iOS
 	// Listen to the notification settings event
@@ -386,8 +349,8 @@ if (OS_ANDROID) {
 	  // Register for push notifications
 	  Ti.Network.registerForPushNotifications({
 	    success: function () {
-            if (fcm != null) {
-                console.log("New token", fcm.fcmToken);
+            if (!!fcm) {
+                console.log('New token', fcm.fcmToken);
             }
         },
 	    error: function (e) {
@@ -411,17 +374,19 @@ if (OS_ANDROID) {
 }
 
 // Register the device with the FCM service.
-if (OS_ANDROID) fcm.registerForPushNotifications();
+if (OS_ANDROID) {
+    FirebaseCloudMessaging.registerForPushNotifications();
+}
 
 // Check if token is already available.
-if (fcm.fcmToken) {
-    Ti.API.info('FCM-Token', fcm.fcmToken);
+if (FirebaseCloudMessaging.fcmToken) {
+    Ti.API.info('FCM-Token', FirebaseCloudMessaging.fcmToken);
 } else {
     Ti.API.info('Token is empty. Waiting for the token callback ...');
 }
 
 // Subscribe to a topic.
-fcm.subscribeToTopic('testTopic');
+FirebaseCloudMessaging.subscribeToTopic('testTopic');
 ```
 
 Example to get the the resume data/notification click data on Android:
@@ -431,7 +396,7 @@ const handleNotificationData = (notifObj) => {
 	if (notifObj) {
 		notifData = JSON.parse(notifObj);
 		// ...process notification data...
-		fcm.clearLastData();
+		FirebaseCloudMessaging.clearLastData();
 	}
 }
 
@@ -442,7 +407,7 @@ handleNotificationData(launchIntent.getStringExtra("fcm_data"));
 Ti.App.addEventListener('resumed', function() {
 	// App was resumed from background on notification click
 	const currIntent = Titanium.Android.currentActivity.intent;
-	var notifData = currIntent.getStringExtra("fcm_data");
+	const notifData = currIntent.getStringExtra("fcm_data");
 	handleNotificationData(notifData);
 });
 ```
@@ -565,10 +530,6 @@ ti build -p ios --build-only
 ```
 
 ### Android
-
-> **Note**: When building for Android, make sure you have the [firebase.core](https://github.com/hansemannn/titanium-firebase-core) module installed globally (`~/Library/Application Support/Titanium/modules/android/firebase.core`). Otherwise, the firebase-iid library will not be referenced properly.
-
-Find the latest library version at https://firebase.google.com/docs/android/learn-more#compare-bom-versions
 
 ```bash
 cd android

@@ -177,7 +177,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		int requestCode = (int)(System.currentTimeMillis() / 1000);
 		PendingIntent contentIntent =
-			PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_ONE_SHOT);
+			PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
 
 		// Start building notification
 

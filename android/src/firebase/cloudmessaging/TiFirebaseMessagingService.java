@@ -22,7 +22,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import me.leolin.shortcutbadger.ShortcutBadger;
 import org.appcelerator.kroll.KrollDict;
@@ -176,8 +175,9 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		notificationIntent.putExtra("fcm_data", jsonData.toString());
 
+		int requestCode = (int)(System.currentTimeMillis() / 1000);
 		PendingIntent contentIntent =
-			PendingIntent.getActivity(this, new Random().nextInt(), notificationIntent, PendingIntent.FLAG_ONE_SHOT);
+			PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
 
 		// Start building notification
 

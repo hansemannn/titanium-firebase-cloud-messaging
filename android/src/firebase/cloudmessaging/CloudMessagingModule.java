@@ -73,7 +73,15 @@ public class CloudMessagingModule extends KrollModule
 
 			if (extras != null) {
 				for (String key : extras.keySet()) {
-					data.put(key, extras.get(key));
+					if (extras.get(key) instanceof Bundle) {
+						Bundle bndl = (Bundle) extras.get(key);
+
+						for (String bdnlKey: bndl.keySet()) {
+							data.put(key+"_"+bdnlKey, bndl.get(bdnlKey));
+						}
+					} else {
+						data.put(key, extras.get(key));
+					}
 				}
 
 				data.put("inBackground", true);

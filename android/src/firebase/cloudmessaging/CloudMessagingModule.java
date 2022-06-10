@@ -80,7 +80,7 @@ public class CloudMessagingModule extends KrollModule
 							data.put(key+"_"+bdnlKey, bndl.get(bdnlKey));
 						}
 					} else {
-						data.put(key, extras.get(key));
+						data.put(key, extras.get(key).toString());
 					}
 				}
 

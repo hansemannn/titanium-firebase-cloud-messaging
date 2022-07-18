@@ -28,6 +28,7 @@ import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiRHelper;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService
@@ -106,6 +107,9 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		Context context = getApplicationContext();
 		Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		int builder_defaults = 0;
+		String parseTitle = "";
+		String parseText = "";
+		boolean isParse = false;
 
 		if (appInForeground) {
 			showNotification = false;
@@ -128,6 +132,24 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 			&& params.get("image") == null) {
 			// no actual content - don't show it
 			showNotification = false;
+		}
+
+		// Check if it is a default Parse/Sashido message ("data.data.alert")
+		if (params.get("data") != null) {
+			try {
+				JSONObject jData = new JSONObject(params.get("data"));
+				if (jData.get("alert") != null) {
+					// Parse notification
+					showNotification = true;
+					isParse = true;
+					parseTitle = jData.get("alert").toString();
+					if (jData.get("text") != null) {
+						parseText = jData.get("text").toString();
+					}
+				}
+			} catch (JSONException e){
+				//
+			}
 		}
 
 		String priorityString = params.get("priority");
@@ -201,6 +223,13 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		} else {
 			builder.setContentText(params.get("message"));
 		}
+		if (isParse){
+			builder.setContentTitle(parseTitle);
+			if (!parseText.equals("")) {
+				builder.setContentText(parseText);
+			}
+		}
+
 		builder.setTicker(params.get("ticker"));
 		builder.setDefaults(builder_defaults);
 		builder.setSound(defaultSoundUri);

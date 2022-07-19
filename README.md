@@ -111,7 +111,7 @@ For a `data notification` you have to place a notification icon "notificationico
 
 <small>**\*** = Alloy</small>
 
-To use a custom icon for a `notification message` you need to add this attribute within the `<application/>` section of your `tiapp.xml`:
+To use the custom icon for a `notification message` you need to add this attribute within the `<application/>` section of your `tiapp.xml`:
 
 ```xml
 <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/notificationicon"/>
@@ -119,7 +119,7 @@ To use a custom icon for a `notification message` you need to add this attribute
 
 Otherwise the default icon will be used.
 
-It should be flat (no gradients), white and face-on perspective.
+It should be flat (no gradients), white and face-on perspective and have a transparent background. The icon will only show the outline/shape of your icon so make sure all you e.g. white is transparent otherwise it will just be a square.
 
 > **Note**: You should generate the icon for all resolutions.
 

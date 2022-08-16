@@ -278,8 +278,11 @@ The propery `lastData` will contain the data part when you send a notification p
 `didRefreshRegistrationToken`
   - `fcmToken` (String)
 
+`success` (Android only)
+  - will fire on Android 13 after you call `registerForPushNotifications` to allow Push notifications
+
 `error` (Android only)
-  - `error` (String): Error during token registration
+  - `error` (String): Error during token registration or user denied `registerForPushNotifications`
 
 `subscribe` (Android only)
   - `success` (Boolean): Successfully subscribed
@@ -376,6 +379,9 @@ if (OS_ANDROID) {
 // Register the device with the FCM service.
 if (OS_ANDROID) {
     FirebaseCloudMessaging.registerForPushNotifications();
+    FirebaseCloudMessaging.addEventListener("success", function(){
+      console.log("got permission");
+    })
 }
 
 // Check if token is already available.

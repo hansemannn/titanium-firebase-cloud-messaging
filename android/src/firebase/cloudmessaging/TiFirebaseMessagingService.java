@@ -137,14 +137,14 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 		// Check if it is a default Parse/Sashido message ("data.data.alert")
 		if (params.get("data") != null) {
 			try {
-				JSONObject jsonData = new JSONObject(params.get("data"));
-				if (jsonData.get("alert") != null) {
+				JSONObject localJsonData = new JSONObject(params.get("data"));
+				if (localJsonData.get("alert") != null) {
 					// Parse notification
 					showNotification = true;
 					isParse = true;
-					parseTitle = jsonData.get("alert").toString();
-					if (jsonData.get("text") != null) {
-						parseText = jsonData.get("text").toString();
+					parseTitle = localJsonData.get("alert").toString();
+					if (localJsonData.get("text") != null) {
+						parseText = localJsonData.get("text").toString();
 					}
 				}
 			} catch (JSONException e){

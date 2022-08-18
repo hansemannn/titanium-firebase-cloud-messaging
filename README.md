@@ -525,6 +525,15 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 
 ```
 
+## Parse
+
+You can use Parse with this module: https://github.com/timanrebel/Parse/pull/59 in combination with Firebase. You include and configure both modules and send your deviceToken to the Parse backend.
+
+If you send a push over e.g. <a href="https://sashido.io">Sashido</a> you can either send a normal text or a json with:
+```json
+{"alert":"test from sashido", "text":"test"}
+```
+With the JSON you can set a title/alert and the text of the notification.
 
 ## Build
 

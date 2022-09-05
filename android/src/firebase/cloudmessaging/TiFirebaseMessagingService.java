@@ -19,6 +19,13 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.titanium.TiApplication;
+import org.appcelerator.titanium.util.TiConvert;
+import org.appcelerator.titanium.util.TiRHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -27,12 +34,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
-
-import org.appcelerator.kroll.KrollDict;
-import org.appcelerator.titanium.TiApplication;
-import org.appcelerator.titanium.util.TiConvert;
-import org.appcelerator.titanium.util.TiRHelper;
-import org.json.JSONObject;
 
 public class TiFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
@@ -104,6 +105,9 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         Context context = getApplicationContext();
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         int builder_defaults = 0;
+        String parseTitle = "";
+        String parseText = "";
+        boolean isParse = false;
 
         if (appInForeground) {
             showNotification = false;
@@ -128,19 +132,37 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             showNotification = false;
         }
 
+        // Check if it is a default Parse/Sashido message ("data.data.alert")
+        if (params.get("data") != null) {
+            try {
+                JSONObject localJsonData = new JSONObject(params.get("data"));
+                if (localJsonData.get("alert") != null) {
+                    // Parse notification
+                    showNotification = true;
+                    isParse = true;
+                    parseTitle = localJsonData.get("alert").toString();
+                    if (localJsonData.get("text") != null) {
+                        parseText = localJsonData.get("text").toString();
+                    }
+                }
+            } catch (JSONException e) {
+                //
+            }
+        }
+
         String priorityString = params.get("priority");
         int priority = NotificationManager.IMPORTANCE_MAX;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && priorityString != null && !priorityString.isEmpty()) {
-            if (priorityString.toLowerCase().equals("low")) {
+            if (priorityString.equalsIgnoreCase("low")) {
                 priority = NotificationManager.IMPORTANCE_LOW;
-            } else if (priorityString.toLowerCase().equals("min")) {
+            } else if (priorityString.equalsIgnoreCase("min")) {
                 priority = NotificationManager.IMPORTANCE_MIN;
-            } else if (priorityString.toLowerCase().equals("max")) {
+            } else if (priorityString.equalsIgnoreCase("max")) {
                 priority = NotificationManager.IMPORTANCE_MAX;
-            } else if (priorityString.toLowerCase().equals("default")) {
+            } else if (priorityString.equalsIgnoreCase("default")) {
                 priority = NotificationManager.IMPORTANCE_DEFAULT;
-            } else if (priorityString.toLowerCase().equals("high")) {
+            } else if (priorityString.equalsIgnoreCase("high")) {
                 priority = NotificationManager.IMPORTANCE_HIGH;
             } else {
                 priority = TiConvert.toInt(priorityString, 1);
@@ -199,6 +221,13 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         } else {
             builder.setContentText(params.get("message"));
         }
+        if (isParse) {
+            builder.setContentTitle(parseTitle);
+            if (!parseText.equals("")) {
+                builder.setContentText(parseText);
+            }
+        }
+
         builder.setTicker(params.get("ticker"));
         builder.setDefaults(builder_defaults);
         builder.setSound(defaultSoundUri);

@@ -59,6 +59,10 @@ public class CloudMessagingModule extends KrollModule {
         // put module init code that needs to run when the application is created
     }
 
+    public static CloudMessagingModule getInstance() {
+        return instance;
+    }
+
     // clang-format off
     @Kroll.method
     @Kroll.getProperty
@@ -360,10 +364,6 @@ public class CloudMessagingModule extends KrollModule {
         Context context = Utils.getApplicationContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(FORCE_SHOW_IN_FOREGROUND, false);
-    }
-
-    public static CloudMessagingModule getInstance() {
-        return instance;
     }
 
     public void setNotificationData(String data) {

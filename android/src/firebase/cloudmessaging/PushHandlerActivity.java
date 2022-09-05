@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class PushHandlerActivity extends Activity {
 
-    private static String LCAT = "FirebaseCloudMessaging";
+    private static final String LCAT = "FirebaseCloudMessaging";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

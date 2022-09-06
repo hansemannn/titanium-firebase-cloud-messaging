@@ -101,6 +101,10 @@ If you run into errors in combination with firebase.analytics e.g. `Error: Attem
 ```
 to the tiapp.xml
 
+If you register a channel with a different ID then `default` you have to add this to your `<application>` node:
+```xml
+<meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="your_channel_id"/>
+```
 
 ### Setting the Notification Icon
 

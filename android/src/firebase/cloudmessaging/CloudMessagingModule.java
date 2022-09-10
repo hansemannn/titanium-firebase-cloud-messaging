@@ -114,28 +114,7 @@ public class CloudMessagingModule extends KrollModule {
                 fireEvent("success", new KrollDict());
                 getToken();
             } else {
-
-                TiBaseActivity.OnRequestPermissionsResultCallback activityCallback;
-                activityCallback = new TiBaseActivity.OnRequestPermissionsResultCallback() {
-                    @Override
-                    public void onRequestPermissionsResult(@NonNull TiBaseActivity activity, int requestCode,
-                                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-                        TiBaseActivity.unregisterPermissionRequestCallback(1);
-                        if (permissions[0].equals("android.permission.POST_NOTIFICATIONS") &&
-                                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                            fireEvent("success", new KrollDict());
-                            getToken();
-                        } else {
-                            KrollDict kd = new KrollDict();
-                            kd.put("error", "permission denied");
-                            fireEvent("error", kd);
-                        }
-                    }
-                };
-                TiBaseActivity.registerPermissionRequestCallback(1, activityCallback);
-                TiApplication.getAppCurrentActivity().requestPermissions(
-                        new String[]{"android.permission.POST_NOTIFICATIONS"},
-                        1);
+                Log.w(LCAT, "POST_NOTIFICATIONS runtime permission is missing. Please request that permission first.");
             }
         } else {
             fireEvent("success", new KrollDict());

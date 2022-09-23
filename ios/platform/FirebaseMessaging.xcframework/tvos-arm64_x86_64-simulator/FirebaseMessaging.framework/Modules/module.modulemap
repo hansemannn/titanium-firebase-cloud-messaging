@@ -1,5 +1,5 @@
 framework module FirebaseMessaging {
-umbrella header "FirebaseMessaging.h"
+umbrella header "FirebaseMessaging-umbrella.h"
 export *
 module * { export * }
   link framework "Foundation"

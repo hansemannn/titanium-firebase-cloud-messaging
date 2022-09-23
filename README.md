@@ -111,7 +111,7 @@ For a `data notification` you have to place a notification icon "notificationico
 
 <small>**\*** = Alloy</small>
 
-To use a custom icon for a `notification message` you need to add this attribute within the `<application/>` section of your `tiapp.xml`:
+To use the custom icon for a `notification message` you need to add this attribute within the `<application/>` section of your `tiapp.xml`:
 
 ```xml
 <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/notificationicon"/>
@@ -119,7 +119,7 @@ To use a custom icon for a `notification message` you need to add this attribute
 
 Otherwise the default icon will be used.
 
-It should be flat (no gradients), white and face-on perspective.
+It should be flat (no gradients), white and face-on perspective and have a transparent background. The icon will only show the outline/shape of your icon so make sure all you e.g. white is transparent otherwise it will just be a square.
 
 > **Note**: You should generate the icon for all resolutions.
 
@@ -519,6 +519,15 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 
 ```
 
+## Parse
+
+You can use Parse with this module: https://github.com/timanrebel/Parse/pull/59 in combination with Firebase. You include and configure both modules and send your deviceToken to the Parse backend.
+
+If you send a push over e.g. <a href="https://sashido.io">Sashido</a> you can either send a normal text or a json with:
+```json
+{"alert":"test from sashido", "text":"test"}
+```
+With the JSON you can set a title/alert and the text of the notification.
 
 ## Build
 

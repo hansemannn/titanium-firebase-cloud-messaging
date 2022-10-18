@@ -179,7 +179,8 @@ Supported notification fields:
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
 ### Android: Note about custom sounds
-To use a custom sound > Android O you need to create a second channel. The default channel will always use the default notification sound on the device!
+To use a custom sound you have to create a second channel. The default channel will always use the default notification sound on the device!
+If you send a normal or mixed notification you have to set the `android_channel_id` in the `notification` node. If you send a data notification the key is called `channelId`. Chech <a href="#extended-php-android-example">extended PHP Android example</a> for a PHP example.
 
 ### Android: Note for switching between v<=v2.0.2 and >=v2.0.3 if you use notification channels with custom sounds
 With versions prior to 2.0.3 of this module, FirebaseCloudMessaging.createNotificationChannel would create the notification sound uri using the resource id of the sound file in the `res/raw` directory. However, as described in this [android issue](https://issuetracker.google.com/issues/131303134), those resource ids can change to reference different files (or no file) between app versions, and  that happens the notification channel may play a different or no sound than originally intended.
@@ -477,13 +478,14 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 <?php $url = 'https://fcm.googleapis.com/fcm/send';
 
     $fields = array (
-        'to' => "TOKEN_ID",
-        // 'to' => "/topics/test",
-        /* 'notification' => array (
-         		"title" => "TiFirebaseMessaging",
-         		"body" => "Message received 📱😂",
-         		"timestamp"=>date('Y-m-d G:i:s'),
-        ),*/
+        'to' => "TOKEN_ID",             // specific ID
+        // 'to' => "/topics/test",      // topic
+        // 'notification' => array (
+        //   "title" => "TiFirebaseMessaging",
+        //   "body" => "Message received 📱😂",
+        //   "timestamp"=>date('Y-m-d G:i:s'),
+        //   "android_channel_id" => "my_other_channel"
+        // ),
         'data' => array(
             "test1" => "value1",
             "test2" => "value2",

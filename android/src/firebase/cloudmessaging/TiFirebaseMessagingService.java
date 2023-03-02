@@ -237,7 +237,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService
 
 		if (params.get("color") != null && params.get("color") != "") {
 			try {
-				int color = TiConvert.toColor(params.get("color"));
+				int color = TiConvert.toColor(params.get("color"), TiApplication.getAppCurrentActivity());
 				builder.setColor(color);
 				builder.setColorized(true);
 			} catch (Exception ex) {

@@ -76,7 +76,14 @@ public class CloudMessagingModule extends KrollModule {
 
             if (extras != null) {
                 for (String key : extras.keySet()) {
-                    data.put(key, extras.get(key));
+                    if (extras.get(key) instanceof Bundle) {
+                        Bundle bndl = (Bundle) extras.get(key);
+                        for (String bdnlKey : bndl.keySet()) {
+                            data.put(key + "_" + bdnlKey, bndl.get(bdnlKey));
+                        }
+                    } else {
+                        data.put(key, extras.get(key).toString());
+                    }
                 }
 
                 data.put("inBackground", true);
@@ -154,8 +161,14 @@ public class CloudMessagingModule extends KrollModule {
     public void clearLastData() {
         SharedPreferences preferences =
                 PreferenceManager.getDefaultSharedPreferences(Utils.getApplicationContext());
-        String prefMessage = preferences.getString("titanium.firebase.cloudmessaging.message", null);
         preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
+
+        // remove intent value
+        Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
+        String notification = intent.getStringExtra("fcm_data");
+        if (notification != null) {
+            intent.removeExtra("fcm_data");
+        }
     }
 
     @Kroll.method

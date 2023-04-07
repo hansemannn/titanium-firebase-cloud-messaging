@@ -3,6 +3,7 @@
 	<!-- Configure the Android platform by added the required permissions, services and notification receiver -->
 	<android xmlns:android="http://schemas.android.com/apk/res/android">
 		<manifest package="firebase.cloudmessaging">
+			<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 			<uses-permission android:name="android.permission.WAKE_LOCK"/>
 			<uses-permission android:name="android.permission.VIBRATE"/>
 			<application>

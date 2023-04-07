@@ -12,6 +12,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -31,6 +32,7 @@ import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
+import org.appcelerator.titanium.TiBaseActivity;
 import org.appcelerator.titanium.util.TiConvert;
 import org.json.JSONObject;
 
@@ -114,7 +116,17 @@ public class CloudMessagingModule extends KrollModule {
     // Methods
     @Kroll.method
     public void registerForPushNotifications() {
-        getToken();
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (TiApplication.getAppCurrentActivity().checkSelfPermission("android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED) {
+                fireEvent("success", new KrollDict());
+                getToken();
+            } else {
+                Log.w(LCAT, "POST_NOTIFICATIONS runtime permission is missing. Please request that permission first.");
+            }
+        } else {
+            fireEvent("success", new KrollDict());
+            getToken();
+        }
         parseBootIntent();
     }
 

@@ -20,8 +20,8 @@ thank you!
 
 ## Requirements
 - [x] iOS: [Firebase-Core](https://github.com/hansemannn/titanium-firebase-core)
-- [x] iOS: Titanium SDK 7.3.0+
-- [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
+- [x] iOS: Titanium SDK 10.0.0
+- [x] Android: Titanium SDK 9.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 - [x] Read the [Titanium-Firebase](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
 
 

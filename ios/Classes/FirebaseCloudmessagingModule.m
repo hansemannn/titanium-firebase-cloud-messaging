@@ -6,10 +6,6 @@
  */
 
 #import "FirebaseCloudmessagingModule.h"
-#import "TiBase.h"
-#import "TiHost.h"
-#import "TiUtils.h"
-#import "TiApp.h"
 
 @implementation FirebaseCloudmessagingModule
 

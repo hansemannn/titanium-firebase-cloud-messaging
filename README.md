@@ -326,7 +326,7 @@ The propery `lastData` will contain the data part when you send a notification p
 ```js
 if (OS_IOS) {
 	const FirebaseCore = require('firebase.core');
-	fc.configure();
+	FirebaseCore.configure();
 }
 
 // Important: The cloud messaging module has to imported after (!) the configure()
@@ -409,8 +409,8 @@ function onToken(e) {
 	if (OS_ANDROID) {
 		Ti.API.info("New token", e.fcmToken);
 	} else {
-		if (fcm != null) {
-			Ti.API.info("New token", fcm.fcmToken);
+		if (FirebaseCloudMessaging != null) {
+			Ti.API.info("New token", FirebaseCloudMessaging.fcmToken);
 		}
 	}
 }
@@ -431,7 +431,7 @@ FirebaseCloudMessaging.subscribeToTopic('testTopic');
 ```js
 if (OS_IOS) {
   const FirebaseCore = require('firebase.core');
-  fc.configure();
+  FirebaseCore.configure();
 }
 
 // Important: The cloud messaging module has to imported after (!) the configure()
@@ -475,8 +475,8 @@ if (OS_ANDROID) {
 	  // Register for push notifications
 	  Ti.Network.registerForPushNotifications({
 	    success: function () {
-            if (!!fcm) {
-                console.log('New token', fcm.fcmToken);
+            if (!!FirebaseCloudMessaging) {
+                console.log('New token', FirebaseCloudMessaging.fcmToken);
             }
         },
 	    error: function (e) {

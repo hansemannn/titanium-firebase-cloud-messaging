@@ -117,7 +117,7 @@ public class CloudMessagingModule extends KrollModule {
     @Kroll.method
     public void registerForPushNotifications() {
         if (Build.VERSION.SDK_INT >= 33) {
-            if (TiApplication.getAppCurrentActivity().checkSelfPermission("android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED) {
+            if (Utils.getApplicationContext().checkSelfPermission("android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED) {
                 fireEvent("success", new KrollDict());
                 getToken();
             } else {

@@ -9,5 +9,5 @@ dependencies {
 
 	// get latest version from https://firebase.google.com/docs/android/learn-more#bom
 	// changelog https://firebase.google.com/support/release-notes/android
-	implementation 'com.google.firebase:firebase-messaging:23.2.1'
+	implementation 'com.google.firebase:firebase-messaging:23.4.1'
 }

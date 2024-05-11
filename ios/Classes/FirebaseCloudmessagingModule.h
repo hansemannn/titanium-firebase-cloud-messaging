@@ -5,7 +5,7 @@
  * Copyright (c) 2017-present by Hans Knöchel. All rights reserved.
  */
 
-#import "TiModule.h"
+#import <TitaniumKit/TitaniumKit.h>
 #import <UserNotifications/UserNotifications.h>
 
 @import FirebaseMessaging;

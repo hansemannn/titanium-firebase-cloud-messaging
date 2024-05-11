@@ -20,8 +20,8 @@ thank you!
 
 ## Requirements
 - [x] iOS: [Firebase-Core](https://github.com/hansemannn/titanium-firebase-core)
-- [x] iOS: Titanium SDK 7.3.0+
-- [x] Android: Titanium SDK 7.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
+- [x] iOS: Titanium SDK 10.0.0
+- [x] Android: Titanium SDK 9.0.0+, [Ti.PlayServices](https://github.com/appcelerator-modules/ti.playservices) module
 - [x] Read the [Titanium-Firebase](https://github.com/hansemannn/titanium-firebase#installation) install part if you set up a new project.
 
 
@@ -87,20 +87,33 @@ Big text notification with colored icon/appname
 </tr>
 </table>
 
+### Register for push
 
-
-### Updates to the Manifest
-
-If you run into errors in combination with firebase.analytics e.g. `Error: Attempt to invoke virtual method 'getInstanceId()' on a null object reference` you can add:
-
-```xml
-<service android:name="com.google.firebase.components.ComponentDiscoveryService" >
-	<meta-data android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
-		android:value="com.google.firebase.components.ComponentRegistrar" />
-</service>
+If you use Titanium 12.0.0+ you can use
+```js
+Ti.Network.registerForPushNotifications({
+  success: function () { ... },
+  error: function () { ... }
+});
 ```
-to the tiapp.xml
 
+to request Android 13 runtime permissions. All other version < Android 13 will call the `success` function right away.
+
+If you have runtime permissions (the `success` event mentioned above or `Ti.Network.remoteNotificationsEnabled` is true) you can call `fcm.registerForPushNotifications()` to request a token. Check the full example below for all steps.
+
+### Android 13 permission
+If you compile your app with **Titanium <=11.1.0.GA** (target SDK 31) and Android 13 phone will ask for Push runtime permission the first time you create a notification channel.
+If you use **Titanium >=12.0.0** (target SDK 33) you can use `Ti.Network.registerForPushNotifications()` to ask for the permission.
+You can also request the permission with older SDKs yourself by using the general `requestPermissions()` method:
+```js
+var permissions = ['android.permission.POST_NOTIFICATIONS'];
+Ti.Android.requestPermissions(permissions, function(e) {
+  if (e.success) {
+    Ti.API.info('SUCCESS');
+  } else {
+    Ti.API.info('ERROR: ' + e.error);
+});
+```
 
 ### Setting the Notification Icon
 
@@ -111,7 +124,7 @@ For a `data notification` you have to place a notification icon "notificationico
 
 <small>**\*** = Alloy</small>
 
-To use a custom icon for a `notification message` you need to add this attribute within the `<application/>` section of your `tiapp.xml`:
+To use the custom icon for a `notification message` you need to add this attribute within the `<application/>` section of your `tiapp.xml`:
 
 ```xml
 <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/notificationicon"/>
@@ -119,7 +132,7 @@ To use a custom icon for a `notification message` you need to add this attribute
 
 Otherwise the default icon will be used.
 
-It should be flat (no gradients), white and face-on perspective.
+It should be flat (no gradients), white and face-on perspective and have a transparent background. The icon will only show the outline/shape of your icon so make sure all you e.g. white is transparent otherwise it will just be a square.
 
 > **Note**: You should generate the icon for all resolutions.
 
@@ -179,12 +192,25 @@ Supported notification fields:
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
 ### Android: Note about custom sounds
-To use a custom sound > Android O you need to create a second channel. The default channel will always use the default notification sound on the device!
+To use a custom sound you have to create a second channel. The default channel will always use the default notification sound on the device!
+If you send a normal or mixed notification you have to set the `android_channel_id` in the `notification` node. If you send a data notification the key is called `channelId`. Chech <a href="#extended-php-android-example">extended PHP Android example</a> for a PHP example.
 
-### Android: Note for switching between v<=v2.0.2 and >=v2.0.3 if you use notification channels with custom sounds
+#### Android: Note for switching between v<=v2.0.2 and >=v2.0.3 if you use notification channels with custom sounds
 With versions prior to 2.0.3 of this module, FirebaseCloudMessaging.createNotificationChannel would create the notification sound uri using the resource id of the sound file in the `res/raw` directory. However, as described in this [android issue](https://issuetracker.google.com/issues/131303134), those resource ids can change to reference different files (or no file) between app versions, and  that happens the notification channel may play a different or no sound than originally intended.
 With version 2.0.3 and later, we now create the uri's using the string filename so that it will not change if resource ids change. So if you are on version <=2.0.2 and are switching to version >=2.0.3, you will want to check if this is a problem for you by installing a test app using version >= 2.0.3 as an upgrade to a previous test app using version <= 2.0.2. Note that you should not uninstall the first app before installing the second app; nor should you reset user data.
 If it is a problem you can workaround by first deleting the existing channel using deleteNotificationChannel, and then recreating the channel with the same settings as before, except with a different id. Don't forget that your push server will need to be version aware and send to this new channel for newer versions of your apps.
+
+### Errors with firebase.analytics
+
+If you run into errors in combination with firebase.analytics e.g. `Error: Attempt to invoke virtual method 'getInstanceId()' on a null object reference` you can add:
+
+```xml
+<service android:name="com.google.firebase.components.ComponentDiscoveryService" >
+	<meta-data android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+		android:value="com.google.firebase.components.ComponentRegistrar" />
+</service>
+```
+to the tiapp.xml
 
 ## API
 
@@ -278,8 +304,11 @@ The propery `lastData` will contain the data part when you send a notification p
 `didRefreshRegistrationToken`
   - `fcmToken` (String)
 
+`success` (Android only)
+  - will fire on Android 13 after you call `registerForPushNotifications` to allow Push notifications
+
 `error` (Android only)
-  - `error` (String): Error during token registration
+  - `error` (String): Error during token registration or user denied `registerForPushNotifications`
 
 `subscribe` (Android only)
   - `success` (Boolean): Successfully subscribed
@@ -292,13 +321,117 @@ The propery `lastData` will contain the data part when you send a notification p
 
 ## Example
 
-Full example for Android/iOS:
+### Titanium 12.0.0.GA+
 
 ```js
+if (OS_IOS) {
+	const FirebaseCore = require('firebase.core');
+	FirebaseCore.configure();
+}
 
+// Important: The cloud messaging module has to imported after (!) the configure()
+// method of the core module is called
+const FirebaseCloudMessaging = require('firebase.cloudmessaging');
+
+// Called when the Firebase token is registered or refreshed.
+FirebaseCloudMessaging.addEventListener('didRefreshRegistrationToken', onToken);
+
+// Called when direct messages arrive. Note that these are different from push notifications.
+FirebaseCloudMessaging.addEventListener('didReceiveMessage', function(e) {
+	Ti.API.info('Message', e.message);
+});
+
+
+if (OS_ANDROID) {
+	// Android
+
+	// create a notification channel
+	const channel = Ti.Android.NotificationManager.createNotificationChannel({
+		id: 'default', // if you use a custom id you have to set the same to the `channelId` in you php send script!
+		name: 'Default channel',
+		importance: Ti.Android.IMPORTANCE_DEFAULT,
+		enableLights: true,
+		enableVibration: true,
+		showBadge: true
+	});
+	FirebaseCloudMessaging.notificationChannel = channel;
+
+	// display last push data if available
+	Ti.API.info(`Last data: ${FirebaseCloudMessaging.lastData}`);
+
+	// request push permission
+	requestPushPermissions();
+} else {
+	// iOS
+	// Listen to the notification settings event
+	Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
+		// Remove the event again to prevent duplicate calls through the Firebase API
+		Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
+		requestPushPermissions();
+	});
+
+	// Register for the notification settings event
+	Ti.App.iOS.registerUserNotificationSettings({
+		types: [
+			Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT,
+			Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND,
+			Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE
+		]
+	});
+}
+
+function requestPushPermissions() {
+	// Register for push notifications
+	Ti.Network.registerForPushNotifications({
+		success: function(e) {
+			// Register the device with the FCM service.
+			if (OS_ANDROID) {
+				// register for a token
+				FirebaseCloudMessaging.registerForPushNotifications();
+			} else {
+				// iOS
+				onToken(e);
+			}
+		},
+		error: function(e) {
+			Ti.API.error(e);
+		},
+		callback: function(e) {
+			// Fired for all kind of notifications (foreground, background & closed)
+			Ti.API.info(e.data);
+		}
+	});
+}
+
+function onToken(e) {
+	// new device is registered
+
+	if (OS_ANDROID) {
+		Ti.API.info("New token", e.fcmToken);
+	} else {
+		if (FirebaseCloudMessaging != null) {
+			Ti.API.info("New token", FirebaseCloudMessaging.fcmToken);
+		}
+	}
+}
+
+// Check if token is already available.
+if (FirebaseCloudMessaging.fcmToken) {
+	Ti.API.info('FCM-Token', FirebaseCloudMessaging.fcmToken);
+} else {
+	Ti.API.info('Token is empty. Waiting for the token callback ...');
+}
+
+// Subscribe to a topic.
+FirebaseCloudMessaging.subscribeToTopic('testTopic');
+```
+
+### Titanium <=11.1.0.GA
+
+```js
 if (OS_IOS) {
   const FirebaseCore = require('firebase.core');
-  fc.configure();
+  FirebaseCore.configure();
 }
 
 // Important: The cloud messaging module has to imported after (!) the configure()
@@ -318,22 +451,15 @@ FirebaseCloudMessaging.addEventListener('didReceiveMessage', function(e) {
 // Android-only: For configuring custom sounds and importance for the generated system
 // notifications when app is in the background
 if (OS_ANDROID) {
-    // FirebaseCloudMessaging.createNotificationChannel({
-    //     sound: 'warn_sound',
-    //     channelId: 'default',
-    //     channelName: 'General Notifications',
-    //     importance: 'high'
-    // });
-
     const channel = Ti.Android.NotificationManager.createNotificationChannel({
-        id: 'default',
+        id: 'default',   // if you use a custom id you have to set the same to the `channelId` in you php send script!
         name: 'Default channel',
         importance: Ti.Android.IMPORTANCE_DEFAULT,
         enableLights: true,
         enableVibration: true,
         showBadge: true
     });
-    // if you use a custom id you have to set the same to the `channelId` in you php send script!
+
 
     FirebaseCloudMessaging.notificationChannel = channel;
 
@@ -349,8 +475,8 @@ if (OS_ANDROID) {
 	  // Register for push notifications
 	  Ti.Network.registerForPushNotifications({
 	    success: function () {
-            if (!!fcm) {
-                console.log('New token', fcm.fcmToken);
+            if (!!FirebaseCloudMessaging) {
+                console.log('New token', FirebaseCloudMessaging.fcmToken);
             }
         },
 	    error: function (e) {
@@ -389,6 +515,7 @@ if (FirebaseCloudMessaging.fcmToken) {
 FirebaseCloudMessaging.subscribeToTopic('testTopic');
 ```
 
+
 Example to get the the resume data/notification click data on Android:
 
 ```javascript
@@ -417,7 +544,7 @@ Ti.App.addEventListener('resumed', function() {
 ### using curl
 
 Data message:
-```
+```shell
 curl -i -H 'Content-type: application/json' -H 'Authorization: key=#####KEY#####' -XPOST https://fcm.googleapis.com/fcm/send -d '{
   "registration_ids":["####DEVICE_ID#####"],
   "data": {"title":"Push Title", "message":"Push content", "name1":"value1", "badge":"150"}
@@ -425,7 +552,7 @@ curl -i -H 'Content-type: application/json' -H 'Authorization: key=#####KEY#####
 ```
 
 Notification message:
-```
+```shell
 curl -i -H 'Content-type: application/json' -H 'Authorization: key=#####KEY#####' -XPOST https://fcm.googleapis.com/fcm/send -d '{
   "registration_ids":["####DEVICE_ID#####"],
   "notification": {"title":"Push Title", "body":"Push content"}
@@ -477,13 +604,14 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 <?php $url = 'https://fcm.googleapis.com/fcm/send';
 
     $fields = array (
-        'to' => "TOKEN_ID",
-        // 'to' => "/topics/test",
-        /* 'notification' => array (
-         		"title" => "TiFirebaseMessaging",
-         		"body" => "Message received 📱😂",
-         		"timestamp"=>date('Y-m-d G:i:s'),
-        ),*/
+        'to' => "TOKEN_ID",             // specific ID
+        // 'to' => "/topics/test",      // topic
+        // 'notification' => array (
+        //   "title" => "TiFirebaseMessaging",
+        //   "body" => "Message received 📱😂",
+        //   "timestamp"=>date('Y-m-d G:i:s'),
+        //   "android_channel_id" => "my_other_channel"
+        // ),
         'data' => array(
             "test1" => "value1",
             "test2" => "value2",
@@ -519,6 +647,15 @@ Run it locally with `php filelane.php` or put it on a webserver where you can ex
 
 ```
 
+## Parse
+
+You can use Parse with this module: https://github.com/timanrebel/Parse/pull/59 in combination with Firebase. You include and configure both modules and send your deviceToken to the Parse backend.
+
+If you send a push over e.g. <a href="https://sashido.io">Sashido</a> you can either send a normal text or a json with:
+```json
+{"alert":"test from sashido", "text":"test"}
+```
+With the JSON you can set a title/alert and the text of the notification.
 
 ## Build
 

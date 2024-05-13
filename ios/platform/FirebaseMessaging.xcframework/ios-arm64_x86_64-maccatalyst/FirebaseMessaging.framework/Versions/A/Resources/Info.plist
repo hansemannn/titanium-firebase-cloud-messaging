@@ -22,31 +22,33 @@
 	<string>????</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
-		<string>AppleTVSimulator</string>
+		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>
-	<string>21K354</string>
+	<string></string>
 	<key>DTPlatformName</key>
-	<string>appletvsimulator</string>
+	<string>macosx</string>
 	<key>DTPlatformVersion</key>
-	<string>17.2</string>
+	<string>14.2</string>
 	<key>DTSDKBuild</key>
-	<string>21K354</string>
+	<string>23C53</string>
 	<key>DTSDKName</key>
-	<string>appletvsimulator17.2</string>
+	<string>macosx14.2</string>
 	<key>DTXcode</key>
 	<string>1520</string>
 	<key>DTXcodeBuild</key>
 	<string>15C500b</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.15</string>
 	<key>MinimumOSVersion</key>
 	<string>100.0</string>
 	<key>UIDeviceFamily</key>
 	<array>
-		<integer>3</integer>
+		<integer>2</integer>
 	</array>
 </dict>
 </plist>

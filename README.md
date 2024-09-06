@@ -102,7 +102,6 @@ to request Android 13 runtime permissions. All other version < Android 13 will c
 If you have runtime permissions (the `success` event mentioned above or `Ti.Network.remoteNotificationsEnabled` is true) you can call `fcm.registerForPushNotifications()` to request a token. Check the full example below for all steps.
 
 ### Android 13 permission
-If you compile your app with **Titanium <=11.1.0.GA** (target SDK 31) and Android 13 phone will ask for Push runtime permission the first time you create a notification channel.
 If you use **Titanium >=12.0.0** (target SDK 33) you can use `Ti.Network.registerForPushNotifications()` to ask for the permission.
 You can also request the permission with older SDKs yourself by using the general `requestPermissions()` method:
 ```js
@@ -321,8 +320,6 @@ The propery `lastData` will contain the data part when you send a notification p
 
 ## Example
 
-### Titanium 12.0.0.GA+
-
 ```js
 if (OS_IOS) {
 	const FirebaseCore = require('firebase.core');
@@ -425,96 +422,7 @@ if (FirebaseCloudMessaging.fcmToken) {
 // Subscribe to a topic.
 FirebaseCloudMessaging.subscribeToTopic('testTopic');
 ```
-
-### Titanium <=11.1.0.GA
-
-```js
-if (OS_IOS) {
-  const FirebaseCore = require('firebase.core');
-  FirebaseCore.configure();
-}
-
-// Important: The cloud messaging module has to imported after (!) the configure()
-// method of the core module is called
-const FirebaseCloudMessaging = require('firebase.cloudmessaging');
-
-// Called when the Firebase token is registered or refreshed.
-FirebaseCloudMessaging.addEventListener('didRefreshRegistrationToken', function(e) {
-    Ti.API.info('Token', e.fcmToken);
-});
-
-// Called when direct messages arrive. Note that these are different from push notifications.
-FirebaseCloudMessaging.addEventListener('didReceiveMessage', function(e) {
-    Ti.API.info('Message', e.message);
-});
-
-// Android-only: For configuring custom sounds and importance for the generated system
-// notifications when app is in the background
-if (OS_ANDROID) {
-    const channel = Ti.Android.NotificationManager.createNotificationChannel({
-        id: 'default',   // if you use a custom id you have to set the same to the `channelId` in you php send script!
-        name: 'Default channel',
-        importance: Ti.Android.IMPORTANCE_DEFAULT,
-        enableLights: true,
-        enableVibration: true,
-        showBadge: true
-    });
-
-
-    FirebaseCloudMessaging.notificationChannel = channel;
-
-    // display last data:
-    Ti.API.info(`Last data: ${FirebaseCloudMessaging.lastData}`);
-} else {
-	// iOS
-	// Listen to the notification settings event
-	Ti.App.iOS.addEventListener('usernotificationsettings', function eventUserNotificationSettings() {
-	  // Remove the event again to prevent duplicate calls through the Firebase API
-	  Ti.App.iOS.removeEventListener('usernotificationsettings', eventUserNotificationSettings);
-
-	  // Register for push notifications
-	  Ti.Network.registerForPushNotifications({
-	    success: function () {
-            if (!!FirebaseCloudMessaging) {
-                console.log('New token', FirebaseCloudMessaging.fcmToken);
-            }
-        },
-	    error: function (e) {
-            console.error(e);
-        },
-	    callback: function (e) {
-            // Fired for all kind of notifications (foreground, background & closed)
-            console.log(e.data);
-        }
-	  });
-	});
-
-	// Register for the notification settings event
-	Ti.App.iOS.registerUserNotificationSettings({
-	  types: [
-	    Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT,
-	    Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND,
-	    Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE
-	  ]
-	});
-}
-
-// Register the device with the FCM service.
-if (OS_ANDROID) {
-    FirebaseCloudMessaging.registerForPushNotifications();
-}
-
-// Check if token is already available.
-if (FirebaseCloudMessaging.fcmToken) {
-    Ti.API.info('FCM-Token', FirebaseCloudMessaging.fcmToken);
-} else {
-    Ti.API.info('Token is empty. Waiting for the token callback ...');
-}
-
-// Subscribe to a topic.
-FirebaseCloudMessaging.subscribeToTopic('testTopic');
-```
-
+### Android intent data
 
 Example to get the the resume data/notification click data on Android:
 
@@ -541,111 +449,7 @@ Ti.App.addEventListener('resumed', function() {
 
 ## Sending push messages
 
-### using curl
-
-Data message:
-```shell
-curl -i -H 'Content-type: application/json' -H 'Authorization: key=#####KEY#####' -XPOST https://fcm.googleapis.com/fcm/send -d '{
-  "registration_ids":["####DEVICE_ID#####"],
-  "data": {"title":"Push Title", "message":"Push content", "name1":"value1", "badge":"150"}
-}'
-```
-
-Notification message:
-```shell
-curl -i -H 'Content-type: application/json' -H 'Authorization: key=#####KEY#####' -XPOST https://fcm.googleapis.com/fcm/send -d '{
-  "registration_ids":["####DEVICE_ID#####"],
-  "notification": {"title":"Push Title", "body":"Push content"}
-}'
-```
-
-###  using PHP
-To test your app you can use this PHP script to send messages to the device/topic:
-
-```php
-<?php
-    $url = 'https://fcm.googleapis.com/fcm/send';
-
-    $fields = [
-        'to' => '/topics/testTopic', // or device token
-        'notification' => [
-            'title' => 'TiFirebaseMessaging',
-            'body' => 'Message received',
-            "badge"=> 1,
-        ],
-        'data' => [
-            'key1' => 'value1',
-            'key2' => 'value2'
-        ]
-    ];
-
-    $headers = [
-        'Authorization: key=SERVER_ID_FROM_FIREBASE_SETTIGNS_CLOUD_MESSAGING', 'Content-Type: application/json'
-    ];
-    $ch = curl_init();
-
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-
-    $result = curl_exec($ch);
-
-    echo $result;
-    curl_close($ch);
-?>
-```
-
-Run it locally with `php filelane.php` or put it on a webserver where you can execute PHP files.
-
-### extended PHP Android example
-```php
-<?php $url = 'https://fcm.googleapis.com/fcm/send';
-
-    $fields = array (
-        'to' => "TOKEN_ID",             // specific ID
-        // 'to' => "/topics/test",      // topic
-        // 'notification' => array (
-        //   "title" => "TiFirebaseMessaging",
-        //   "body" => "Message received 📱😂",
-        //   "timestamp"=>date('Y-m-d G:i:s'),
-        //   "android_channel_id" => "my_other_channel"
-        // ),
-        'data' => array(
-            "test1" => "value1",
-            "test2" => "value2",
-            "timestamp"=>date('Y-m-d G:i:s'),
-            "title" => "title",
-            "message" => "message",
-            "big_text"=>"big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text big text even more text ",
-            "big_text_summary"=>"big_text_summary",
-            "icon" => "http://via.placeholder.com/150x150",
-            "image" => "http://via.placeholder.com/350x150",	// won't show the big_text
-            "force_show_in_foreground"=> true,
-            "color" => "#ff6600",
-            "channelId" => "default"	// or a different channel
-        )
-    );
-
-    $headers = array (
-        'Authorization: key=API_KEY',
-        'Content-Type: application/json'
-    );
-
-    $ch = curl_init ();
-    curl_setopt ( $ch, CURLOPT_URL, $url );
-    curl_setopt ( $ch, CURLOPT_POST, true );
-    curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
-    curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-    curl_setopt ( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
-
-    $result = curl_exec ( $ch );
-    echo $result."\n";
-    curl_close ( $ch );
-?>
-
-```
+Check https://firebase.google.com/docs/cloud-messaging/server or frameworks like https://github.com/kreait/firebase-php/
 
 ## Parse
 

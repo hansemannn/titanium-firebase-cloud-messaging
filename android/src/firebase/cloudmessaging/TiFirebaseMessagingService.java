@@ -190,7 +190,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
                 jsonData.put("notification_body", remoteMessage.getNotification().getBody());
             }
         } catch (Exception ex) {
-            //
+            Log.e(TAG, "Error adding fields: " + ex.getMessage());
         }
 
         if (!showNotification) {

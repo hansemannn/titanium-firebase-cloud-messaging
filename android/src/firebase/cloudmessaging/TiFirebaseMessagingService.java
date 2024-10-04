@@ -181,6 +181,18 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         editor.putString("titanium.firebase.cloudmessaging.message", jsonData.toString());
         editor.commit();
 
+        try {
+            // adding normal notification fields to the fcm_data node
+            if (!remoteMessage.getNotification().getTitle().isEmpty()) {
+                jsonData.put("notification_title", remoteMessage.getNotification().getTitle());
+            }
+            if (!remoteMessage.getNotification().getBody().isEmpty()) {
+                jsonData.put("notification_body", remoteMessage.getNotification().getBody());
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Error adding fields: " + ex.getMessage());
+        }
+
         if (!showNotification) {
             // hidden notification - still send broadcast with data for next app start
             Intent i = new Intent();

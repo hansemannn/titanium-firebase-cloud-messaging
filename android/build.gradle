@@ -4,10 +4,10 @@ repositories {
 }
 
 dependencies {
-	implementation "androidx.preference:preference:1.1.1"
+	implementation "androidx.preference:preference:1.2.1"
 	implementation "me.leolin:ShortcutBadger:1.1.22@aar"
 
 	// get latest version from https://firebase.google.com/docs/android/learn-more#bom
 	// changelog https://firebase.google.com/support/release-notes/android
-	implementation 'com.google.firebase:firebase-messaging:23.2.1'
+	implementation 'com.google.firebase:firebase-messaging:24.1.0'
 }

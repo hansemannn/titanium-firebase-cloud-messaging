@@ -2,7 +2,7 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 10.0.0
+version: 11.0.0
 apiversion: 2
 architectures: arm64 x86_64
 description: titanium-firebase-cloud-messaging

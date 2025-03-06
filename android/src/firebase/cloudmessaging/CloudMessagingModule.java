@@ -71,7 +71,8 @@ public class CloudMessagingModule extends KrollModule {
 
             if (extras != null) {
                 for (String key : extras.keySet()) {
-                    if (extras.get(key) instanceof Bundle bndl) {
+                    if (extras.get(key) instanceof Bundle) {
+                        Bundle bndl = (Bundle) extras.get(key);
                         for (String bdnlKey : bndl.keySet()) {
                             data.put(key + "_" + bdnlKey, bndl.get(bdnlKey));
                         }
@@ -321,14 +322,14 @@ public class CloudMessagingModule extends KrollModule {
             return;
         }
 
-        if (!(channel instanceof NotificationChannelProxy channelProxy)) {
+        if (!(channel instanceof NotificationChannelProxy)) {
             return;
         }
 
         NotificationManager notificationManager =
                 (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         assert notificationManager != null;
-        notificationManager.createNotificationChannel(channelProxy.getNotificationChannel());
+        notificationManager.createNotificationChannel(((NotificationChannelProxy) channel).getNotificationChannel());
     }
 
     // clang-format off

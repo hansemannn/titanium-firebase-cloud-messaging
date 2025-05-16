@@ -50,11 +50,27 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "New token: " + s);
     }
 
+    private boolean callBraze(Context context, RemoteMessage remoteMessage) {
+        try {
+            return (Boolean) Class.forName("com.braze.push.BrazeFirebaseMessagingService")
+                    .getMethod("handleBrazeRemoteMessage", Context.class, RemoteMessage.class)
+                    .invoke(null, context, remoteMessage);
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+            return false;
+        }
+    }
+
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         HashMap<String, Object> msg = new HashMap<>();
+        Context context = getApplicationContext();
         CloudMessagingModule module = CloudMessagingModule.getInstance();
         boolean isVisible = true;
+
+        if (callBraze(context, remoteMessage)) {
+            return;
+        }
 
         if (!remoteMessage.getData().isEmpty()) {
             // data message

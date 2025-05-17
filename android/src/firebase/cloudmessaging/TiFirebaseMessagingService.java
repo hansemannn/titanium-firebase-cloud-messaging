@@ -359,7 +359,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         return true;
     }
 
-
     private Bitmap getBitmapFromURL(String src) throws Exception {
         HttpURLConnection connection = (HttpURLConnection) (new URL(src)).openConnection();
         connection.setDoInput(true);

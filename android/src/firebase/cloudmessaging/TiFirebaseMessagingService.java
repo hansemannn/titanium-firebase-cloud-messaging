@@ -55,10 +55,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
      * This method uses reflection to dynamically call the Braze SDK's handling method without requiring
      * a direct dependency on the Braze SDK.
      * 
-     * @param context The application context to be passed to the Braze handler
      * @param remoteMessage The Firebase RemoteMessage object to be processed
      * @return true if the message was successfully handled by Braze, false otherwise
      */
+    @SuppressWarnings({"all"})
     private boolean handleBrazeRemoteMessage(RemoteMessage remoteMessage) {
         Context context = getApplicationContext();
 
@@ -97,7 +97,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         msg.put("from", remoteMessage.getFrom());
-        msg.put("to", remoteMessage.getTo());
         msg.put("ttl", remoteMessage.getTtl());
         msg.put("messageId", remoteMessage.getMessageId());
         msg.put("messageType", remoteMessage.getMessageType());
@@ -149,10 +148,11 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         // Check if it is a default Parse/Sashido message ("data.data.alert")
-        if (params.get("data") != null) {
+        String parseData = params.get("data");
+        if (parseData != null) {
             try {
                 // Parse notification
-                JSONObject localJsonData = new JSONObject(params.get("data"));
+                JSONObject localJsonData = new JSONObject(parseData);
                 parseTitle = localJsonData.get("alert").toString();
                 showNotification = true;
                 isParse = true;
@@ -166,7 +166,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         int priority = 1;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            priority = NotificationManager.IMPORTANCE_MAX;
+            priority = NotificationManager.IMPORTANCE_DEFAULT;
 
             if (!priorityValue.isEmpty()) {
                 if (priorityValue.equalsIgnoreCase("low")) {
@@ -175,8 +175,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
                     priority = NotificationManager.IMPORTANCE_MIN;
                 } else if (priorityValue.equalsIgnoreCase("max")) {
                     priority = NotificationManager.IMPORTANCE_MAX;
-                } else if (priorityValue.equalsIgnoreCase("default")) {
-                    priority = NotificationManager.IMPORTANCE_DEFAULT;
                 } else if (priorityValue.equalsIgnoreCase("high")) {
                     priority = NotificationManager.IMPORTANCE_HIGH;
                 } else {
@@ -218,7 +216,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 
         if (!showNotification) {
             // hidden notification - still send broadcast with data for next app start
-            Intent i = new Intent();
+            Intent i = new Intent().setAction("ti.firebase.messaging.hidden-notification");
             i.addCategory(Intent.CATEGORY_LAUNCHER);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             i.putExtra("fcm_data", jsonData.toString());

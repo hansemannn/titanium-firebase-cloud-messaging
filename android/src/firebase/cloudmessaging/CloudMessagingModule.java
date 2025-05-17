@@ -71,15 +71,15 @@ public class CloudMessagingModule extends KrollModule {
 
             if (extras != null) {
                 for (String key : extras.keySet()) {
-                    if (extras.get(key) instanceof Bundle) {
-                        Bundle bndl = (Bundle) extras.get(key);
-                        for (String bdnlKey : bndl.keySet()) {
-                            data.put(key + "_" + bdnlKey, bndl.get(bdnlKey));
+                    Bundle bundle = extras.getBundle(key);
+                    if (bundle != null) {
+                        for (String bundleKey : bundle.keySet()) {
+                            data.put(key + "_" + bundleKey, bundle.getString(bundleKey));
                         }
                     } else {
-                        Object value = extras.get(key);
+                        String value = extras.getString(key);
                         if (value != null) {
-                            data.put(key, value.toString());
+                            data.put(key, value);
                         }
                     }
                 }
@@ -192,7 +192,12 @@ public class CloudMessagingModule extends KrollModule {
     }
 
     @Kroll.method
+    @SuppressWarnings("deprecation")
     public void sendMessage(KrollDict obj) {
+        Log.e(LCAT, "Deprecated: This function is actually decommissioned along " +
+                "with all of FCM upstream messaging. Learn more in the FAQ about FCM features " +
+                "deprecated in June 2023: https://firebase.google.com/support/faq?hl=de#fcm-23-deprecation");
+
         FirebaseMessaging fm = FirebaseMessaging.getInstance();
 
         String fireTo = obj.getString("to");
@@ -204,10 +209,10 @@ public class CloudMessagingModule extends KrollModule {
         rm.setTtl(ttl);
 
         // add custom data
-        Map<String, String> data = (HashMap) obj.get("data");
-        assert data != null;
-        for (String o : data.keySet()) {
-            rm.addData(o, data.get(o));
+        if (obj.get("data") instanceof Map<?, ?> data) {
+            for (Object o : data.keySet()) {
+                rm.addData((String) o, (String) data.get(o));
+            }
         }
 
         if (!fireTo.isEmpty() && !fireMessageId.isEmpty()) {

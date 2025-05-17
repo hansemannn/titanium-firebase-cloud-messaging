@@ -50,7 +50,18 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "New token: " + s);
     }
 
-    private boolean callBraze(Context context, RemoteMessage remoteMessage) {
+    /**
+     * Attempts to handle a Firebase Cloud Messaging remote message using the Braze SDK if it's available.
+     * This method uses reflection to dynamically call the Braze SDK's handling method without requiring
+     * a direct dependency on the Braze SDK.
+     * 
+     * @param context The application context to be passed to the Braze handler
+     * @param remoteMessage The Firebase RemoteMessage object to be processed
+     * @return true if the message was successfully handled by Braze, false otherwise
+     */
+    private boolean handleBrazeRemoteMessage(RemoteMessage remoteMessage) {
+        Context context = getApplicationContext();
+
         try {
             return (Boolean) Class.forName("com.braze.push.BrazeFirebaseMessagingService")
                     .getMethod("handleBrazeRemoteMessage", Context.class, RemoteMessage.class)
@@ -64,11 +75,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         HashMap<String, Object> msg = new HashMap<>();
-        Context context = getApplicationContext();
         CloudMessagingModule module = CloudMessagingModule.getInstance();
         boolean isVisible = true;
 
-        if (callBraze(context, remoteMessage)) {
+        if (handleBrazeRemoteMessage(remoteMessage)) {
             return;
         }
 
@@ -348,6 +358,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         notificationManager.notify(id, builder.build());
         return true;
     }
+
 
     private Bitmap getBitmapFromURL(String src) throws Exception {
         HttpURLConnection connection = (HttpURLConnection) (new URL(src)).openConnection();

@@ -74,6 +74,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage);
+        
         HashMap<String, Object> msg = new HashMap<>();
         CloudMessagingModule module = CloudMessagingModule.getInstance();
         boolean isVisible = true;

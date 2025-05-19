@@ -123,6 +123,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         String parseTitle = "";
         String parseText = "";
         boolean isParse = false;
+        boolean noContent = false;
 
         if ( TiApplication.isCurrentActivityInForeground()) {
             showNotification = false;
@@ -145,7 +146,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
                 && params.get("big_text") == null && params.get("big_text_summary") == null && params.get("ticker") == null
                 && params.get("image") == null) {
             // no actual content - don't show it
-            showNotification = false;
+            noContent = true;
         }
 
         // Check if it is a default Parse/Sashido message ("data.data.alert")
@@ -215,14 +216,14 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             Log.e(TAG, "Error adding fields: " + ex.getMessage());
         }
 
-        if (!showNotification) {
+        if (noContent) {
             // hidden notification - still send broadcast with data for next app start
             Intent i = new Intent().setAction("ti.firebase.messaging.hidden-notification");
             i.addCategory(Intent.CATEGORY_LAUNCHER);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             i.putExtra("fcm_data", jsonData.toString());
             sendBroadcast(i);
-            return false;
+            return true;
         }
 
         Intent notificationIntent = new Intent(this, PushHandlerActivity.class);

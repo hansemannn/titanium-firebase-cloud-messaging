@@ -67,7 +67,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
                     .getMethod("handleBrazeRemoteMessage", Context.class, RemoteMessage.class)
                     .invoke(null, context, remoteMessage);
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
             return false;
         }
     }

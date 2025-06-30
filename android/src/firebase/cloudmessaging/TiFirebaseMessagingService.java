@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 
@@ -40,7 +41,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
     private static final AtomicInteger atomic = new AtomicInteger(0);
 
     @Override
-    public void onNewToken(String s) {
+    public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
         CloudMessagingModule module = CloudMessagingModule.getInstance();
         if (module != null) {
@@ -49,24 +50,40 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "New token: " + s);
     }
 
-    @Override
-    public void onMessageSent(String msgID) {
-        Log.d(TAG, "Message sent: " + msgID);
+    /**
+     * Attempts to handle a Firebase Cloud Messaging remote message using the Braze SDK if it's available.
+     * This method uses reflection to dynamically call the Braze SDK's handling method without requiring
+     * a direct dependency on the Braze SDK.
+     * 
+     * @param remoteMessage The Firebase RemoteMessage object to be processed
+     * @return true if the message was successfully handled by Braze, false otherwise
+     */
+    @SuppressWarnings({"all"})
+    private boolean handleBrazeRemoteMessage(RemoteMessage remoteMessage) {
+        Context context = getApplicationContext();
+
+        try {
+            return (Boolean) Class.forName("com.braze.push.BrazeFirebaseMessagingService")
+                    .getMethod("handleBrazeRemoteMessage", Context.class, RemoteMessage.class)
+                    .invoke(null, context, remoteMessage);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
-    public void onSendError(String msgID, Exception exception) {
-        Log.e(TAG, "Send Error: " + msgID + " " + exception);
-    }
-
-    @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
-        HashMap<String, Object> msg = new HashMap<String, Object>();
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage);
+        
+        HashMap<String, Object> msg = new HashMap<>();
         CloudMessagingModule module = CloudMessagingModule.getInstance();
-        Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
-        Boolean isVisible = true;
+        boolean isVisible = true;
 
-        if (remoteMessage.getData().size() > 0) {
+        if (handleBrazeRemoteMessage(remoteMessage)) {
+            return;
+        }
+
+        if (!remoteMessage.getData().isEmpty()) {
             // data message
             isVisible = showNotification(remoteMessage);
         }
@@ -81,14 +98,13 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         msg.put("from", remoteMessage.getFrom());
-        msg.put("to", remoteMessage.getTo());
         msg.put("ttl", remoteMessage.getTtl());
         msg.put("messageId", remoteMessage.getMessageId());
         msg.put("messageType", remoteMessage.getMessageType());
         msg.put("data", new KrollDict(remoteMessage.getData()));
         msg.put("sendTime", remoteMessage.getSentTime());
 
-        if (isVisible || appInForeground) {
+        if (isVisible || TiApplication.isCurrentActivityInForeground()) {
             // app is in foreground or notification was show - send data to event receiver
             if (module != null) {
                 module.onMessageReceived(msg);
@@ -100,8 +116,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         CloudMessagingModule module = CloudMessagingModule.getInstance();
         Map<String, String> params = remoteMessage.getData();
         JSONObject jsonData = new JSONObject(params);
-        Boolean appInForeground = TiApplication.isCurrentActivityInForeground();
-        Boolean showNotification = true;
+        boolean showNotification = true;
         Context context = getApplicationContext();
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         int builder_defaults = 0;
@@ -109,12 +124,13 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         String parseText = "";
         boolean isParse = false;
 
-        if (appInForeground) {
+        if ( TiApplication.isCurrentActivityInForeground()) {
             showNotification = false;
         }
 
-        if (params.get("force_show_in_foreground") != null && params.get("force_show_in_foreground") != "") {
-            showNotification = showNotification || TiConvert.toBoolean(params.get("force_show_in_foreground"), false);
+        String forceShowInFg = getString(params, "force_show_in_foreground");
+        if (!forceShowInFg.isEmpty()) {
+            showNotification = showNotification || TiConvert.toBoolean(forceShowInFg, false);
         }
 
         if (module != null && module.forceShowInForeground()) {
@@ -133,44 +149,44 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         // Check if it is a default Parse/Sashido message ("data.data.alert")
-        if (params.get("data") != null) {
+        String parseData = params.get("data");
+        if (parseData != null) {
             try {
-                JSONObject localJsonData = new JSONObject(params.get("data"));
-                if (localJsonData.get("alert") != null) {
-                    // Parse notification
-                    showNotification = true;
-                    isParse = true;
-                    parseTitle = localJsonData.get("alert").toString();
-                    if (localJsonData.get("text") != null) {
-                        parseText = localJsonData.get("text").toString();
-                    }
-                }
+                // Parse notification
+                JSONObject localJsonData = new JSONObject(parseData);
+                parseTitle = localJsonData.get("alert").toString();
+                showNotification = true;
+                isParse = true;
+                parseText = localJsonData.get("text").toString();
             } catch (JSONException e) {
                 //
             }
         }
 
-        String priorityString = params.get("priority");
-        int priority = NotificationManager.IMPORTANCE_MAX;
+        String priorityValue = getString(params, "priority");
+        int priority = 1;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && priorityString != null && !priorityString.isEmpty()) {
-            if (priorityString.equalsIgnoreCase("low")) {
-                priority = NotificationManager.IMPORTANCE_LOW;
-            } else if (priorityString.equalsIgnoreCase("min")) {
-                priority = NotificationManager.IMPORTANCE_MIN;
-            } else if (priorityString.equalsIgnoreCase("max")) {
-                priority = NotificationManager.IMPORTANCE_MAX;
-            } else if (priorityString.equalsIgnoreCase("default")) {
-                priority = NotificationManager.IMPORTANCE_DEFAULT;
-            } else if (priorityString.equalsIgnoreCase("high")) {
-                priority = NotificationManager.IMPORTANCE_HIGH;
-            } else {
-                priority = TiConvert.toInt(priorityString, 1);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            priority = NotificationManager.IMPORTANCE_DEFAULT;
+
+            if (!priorityValue.isEmpty()) {
+                if (priorityValue.equalsIgnoreCase("low")) {
+                    priority = NotificationManager.IMPORTANCE_LOW;
+                } else if (priorityValue.equalsIgnoreCase("min")) {
+                    priority = NotificationManager.IMPORTANCE_MIN;
+                } else if (priorityValue.equalsIgnoreCase("max")) {
+                    priority = NotificationManager.IMPORTANCE_MAX;
+                } else if (priorityValue.equalsIgnoreCase("high")) {
+                    priority = NotificationManager.IMPORTANCE_HIGH;
+                } else {
+                    priority = TiConvert.toInt(priorityValue, 1);
+                }
             }
         }
 
-        if (params.get("sound") != null && params.get("sound") != "" && !params.get("sound").isEmpty()) {
-            defaultSoundUri = Utils.getSoundUri(params.get("sound"));
+        String soundValue = getString(params, "big_text");
+        if (!soundValue.isEmpty()) {
+            defaultSoundUri = Utils.getSoundUri(soundValue);
             Log.d(TAG, "showNotification custom sound: " + defaultSoundUri);
         } else {
             builder_defaults |= Notification.DEFAULT_SOUND;
@@ -179,11 +195,29 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("titanium.firebase.cloudmessaging.message", jsonData.toString());
-        editor.commit();
+        editor.apply();
+
+        try {
+            // adding normal notification fields to the fcm_data node
+            RemoteMessage.Notification notification = remoteMessage.getNotification();
+            if (notification != null) {
+                String title = notification.getTitle();
+                String body = notification.getBody();
+
+                if (title != null && !title.isEmpty()) {
+                    jsonData.put("notification_title", title);
+                }
+                if (body != null && !body.isEmpty()) {
+                    jsonData.put("notification_body", body);
+                }
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Error adding fields: " + ex.getMessage());
+        }
 
         if (!showNotification) {
             // hidden notification - still send broadcast with data for next app start
-            Intent i = new Intent();
+            Intent i = new Intent().setAction("ti.firebase.messaging.hidden-notification");
             i.addCategory(Intent.CATEGORY_LAUNCHER);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             i.putExtra("fcm_data", jsonData.toString());
@@ -202,15 +236,9 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         // Start building notification
 
         NotificationCompat.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "default";
-            if (params.get("channelId") != null && params.get("channelId") != "") {
-                channelId = params.get("channelId");
-            }
-            builder = new NotificationCompat.Builder(context, channelId);
-        } else {
-            builder = new NotificationCompat.Builder(context);
-        }
+        String channelValue = getString(params, "channelId");
+        String channelId = channelValue.isEmpty() ? "default" : channelValue;
+        builder = new NotificationCompat.Builder(context, channelId);
         builder.setContentIntent(contentIntent);
         builder.setAutoCancel(true);
         builder.setPriority(priority);
@@ -223,7 +251,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
         if (isParse) {
             builder.setContentTitle(parseTitle);
-            if (!parseText.equals("")) {
+            if (!parseText.isEmpty()) {
                 builder.setContentText(parseText);
             }
         }
@@ -233,12 +261,14 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         builder.setSound(defaultSoundUri);
 
         // BigText
-        if (params.get("big_text") != null && params.get("big_text") != "") {
+        String bigTextValue = getString(params, "big_text");
+        if (!bigTextValue.isEmpty()) {
             NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-            bigTextStyle.bigText(params.get("big_text"));
+            bigTextStyle.bigText(bigTextValue);
 
-            if (params.get("big_text_summary") != null && params.get("big_text_summary") != "") {
-                bigTextStyle.setSummaryText(params.get("big_text_summary"));
+            String bigTextSummaryValue = getString(params, "big_text_summary");
+            if (!bigTextSummaryValue.isEmpty()) {
+                bigTextStyle.setSummaryText(bigTextSummaryValue);
             }
 
             builder.setStyle(bigTextStyle);
@@ -246,8 +276,8 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 
         // Icons
         try {
-            int smallIcon = this.getResource("drawable", "notificationicon");
-            int smallAppIcon = this.getResource("drawable", "appicon");
+            int smallIcon = this.getResource("notificationicon");
+            int smallAppIcon = this.getResource("appicon");
             if (smallIcon > 0) {
                 // use custom icon
                 builder.setSmallIcon(smallIcon);
@@ -262,9 +292,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             Log.e(TAG, "Smallicon exception: " + ex.getMessage());
         }
 
-        if (params.get("color") != null && params.get("color") != "") {
+        String colorValue = getString(params, "color");
+        if (!colorValue.isEmpty()) {
             try {
-                int color = TiConvert.toColor(params.get("color"), TiApplication.getAppCurrentActivity());
+                int color = TiConvert.toColor(colorValue, TiApplication.getAppCurrentActivity());
                 builder.setColor(color);
                 builder.setColorized(true);
             } catch (Exception ex) {
@@ -273,9 +304,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         // Large icon
-        if (params.get("icon") != null && params.get("icon") != "") {
+        String iconValue = getString(params, "icon");
+        if (!iconValue.isEmpty()) {
             try {
-                Bitmap icon = this.getBitmapFromURL(params.get("icon"));
+                Bitmap icon = this.getBitmapFromURL(iconValue);
                 //Check if the icon should be displayed as a circle
                 if (jsonData.optBoolean("rounded_large_icon")) {
                     //Converting the icon Bitmap to a circle shaped Bitmap
@@ -288,9 +320,10 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         // Large icon
-        if (params.get("image") != null && params.get("image") != "") {
+        String imageValue = getString(params, "image");
+        if (!imageValue.isEmpty()) {
             try {
-                Bitmap image = this.getBitmapFromURL(params.get("image"));
+                Bitmap image = this.getBitmapFromURL(imageValue);
                 NotificationCompat.BigPictureStyle notiStyle = new NotificationCompat.BigPictureStyle();
                 notiStyle.bigPicture(image);
                 builder.setStyle(notiStyle);
@@ -300,16 +333,19 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         // Badge number
-        if (params.get("badge") != null && params.get("badge") != "") {
-            ShortcutBadger.applyCount(context, TiConvert.toInt(params.get("badge"), 1));
-            builder.setNumber(TiConvert.toInt(params.get("badge"), 1));
+        String badgeValue = getString(params, "badge");
+        if (!badgeValue.isEmpty()) {
+            int badgeNumber = TiConvert.toInt(badgeValue, 1);
+            ShortcutBadger.applyCount(context, badgeNumber);
+            builder.setNumber(badgeNumber);
         }
 
         int id = 0;
-        if (params != null && params.get("id") != "") {
+        String idValue = getString(params, "id");
+        if (!idValue.isEmpty()) {
             // ensure that the id sent from the server is negative to prevent
             // collision with the atomic integer
-            id = TiConvert.toInt(params.get("id"), 0);
+            id = TiConvert.toInt(idValue, 0);
         }
 
         if (id == 0) {
@@ -330,19 +366,28 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         return BitmapFactory.decodeStream(new BufferedInputStream(connection.getInputStream()));
     }
 
-    private int getResource(String type, String name) {
+    private int getResource(String name) {
         int icon = 0;
         if (name != null) {
             int index = name.lastIndexOf(".");
             if (index > 0)
                 name = name.substring(0, index);
             try {
-                icon = TiRHelper.getApplicationResource(type + "." + name);
+                icon = TiRHelper.getApplicationResource("drawable." + name);
             } catch (TiRHelper.ResourceNotFoundException ex) {
-                Log.w(TAG, type + "." + name + " not found; make sure it's in platform/android/res/" + type);
+                Log.w(TAG, "drawable." + name + " not found; make sure it's in platform/android/res/drawable");
             }
         }
 
         return icon;
+    }
+
+    private String getString(Map<String, String> params, String key) {
+        Object value = params.get(key);
+        if (value == null) {
+            return "";
+        }
+
+        return value.toString();
     }
 }

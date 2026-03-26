@@ -184,7 +184,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             }
         }
 
-        String soundValue = getString(params, "big_text");
+        String soundValue = getString(params, "sound");
         if (!soundValue.isEmpty()) {
             defaultSoundUri = Utils.getSoundUri(soundValue);
             Log.d(TAG, "showNotification custom sound: " + defaultSoundUri);

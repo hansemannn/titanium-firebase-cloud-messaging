@@ -191,37 +191,6 @@ public class CloudMessagingModule extends KrollModule {
         });
     }
 
-    @Kroll.method
-    @SuppressWarnings("deprecation")
-    public void sendMessage(KrollDict obj) {
-        Log.e(LCAT, "Deprecated: This function is actually decommissioned along " +
-                "with all of FCM upstream messaging. Learn more in the FAQ about FCM features " +
-                "deprecated in June 2023: https://firebase.google.com/support/faq?hl=de#fcm-23-deprecation");
-
-        FirebaseMessaging fm = FirebaseMessaging.getInstance();
-
-        String fireTo = obj.getString("to");
-        String fireMessageId = obj.getString("messageId");
-        int ttl = TiConvert.toInt(obj.get("timeToLive"), 0);
-
-        RemoteMessage.Builder rm = new RemoteMessage.Builder(fireTo);
-        rm.setMessageId(fireMessageId);
-        rm.setTtl(ttl);
-
-        // add custom data
-        if (obj.get("data") instanceof Map<?, ?> data) {
-            for (Object o : data.keySet()) {
-                rm.addData((String) o, (String) data.get(o));
-            }
-        }
-
-        if (!fireTo.isEmpty() && !fireMessageId.isEmpty()) {
-            fm.send(rm.build());
-        } else {
-            Log.e(LCAT, "Please set 'to' and 'messageId'");
-        }
-    }
-
     public void onTokenRefresh(String token) {
         try {
             if (hasListeners("didRefreshRegistrationToken")) {

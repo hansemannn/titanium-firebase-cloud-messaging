@@ -26,7 +26,8 @@ public class PushHandlerActivity extends Activity {
 
             Intent launcherIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             assert launcherIntent != null;
-            launcherIntent.addCategory(Intent.ACTION_MAIN);
+            launcherIntent.setAction(Intent.ACTION_MAIN);
+            launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             launcherIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             launcherIntent.putExtra("fcm_data", notification);
 

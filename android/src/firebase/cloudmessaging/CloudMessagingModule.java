@@ -60,6 +60,7 @@ public class CloudMessagingModule extends KrollModule {
     // clang-format off
     @Kroll.method
     @Kroll.getProperty
+    @SuppressWarnings("deprecation")
     private KrollDict getLastData()
     // clang-format on
     {
@@ -71,16 +72,14 @@ public class CloudMessagingModule extends KrollModule {
 
             if (extras != null) {
                 for (String key : extras.keySet()) {
-                    Bundle bundle = extras.getBundle(key);
-                    if (bundle != null) {
+                    Object value = extras.get(key);
+                    if (value instanceof Bundle) {
+                        Bundle bundle = (Bundle) value;
                         for (String bundleKey : bundle.keySet()) {
-                            data.put(key + "_" + bundleKey, bundle.getString(bundleKey));
+                            data.put(key + "_" + bundleKey, String.valueOf(bundle.get(bundleKey)));
                         }
-                    } else {
-                        String value = extras.getString(TiConvert.toString(key));
-                        if (value != null) {
-                            data.put(key, value);
-                        }
+                    } else if (value != null) {
+                        data.put(key, String.valueOf(value));
                     }
                 }
 

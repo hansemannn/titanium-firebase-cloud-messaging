@@ -104,8 +104,17 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         msg.put("data", new KrollDict(remoteMessage.getData()));
         msg.put("sendTime", remoteMessage.getSentTime());
 
-        if (isVisible || TiApplication.isCurrentActivityInForeground()) {
-            // app is in foreground or notification was show - send data to event receiver
+        boolean inForeground = TiApplication.isCurrentActivityInForeground();
+        msg.put("inBackground", !inForeground);
+
+        // Fire the JS "didReceiveMessage" event when the app is in the foreground, when a
+        // notification was shown, OR when a silent data-only push arrives while the JS runtime
+        // is still alive (app backgrounded but not killed). The last case lets background
+        // data-only pushes (e.g. silent sync_signal) be handled immediately instead of waiting
+        // for the next app resume. When the process is dead, module == null and the payload is
+        // still persisted to "titanium.firebase.cloudmessaging.message" for cold-start recovery.
+        boolean isSilentData = !isVisible && remoteMessage.getNotification() == null;
+        if (isVisible || inForeground || (module != null && isSilentData)) {
             if (module != null) {
                 module.onMessageReceived(msg);
             }

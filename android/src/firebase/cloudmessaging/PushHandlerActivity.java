@@ -6,6 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.appcelerator.kroll.KrollDict;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 public class PushHandlerActivity extends Activity {
 
     private static final String LCAT = "FirebaseCloudMessaging";
@@ -14,7 +19,6 @@ public class PushHandlerActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         try {
             super.onCreate(savedInstanceState);
-            finish();
 
             CloudMessagingModule module = CloudMessagingModule.getInstance();
             Context context = getApplicationContext();
@@ -22,6 +26,13 @@ public class PushHandlerActivity extends Activity {
 
             if (module != null) {
                 module.setNotificationData(notification);
+
+                if (notification != null) {
+                    HashMap<String, Object> msg = new HashMap<>();
+                    msg.put("data", new KrollDict(new JSONObject(notification)));
+                    module.onMessageReceived(msg);
+                }
+                return;
             }
 
             Intent launcherIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());

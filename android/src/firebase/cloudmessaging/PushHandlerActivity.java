@@ -26,8 +26,11 @@ public class PushHandlerActivity extends Activity {
 
             Intent launcherIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             assert launcherIntent != null;
-            launcherIntent.addCategory(Intent.ACTION_MAIN);
-            launcherIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // Titanium's TiRootActivity only recognises its own main intent. Anything
+            // else makes it spawn a second root activity, which shows an extra splash
+            // before finishing itself. Matching that intent keeps the launch to one.
+            launcherIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            launcherIntent.setPackage(context.getPackageName());
             launcherIntent.putExtra("fcm_data", notification);
 
             startActivity(launcherIntent);

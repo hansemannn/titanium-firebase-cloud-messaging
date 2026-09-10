@@ -358,6 +358,21 @@ public class CloudMessagingModule extends KrollModule {
 
     public void setNotificationData(String data) {
         notificationData = data;
+
+        // PushHandlerActivity calls this the moment the user taps a notification,
+        // before the app is brought to the front. When the runtime is already alive
+        // the launcher Intent is not delivered a second time, so this event is the
+        // only way the app gets to know about the tap. On a cold start the module
+        // does not exist yet and parseBootIntent() reads the payload instead.
+        try {
+            if ((data != null) && !data.isEmpty() && hasListeners("didOpenNotification")) {
+                KrollDict event = new KrollDict();
+                event.put("message", new KrollDict(new JSONObject(data)));
+                fireEvent("didOpenNotification", event);
+            }
+        } catch (Exception ex) {
+            Log.e(LCAT, "didOpenNotification: " + ex.getMessage());
+        }
     }
 
     public void parseBootIntent() {

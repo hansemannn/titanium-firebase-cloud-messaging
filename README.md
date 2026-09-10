@@ -42,6 +42,8 @@ thank you!
 </tr>
 </table>
 
+Load `firebase.core` and `firebase.cloudmessaging` at startup, before anything registers for push. `_configure` registers the module as an application delegate, and its `didRegisterForRemoteNotificationsWithDeviceToken` is what hands the APNs token to Firebase. If the module is loaded after APNs has already returned the token, it can miss that callback and fail to pass the token to Firebase. This can leave the app with notification permission and an APNs token, but no callback from `fetchToken` or `didRefreshRegistrationToken` event.
+
 To register for push notifications on iOS, you only need to call the Titanium related methods as the following:
 ```js
 // Listen to the notification settings event
@@ -66,6 +68,8 @@ Ti.App.iOS.registerUserNotificationSettings({
   ]
 });
 ```
+
+On iOS, use that `callback` to handle received notifications and notification taps. The payload is in `e.data`. Leaving the callback empty registers the app for notifications without adding any app-specific handling for them.
 
 ## Android Notes:
 
@@ -168,6 +172,8 @@ fi
 
 On Android there are two different messages that the phone can process: `Notification messages` and `Data messages`. A `Notification message` is processed by the system, the `Data message` is handeled by `showNotification()` in `TiFirebaseMessagingService`. Using the `notification` block inside the POSTFIELDS will send a `Notification message`.
 
+With a top-level `notification` block and the app in the background, Android displays the notification itself. This bypasses the module's `onMessageReceived()`, `showNotification()` and `PushHandlerActivity` handling. The module does not process the custom data fields below through this path, and the system controls the tap intent. Use a data-only message if you want the module to display the notification and handle the tap.
+
 Supported data fields:
 * "title" => "string"
 * "message" => "string"
@@ -190,9 +196,11 @@ Supported notification fields:
 * "tag" => "custom_notification_tag",   // push with the same tag will replace each other
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
+Both field lists above apply to Android. On iOS, notification text comes from the APNs `alert` payload. Sending image fields alone is not enough: [Firebase's documented image flow](https://firebase.google.com/docs/cloud-messaging/customize-messages/cross-platform) requires `apns.fcm_options.image`, `"mutable-content": 1` inside `apns.payload.aps`, and a Notification Service Extension integrated into the app. This requires additional app-level setup.
+
 ### Android: Note about custom sounds
 To use a custom sound you have to create a second channel. The default channel will always use the default notification sound on the device!
-If you send a normal or mixed notification you have to set the `android_channel_id` in the `notification` node. If you send a data notification the key is called `channelId`. Chech <a href="#extended-php-android-example">extended PHP Android example</a> for a PHP example.
+If you send a normal or mixed notification you have to set the `android_channel_id` in the `notification` node. If you send a data notification the key is called `channelId`. See the [PHP Android example](#php-android-example) below for a data-only message with `channelId`.
 
 #### Android: Note for switching between v<=v2.0.2 and >=v2.0.3 if you use notification channels with custom sounds
 With versions prior to 2.0.3 of this module, FirebaseCloudMessaging.createNotificationChannel would create the notification sound uri using the resource id of the sound file in the `res/raw` directory. However, as described in this [android issue](https://issuetracker.google.com/issues/131303134), those resource ids can change to reference different files (or no file) between app versions, and  that happens the notification channel may play a different or no sound than originally intended.
@@ -299,6 +307,8 @@ The propery `lastData` will contain the data part when you send a notification p
 	  // Handle background notification action click
 	});
 	```
+
+	Android Note: tapping a notification posted by the module does not emit this event directly. `PushHandlerActivity` puts the payload into the launcher intent as the `fcm_data` extra instead, and `parseBootIntent()` is what turns that extra into this event. It runs at the end of `registerForPushNotifications()`, so a cold start emits the event if the app calls registration during startup. On a background resume, if registration is not called again, the app needs to read the intent. See [Android intent data](#android-intent-data) for an example.
 
 `didRefreshRegistrationToken`
   - `fcmToken` (String)
@@ -450,6 +460,46 @@ Ti.App.addEventListener('resumed', function() {
 ## Sending push messages
 
 Check https://firebase.google.com/docs/cloud-messaging/server or frameworks like https://github.com/kreait/firebase-php/
+
+Examples with a top-level `notification` block use system notification handling on Android when the app is in the background. To use the module's notification handling, send data-only messages as described in [Data / Notification messages](#data--notification-messages).
+
+### PHP Android example
+
+This example adapts Michael Gangolf's PHP/Kreait snippet from his [Firebase push tutorial](https://www.fromzerotoapp.com/ah-push-it-use-firebase-push-in-your-app/) to send a data-only Android message through FCM HTTP v1. HTTP v1 requires an OAuth 2.0 access token rather than the static server key the legacy API used, which is why this example uses a library instead of a plain POST. If you cannot add a Composer dependency, sign the service account JWT yourself, exchange it for an access token, and post the same payload to `https://fcm.googleapis.com/v1/projects/<project-id>/messages:send`.
+
+Install the dependency with Composer:
+
+```sh
+composer require kreait/firebase-php
+```
+
+Enable the Firebase Cloud Messaging API for your Firebase project and download a service account JSON key from Project settings > Service accounts. Replace the credentials path and `DEVICE_FCM_TOKEN` below with your service account file and the Android device's FCM registration token. Keep the service account key on your server, outside the public web directory.
+
+```php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+
+$token = 'DEVICE_FCM_TOKEN';
+$factory = (new Factory)->withServiceAccount('/path/to/service-account.json');
+$messaging = $factory->createMessaging();
+$message = CloudMessage::new()
+    ->withToken($token)
+    ->withData([
+        'title' => 'Title',
+        'message' => 'Body',
+        'channelId' => 'default',
+    ]);
+
+$messaging->send($message);
+```
+
+Use the ID of a notification channel created by your app for `channelId`. FCM requires every value inside `data` to be a string, so the boolean and integer fields listed above travel as `"true"` or `"1"`. The adaptation replaces the original snippet's `withNotification()` call with the module's `title`, `message` and `channelId` data fields, so Android uses the module's notification handling. It does not configure an iOS alert payload.
+
+For more background, see [Michael Gangolf's Firebase push tutorial](https://www.fromzerotoapp.com/ah-push-it-use-firebase-push-in-your-app/). Note that the data-message example there still uses the legacy FCM API, which Google began shutting down in July 2024.
 
 ## Parse
 

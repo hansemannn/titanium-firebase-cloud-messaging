@@ -42,7 +42,11 @@ if (isAndroid) {
         Ti.Network.registerForPushNotifications({
             success: function () { },
             error: function () { },
-            callback: function () { } // Fired for all kind of notifications (foreground, background & closed)
+            // Fired for all kind of notifications (foreground, background & closed),
+            // including the tap that opened the app. The payload is in e.data.
+            callback: function (e) {
+                Ti.API.info('Notification', e.data);
+            }
         });
     });
 

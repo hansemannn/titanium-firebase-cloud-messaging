@@ -356,7 +356,13 @@ public class CloudMessagingModule extends KrollModule {
         return prefs.getBoolean(FORCE_SHOW_IN_FOREGROUND, false);
     }
 
-    public void setNotificationData(String data) {
+    /**
+     * Stores the payload of a tapped notification and tells the app about it.
+     *
+     * @return true when a listener actually received it, so the caller knows the
+     *         Intent does not need to carry the payload as well.
+     */
+    public boolean setNotificationData(String data) {
         notificationData = data;
 
         // PushHandlerActivity calls this the moment the user taps a notification,
@@ -369,10 +375,13 @@ public class CloudMessagingModule extends KrollModule {
                 KrollDict event = new KrollDict();
                 event.put("message", new KrollDict(new JSONObject(data)));
                 fireEvent("didOpenNotification", event);
+                return true;
             }
         } catch (Exception ex) {
             Log.e(LCAT, "didOpenNotification: " + ex.getMessage());
         }
+
+        return false;
     }
 
     public void parseBootIntent() {

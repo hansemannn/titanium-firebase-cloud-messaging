@@ -42,7 +42,7 @@ thank you!
 </tr>
 </table>
 
-Load `firebase.core` and `firebase.cloudmessaging` at startup, before anything registers for push. `_configure` registers the module as an application delegate, and its `didRegisterForRemoteNotificationsWithDeviceToken` is what hands the APNs token to Firebase. If the module is loaded after APNs has already returned the token, it can miss that callback and fail to pass the token to Firebase. This can leave the app with notification permission and an APNs token, but no callback from `fetchToken` or `didRefreshRegistrationToken` event.
+Load `firebase.core` and `firebase.cloudmessaging` at startup, before registering for push. Load them later and Firebase never gets the APNs token: the permission is granted, APNs returns a token, and `fetchToken` never calls back. See [CONTEXT.md](CONTEXT.md) for why.
 
 To register for push notifications on iOS, you only need to call the Titanium related methods as the following:
 ```js
@@ -69,7 +69,7 @@ Ti.App.iOS.registerUserNotificationSettings({
 });
 ```
 
-On iOS, use that `callback` to handle received notifications and notification taps. The payload is in `e.data`. Leaving the callback empty registers the app for notifications without adding any app-specific handling for them.
+That `callback` is where iOS notifications arrive, taps included. The payload is in `e.data`.
 
 ## Android Notes:
 
@@ -172,7 +172,7 @@ fi
 
 On Android there are two different messages that the phone can process: `Notification messages` and `Data messages`. A `Notification message` is processed by the system, the `Data message` is handeled by `showNotification()` in `TiFirebaseMessagingService`. Using the `notification` block inside the POSTFIELDS will send a `Notification message`.
 
-With a top-level `notification` block and the app in the background, Android displays the notification itself. This bypasses the module's `onMessageReceived()`, `showNotification()` and `PushHandlerActivity` handling. The module does not process the custom data fields below through this path, and the system controls the tap intent. Use a data-only message if you want the module to display the notification and handle the tap.
+Send a top-level `notification` block with the app in the background and Android posts the notification itself. `onMessageReceived()` is never called, so the data fields below are ignored and the tap intent belongs to the system, which relaunches the app instead of resuming it. Send the fields inside `data` for the module to handle both.
 
 Supported data fields:
 * "title" => "string"
@@ -196,7 +196,7 @@ Supported notification fields:
 * "tag" => "custom_notification_tag",   // push with the same tag will replace each other
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
-Both field lists above apply to Android. On iOS, notification text comes from the APNs `alert` payload. Sending image fields alone is not enough: [Firebase's documented image flow](https://firebase.google.com/docs/cloud-messaging/customize-messages/cross-platform) requires `apns.fcm_options.image`, `"mutable-content": 1` inside `apns.payload.aps`, and a Notification Service Extension integrated into the app. This requires additional app-level setup.
+Both lists are Android. On iOS the text comes from the APNs `alert` payload, and images need more than a field: [Firebase's image flow](https://firebase.google.com/docs/cloud-messaging/customize-messages/cross-platform) wants `apns.fcm_options.image`, `"mutable-content": 1` inside `apns.payload.aps`, and a Notification Service Extension in the app.
 
 ### Android: Note about custom sounds
 To use a custom sound you have to create a second channel. The default channel will always use the default notification sound on the device!
@@ -308,7 +308,7 @@ The propery `lastData` will contain the data part when you send a notification p
 	});
 	```
 
-	Android Note: tapping a notification posted by the module does not emit this event directly. `PushHandlerActivity` puts the payload into the launcher intent as the `fcm_data` extra instead, and `parseBootIntent()` is what turns that extra into this event. It runs at the end of `registerForPushNotifications()`, so a cold start emits the event if the app calls registration during startup. On a background resume, if registration is not called again, the app needs to read the intent. See [Android intent data](#android-intent-data) for an example.
+	Android Note: a tap does not emit this event. The payload goes into the launcher intent as the `fcm_data` extra, and only `registerForPushNotifications()` turns it into an event, so a cold start gets one and a resume does not. Read the intent yourself: see [Android intent data](#android-intent-data).
 
 `didRefreshRegistrationToken`
   - `fcmToken` (String)
@@ -461,19 +461,17 @@ Ti.App.addEventListener('resumed', function() {
 
 Check https://firebase.google.com/docs/cloud-messaging/server or frameworks like https://github.com/kreait/firebase-php/
 
-Examples with a top-level `notification` block use system notification handling on Android when the app is in the background. To use the module's notification handling, send data-only messages as described in [Data / Notification messages](#data--notification-messages).
+Examples elsewhere tend to use a top-level `notification` block, which hands the notification to the system on Android. Send data-only instead: see [Data / Notification messages](#data--notification-messages).
 
 ### PHP Android example
 
-This example adapts Michael Gangolf's PHP/Kreait snippet from his [Firebase push tutorial](https://www.fromzerotoapp.com/ah-push-it-use-firebase-push-in-your-app/) to send a data-only Android message through FCM HTTP v1. HTTP v1 requires an OAuth 2.0 access token rather than the static server key the legacy API used, which is why this example uses a library instead of a plain POST. If you cannot add a Composer dependency, sign the service account JWT yourself, exchange it for an access token, and post the same payload to `https://fcm.googleapis.com/v1/projects/<project-id>/messages:send`.
-
-Install the dependency with Composer:
+A data-only message over FCM HTTP v1, adapted from Michael Gangolf's [Firebase push tutorial](https://www.fromzerotoapp.com/ah-push-it-use-firebase-push-in-your-app/). HTTP v1 takes an OAuth 2.0 access token instead of the old server key, hence the library. Without Composer, sign the service account JWT yourself and post the same payload to `https://fcm.googleapis.com/v1/projects/<project-id>/messages:send`.
 
 ```sh
 composer require kreait/firebase-php
 ```
 
-Enable the Firebase Cloud Messaging API for your Firebase project and download a service account JSON key from Project settings > Service accounts. Replace the credentials path and `DEVICE_FCM_TOKEN` below with your service account file and the Android device's FCM registration token. Keep the service account key on your server, outside the public web directory.
+Enable the Cloud Messaging API and download a service account key from Project settings > Service accounts, then fill in the path and the device token below.
 
 ```php
 <?php
@@ -497,9 +495,11 @@ $message = CloudMessage::new()
 $messaging->send($message);
 ```
 
-Use the ID of a notification channel created by your app for `channelId`. FCM requires every value inside `data` to be a string, so the boolean and integer fields listed above travel as `"true"` or `"1"`. The adaptation replaces the original snippet's `withNotification()` call with the module's `title`, `message` and `channelId` data fields, so Android uses the module's notification handling. It does not configure an iOS alert payload.
+`channelId` must match a channel your app created. Every value inside `data` has to be a string, so the boolean and integer fields above travel as `"true"` or `"1"`.
 
-For more background, see [Michael Gangolf's Firebase push tutorial](https://www.fromzerotoapp.com/ah-push-it-use-firebase-push-in-your-app/). Note that the data-message example there still uses the legacy FCM API, which Google began shutting down in July 2024.
+The original snippet used `withNotification()`; this one puts the text in `data` so the module draws the notification. There is no iOS alert payload here.
+
+The tutorial's own data-message example still uses the legacy API, shut down from July 2024.
 
 ## Parse
 

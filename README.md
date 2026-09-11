@@ -308,7 +308,7 @@ The propery `lastData` will contain the data part when you send a notification p
 	});
 	```
 
-	Android Note: a tap does not emit this event. The payload goes into the launcher intent as the `fcm_data` extra, and only `registerForPushNotifications()` turns it into an event, so a cold start gets one and a resume does not. Read the intent yourself: see [Android intent data](#android-intent-data).
+	Android Note: a tap emits `didOpenNotification`, not this one. On a cold start the module does not exist yet, so the payload arrives in the launcher intent and `registerForPushNotifications()` turns it into this event: see [Android intent data](#android-intent-data).
 
 `didOpenNotification` (Android only)
   - `message` (Object)

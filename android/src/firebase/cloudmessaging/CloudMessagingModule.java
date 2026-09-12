@@ -372,8 +372,12 @@ public class CloudMessagingModule extends KrollModule {
         // does not exist yet and parseBootIntent() reads the payload instead.
         try {
             if ((data != null) && !data.isEmpty() && hasListeners("didOpenNotification")) {
+                // Same shape as didReceiveMessage: the payload goes under message.data.
+                KrollDict message = new KrollDict();
+                message.put("data", new KrollDict(new JSONObject(data)));
+
                 KrollDict event = new KrollDict();
-                event.put("message", new KrollDict(new JSONObject(data)));
+                event.put("message", message);
                 fireEvent("didOpenNotification", event);
                 return true;
             }

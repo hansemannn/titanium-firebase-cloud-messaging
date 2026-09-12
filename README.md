@@ -312,9 +312,14 @@ The propery `lastData` will contain the data part when you send a notification p
 
 `didOpenNotification` (Android only)
   - `message` (Object)
+    - `data` (Object): the notification payload, under the same key as `didReceiveMessage`.
 
 	Fired when the user taps a notification this module posted, before the app comes to the front. On a cold start the
 	module does not exist yet, so the payload arrives in the intent instead.
+
+	Existing apps need this listener. Up to 3.5.4 a tap on a running app arrived through the launcher intent; Android now
+	brings the task to the front without delivering it again, so an app that only reads the intent stops seeing those
+	taps. `lastData` still holds the payload.
 
 `didRefreshRegistrationToken`
   - `fcmToken` (String)
@@ -442,7 +447,7 @@ FirebaseCloudMessaging.subscribeToTopic('testTopic');
 
 Example to get the the resume data/notification click data on Android:
 
-Only needed for a cold start. While the app is running, `didOpenNotification` covers the tap.
+Only needed for a cold start. While the app is running, Android does not deliver the intent again, so the tap arrives as `didOpenNotification` instead.
 
 ```javascript
 const handleNotificationData = (notifObj) => {

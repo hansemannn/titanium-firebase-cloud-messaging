@@ -14,6 +14,8 @@ public class PushHandlerActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         try {
             super.onCreate(savedInstanceState);
+            // Must come before startActivity(). When the app is not running, this activity's task
+            // is the app's only one, and the launcher intent would join it and be removed with it.
             finish();
 
             CloudMessagingModule module = CloudMessagingModule.getInstance();

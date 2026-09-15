@@ -54,7 +54,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
      * Attempts to handle a Firebase Cloud Messaging remote message using the Braze SDK if it's available.
      * This method uses reflection to dynamically call the Braze SDK's handling method without requiring
      * a direct dependency on the Braze SDK.
-     * 
+     *
      * @param remoteMessage The Firebase RemoteMessage object to be processed
      * @return true if the message was successfully handled by Braze, false otherwise
      */
@@ -74,7 +74,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        
+
         HashMap<String, Object> msg = new HashMap<>();
         CloudMessagingModule module = CloudMessagingModule.getInstance();
         boolean isVisible = true;
@@ -193,7 +193,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             }
         }
 
-        String soundValue = getString(params, "big_text");
+        String soundValue = getString(params, "sound");
         if (!soundValue.isEmpty()) {
             defaultSoundUri = Utils.getSoundUri(soundValue);
             Log.d(TAG, "showNotification custom sound: " + defaultSoundUri);

@@ -9,6 +9,7 @@ package firebase.cloudmessaging;
 
 import static firebase.cloudmessaging.Utils.getApplicationContext;
 
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -21,6 +22,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.PreferenceManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -375,6 +378,7 @@ public class CloudMessagingModule extends KrollModule {
                 // Same shape as didReceiveMessage: the payload goes under message.data.
                 KrollDict message = new KrollDict();
                 message.put("data", new KrollDict(new JSONObject(data)));
+                message.put("inBackground", !wasOnScreen());
 
                 KrollDict event = new KrollDict();
                 event.put("message", message);
@@ -386,6 +390,15 @@ public class CloudMessagingModule extends KrollModule {
         }
 
         return false;
+    }
+
+    // Whether the app was on screen when the notification was tapped. By now starting
+    // PushHandlerActivity has paused the Titanium activity, so isCurrentActivityInForeground()
+    // is false in both cases. A paused activity is still visible; a stopped one is not.
+    private static boolean wasOnScreen() {
+        Activity activity = TiApplication.getAppCurrentActivity();
+        return (activity instanceof LifecycleOwner)
+                && ((LifecycleOwner) activity).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
     }
 
     public void parseBootIntent() {

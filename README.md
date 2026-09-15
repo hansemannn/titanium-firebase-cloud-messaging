@@ -313,13 +313,17 @@ The propery `lastData` will contain the data part when you send a notification p
 `didOpenNotification` (Android only)
   - `message` (Object)
     - `data` (Object): the notification payload, under the same key as `didReceiveMessage`.
+    - `inBackground` (Boolean): `false` when the app was on screen at the time of the tap.
 
-	Fired when the user taps a notification this module posted, before the app comes to the front. On a cold start the
-	module does not exist yet, so the payload arrives in the intent instead.
+	Fired when the user taps a notification this module posted. Where the tap arrives depends on the app's state:
 
-	Existing apps need this listener. Up to 3.5.4 a tap on a running app arrived through the launcher intent; Android now
-	brings the task to the front without delivering it again, so an app that only reads the intent stops seeing those
-	taps. `lastData` still holds the payload.
+	| App when tapped | Arrives as |
+	| --- | --- |
+	| On screen | `didOpenNotification`, `inBackground: false` |
+	| In the background | `didOpenNotification`, `inBackground: true` |
+	| Not running | `fcm_data` in the launch intent, see [Android intent data](#android-intent-data) |
+
+	Existing apps need this listener. Up to 3.5.4 a tap on a running app arrived through the launcher intent, which no longer happens. `lastData` still holds the payload.
 
 `didRefreshRegistrationToken`
   - `fcmToken` (String)

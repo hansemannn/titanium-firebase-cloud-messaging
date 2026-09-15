@@ -9,6 +9,7 @@ package firebase.cloudmessaging;
 
 import static firebase.cloudmessaging.Utils.getApplicationContext;
 
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -21,6 +22,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.PreferenceManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -356,8 +359,46 @@ public class CloudMessagingModule extends KrollModule {
         return prefs.getBoolean(FORCE_SHOW_IN_FOREGROUND, false);
     }
 
-    public void setNotificationData(String data) {
+    /**
+     * Stores the payload of a tapped notification and tells the app about it.
+     *
+     * @return true when a listener actually received it, so the caller knows the
+     *         Intent does not need to carry the payload as well.
+     */
+    public boolean setNotificationData(String data) {
         notificationData = data;
+
+        // PushHandlerActivity calls this the moment the user taps a notification,
+        // before the app is brought to the front. When the runtime is already alive
+        // the launcher Intent is not delivered a second time, so this event is the
+        // only way the app gets to know about the tap. On a cold start the module
+        // does not exist yet and parseBootIntent() reads the payload instead.
+        try {
+            if ((data != null) && !data.isEmpty() && hasListeners("didOpenNotification")) {
+                // Same shape as didReceiveMessage: the payload goes under message.data.
+                KrollDict message = new KrollDict();
+                message.put("data", new KrollDict(new JSONObject(data)));
+                message.put("inBackground", !wasOnScreen());
+
+                KrollDict event = new KrollDict();
+                event.put("message", message);
+                fireEvent("didOpenNotification", event);
+                return true;
+            }
+        } catch (Exception ex) {
+            Log.e(LCAT, "didOpenNotification: " + ex.getMessage());
+        }
+
+        return false;
+    }
+
+    // Whether the app was on screen when the notification was tapped. By now starting
+    // PushHandlerActivity has paused the Titanium activity, so isCurrentActivityInForeground()
+    // is false in both cases. A paused activity is still visible; a stopped one is not.
+    private static boolean wasOnScreen() {
+        Activity activity = TiApplication.getAppCurrentActivity();
+        return (activity instanceof LifecycleOwner)
+                && ((LifecycleOwner) activity).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
     }
 
     public void parseBootIntent() {

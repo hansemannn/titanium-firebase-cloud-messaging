@@ -308,7 +308,22 @@ The propery `lastData` will contain the data part when you send a notification p
 	});
 	```
 
-	Android Note: a tap does not emit this event. The payload goes into the launcher intent as the `fcm_data` extra, and only `registerForPushNotifications()` turns it into an event, so a cold start gets one and a resume does not. Read the intent yourself: see [Android intent data](#android-intent-data).
+	Android Note: a tap emits `didOpenNotification`, not this one. On a cold start the module does not exist yet, so the payload arrives in the launcher intent and `registerForPushNotifications()` turns it into this event: see [Android intent data](#android-intent-data).
+
+`didOpenNotification` (Android only)
+  - `message` (Object)
+    - `data` (Object): the notification payload, under the same key as `didReceiveMessage`.
+    - `inBackground` (Boolean): `false` when the app was on screen at the time of the tap.
+
+	Fired when the user taps a notification this module posted. Where the tap arrives depends on the app's state:
+
+	| App when tapped | Arrives as |
+	| --- | --- |
+	| On screen | `didOpenNotification`, `inBackground: false` |
+	| In the background | `didOpenNotification`, `inBackground: true` |
+	| Not running | `fcm_data` in the launch intent, see [Android intent data](#android-intent-data) |
+
+	Existing apps need this listener. Up to 3.5.4 a tap on a running app arrived through the launcher intent, which no longer happens. `lastData` still holds the payload.
 
 `didRefreshRegistrationToken`
   - `fcmToken` (String)
@@ -435,6 +450,8 @@ FirebaseCloudMessaging.subscribeToTopic('testTopic');
 ### Android intent data
 
 Example to get the the resume data/notification click data on Android:
+
+Only needed for a cold start. While the app is running, Android does not deliver the intent again, so the tap arrives as `didOpenNotification` instead.
 
 ```javascript
 const handleNotificationData = (notifObj) => {

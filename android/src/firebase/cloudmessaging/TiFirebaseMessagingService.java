@@ -238,9 +238,24 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         notificationIntent.putExtra("fcm_data", jsonData.toString());
 
-        int requestCode = (int) (System.currentTimeMillis() / 1000);
-        PendingIntent contentIntent =
-                PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
+        int id = 0;
+        String idValue = getString(params, "id");
+        if (!idValue.isEmpty()) {
+            // ensure that the id sent from the server is negative to prevent
+            // collision with the atomic integer
+            id = TiConvert.toInt(idValue, 0);
+        }
+
+        if (id == 0) {
+            id = atomic.getAndIncrement();
+        }
+
+        // The notification id doubles as the request code. A timestamp in seconds gave
+        // two notifications arriving in the same second the same PendingIntent, and the
+        // first tap used it up for both. When an id is reused, the notification replaces
+        // the old one and FLAG_UPDATE_CURRENT swaps in its payload.
+        PendingIntent contentIntent = PendingIntent.getActivity(this, id, notificationIntent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Start building notification
 
@@ -347,18 +362,6 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             int badgeNumber = TiConvert.toInt(badgeValue, 1);
             ShortcutBadger.applyCount(context, badgeNumber);
             builder.setNumber(badgeNumber);
-        }
-
-        int id = 0;
-        String idValue = getString(params, "id");
-        if (!idValue.isEmpty()) {
-            // ensure that the id sent from the server is negative to prevent
-            // collision with the atomic integer
-            id = TiConvert.toInt(idValue, 0);
-        }
-
-        if (id == 0) {
-            id = atomic.getAndIncrement();
         }
 
         // Send

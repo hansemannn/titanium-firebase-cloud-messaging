@@ -52,7 +52,7 @@ public class CloudMessagingModule extends KrollModule {
     private String notificationData = "";
 
     public CloudMessagingModule() {
-        super();
+        super("CloudMessaging");
         instance = this;
     }
 

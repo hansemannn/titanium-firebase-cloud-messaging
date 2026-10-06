@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.PreferenceManager;
@@ -51,6 +52,8 @@ public class CloudMessagingModule extends KrollModule {
     private static String fcmToken = null;
     private String notificationData = "";
 
+    public static final String LAST_MESSAGE_DATA_KEY_NAME = "titanium.firebase.cloudmessaging.message";
+
     public CloudMessagingModule() {
         super("CloudMessaging");
         instance = this;
@@ -59,6 +62,17 @@ public class CloudMessagingModule extends KrollModule {
     public static CloudMessagingModule getInstance() {
         return instance;
     }
+
+    @Nullable
+    private static Intent getCurrentIntent() {
+        Activity activity = TiApplication.getAppRootOrCurrentActivity();
+        if (activity == null) {
+            return null;
+        }
+
+        return activity.getIntent();
+    }
+
 
     // clang-format off
     @Kroll.method
@@ -69,7 +83,11 @@ public class CloudMessagingModule extends KrollModule {
         KrollDict data = new KrollDict();
 
         try {
-            Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
+            Intent intent = getCurrentIntent();
+            if (intent == null) {
+                return data;
+            }
+
             Bundle extras = intent.getExtras();
 
             if (extras != null) {
@@ -97,11 +115,13 @@ public class CloudMessagingModule extends KrollModule {
             if (data.get("message") == null) {
                 SharedPreferences preferences =
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                String prefMessage = preferences.getString("titanium.firebase.cloudmessaging.message", null);
+                String prefMessage = preferences.getString(LAST_MESSAGE_DATA_KEY_NAME, null);
                 if (prefMessage != null) {
                     data.put("message", new KrollDict(new JSONObject(prefMessage)));
                 }
-                preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
+
+
+                clearLastData();
             }
         } catch (Exception ex) {
             Log.e(LCAT, "getLastData" + ex);
@@ -156,12 +176,11 @@ public class CloudMessagingModule extends KrollModule {
     public void clearLastData() {
         SharedPreferences preferences =
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
+        preferences.edit().remove(LAST_MESSAGE_DATA_KEY_NAME).apply();
 
-        // remove intent value
-        Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
-        String notification = intent.getStringExtra("fcm_data");
-        if (notification != null) {
+        // Remove data from intent as well.
+        Intent intent = getCurrentIntent();
+        if (intent != null) {
             intent.removeExtra("fcm_data");
         }
     }
@@ -401,7 +420,11 @@ public class CloudMessagingModule extends KrollModule {
 
     public void parseBootIntent() {
         try {
-            Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
+            Intent intent = getCurrentIntent();
+            if (intent == null) {
+                return;
+            }
+
             String notification = intent.getStringExtra("fcm_data");
             if (notification != null) {
                 HashMap<String, Object> msg = new HashMap<>();
@@ -411,11 +434,10 @@ public class CloudMessagingModule extends KrollModule {
             } else {
                 Log.d(LCAT, "Empty notification in Intent");
             }
+
+            clearLastData();
         } catch (Exception ex) {
             Log.e(LCAT, "parseBootIntent" + ex);
         }
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
     }
 }

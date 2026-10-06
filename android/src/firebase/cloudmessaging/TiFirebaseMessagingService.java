@@ -1,5 +1,7 @@
 package firebase.cloudmessaging;
 
+import static firebase.cloudmessaging.CloudMessagingModule.LAST_MESSAGE_DATA_KEY_NAME;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -39,6 +41,7 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 public class TiFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
     private static final AtomicInteger atomic = new AtomicInteger(0);
+    private static final int NOTIFICATION_INTENT_FLAGS = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP;
 
     @Override
     public void onNewToken(@NonNull String s) {
@@ -203,7 +206,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("titanium.firebase.cloudmessaging.message", jsonData.toString());
+        editor.putString(LAST_MESSAGE_DATA_KEY_NAME, jsonData.toString());
         editor.apply();
 
         try {
@@ -228,14 +231,14 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             // hidden notification - still send broadcast with data for next app start
             Intent i = new Intent().setAction("ti.firebase.messaging.hidden-notification");
             i.addCategory(Intent.CATEGORY_LAUNCHER);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i.setFlags(NOTIFICATION_INTENT_FLAGS);
             i.putExtra("fcm_data", jsonData.toString());
             sendBroadcast(i);
             return false;
         }
 
         Intent notificationIntent = new Intent(this, PushHandlerActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.setFlags(NOTIFICATION_INTENT_FLAGS);
         notificationIntent.putExtra("fcm_data", jsonData.toString());
 
         int id = 0;

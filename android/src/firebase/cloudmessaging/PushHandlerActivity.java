@@ -1,5 +1,7 @@
 package firebase.cloudmessaging;
 
+import static firebase.cloudmessaging.CloudMessagingModule.wasOnScreen;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +27,7 @@ public class PushHandlerActivity extends Activity {
             // The payload travels by exactly one route. If a listener took it, the
             // Intent must not carry it as well: Titanium resumes the root activity
             // twice, and the second pass would deliver the same notification again.
-            boolean delivered = (module != null) && module.setNotificationData(notification);
+            boolean delivered = (module != null) && module.triggerDidOpenNotification(notification, !wasOnScreen());
 
             Intent launcherIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             assert launcherIntent != null;

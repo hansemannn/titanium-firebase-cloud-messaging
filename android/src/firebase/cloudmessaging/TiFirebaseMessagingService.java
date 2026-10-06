@@ -32,7 +32,6 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -77,56 +76,46 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        
-        HashMap<String, Object> msg = new HashMap<>();
-        CloudMessagingModule module = CloudMessagingModule.getInstance();
-        boolean isVisible = true;
 
         if (handleBrazeRemoteMessage(remoteMessage)) {
             return;
         }
 
-        if (!remoteMessage.getData().isEmpty()) {
-            // data message
-            isVisible = showNotification(remoteMessage);
-        }
+        boolean isVisible = showNotification(remoteMessage);
 
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            msg.put("title", remoteMessage.getNotification().getTitle());
-            msg.put("body", remoteMessage.getNotification().getBody());
+        RemoteMessage.Notification remoteMessageNotification = remoteMessage.getNotification();
+        if (remoteMessageNotification != null) {
+            Log.d(TAG, "Message Notification Body: " + remoteMessageNotification.getBody());
             isVisible = true;
-        } else {
-            Log.d(TAG, "Data message: " + remoteMessage.getData());
         }
-
-        msg.put("from", remoteMessage.getFrom());
-        msg.put("ttl", remoteMessage.getTtl());
-        msg.put("messageId", remoteMessage.getMessageId());
-        msg.put("messageType", remoteMessage.getMessageType());
-        msg.put("data", new KrollDict(remoteMessage.getData()));
-        msg.put("sendTime", remoteMessage.getSentTime());
-
-        boolean inForeground = TiApplication.isCurrentActivityInForeground();
-        msg.put("inBackground", !inForeground);
 
         // Fire the JS "didReceiveMessage" event when the app is in the foreground, when a
         // notification was shown, OR when a silent data-only push arrives while the JS runtime
         // is still alive (app backgrounded but not killed). The last case lets background
         // data-only pushes (e.g. silent sync_signal) be handled immediately instead of waiting
         // for the next app resume. When the process is dead, module == null and the payload is
-        // still persisted to "titanium.firebase.cloudmessaging.message" for cold-start recovery.
-        boolean isSilentData = !isVisible && remoteMessage.getNotification() == null;
+        // still persisted to LAST_MESSAGE_DATA_KEY_NAME for cold-start recovery.
+        boolean isSilentData = !isVisible && remoteMessageNotification == null;
+
+        CloudMessagingModule module = CloudMessagingModule.getInstance();
+        boolean inForeground = TiApplication.isCurrentActivityInForeground();
+
         if (isVisible || inForeground || (module != null && isSilentData)) {
             if (module != null) {
-                module.onMessageReceived(msg);
+                KrollDict message = Utils.prepareMessageFromRemoteMessage(remoteMessage);
+                module.triggerDidReceiveMessage(message.toString(), !inForeground);
             }
         }
     }
 
     private Boolean showNotification(RemoteMessage remoteMessage) {
-        CloudMessagingModule module = CloudMessagingModule.getInstance();
         Map<String, String> params = remoteMessage.getData();
+
+        if (params.isEmpty()) {
+            return false;
+        }
+
+        CloudMessagingModule module = CloudMessagingModule.getInstance();
         JSONObject jsonData = new JSONObject(params);
         boolean showNotification = true;
         Context context = getApplicationContext();

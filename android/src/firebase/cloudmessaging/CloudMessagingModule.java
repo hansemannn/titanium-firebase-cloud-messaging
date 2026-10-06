@@ -74,16 +74,14 @@ public class CloudMessagingModule extends KrollModule {
 
             if (extras != null) {
                 for (String key : extras.keySet()) {
-                    Bundle bundle = extras.getBundle(key);
-                    if (bundle != null) {
+                    Object value = extras.get(key);
+
+                    if (value instanceof Bundle bundle) {
                         for (String bundleKey : bundle.keySet()) {
                             data.put(key + "_" + bundleKey, bundle.getString(bundleKey));
                         }
                     } else {
-                        String value = extras.getString(key);
-                        if (value != null) {
-                            data.put(key, value);
-                        }
+                        data.put(key, value);
                     }
                 }
 

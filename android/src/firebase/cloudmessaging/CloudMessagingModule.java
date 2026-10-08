@@ -23,8 +23,6 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.PreferenceManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -35,14 +33,13 @@ import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
-import org.appcelerator.titanium.util.TiConvert;
 import org.json.JSONObject;
-
-import java.util.Map;
 
 import ti.modules.titanium.android.notificationmanager.NotificationChannelProxy;
 
-@Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
+@Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging", propertyAccessors = {
+    "notifyOnPushTap",
+})
 public class CloudMessagingModule extends KrollModule {
 
     static final String LCAT = "FirebaseCloudMessaging";
@@ -53,14 +50,16 @@ public class CloudMessagingModule extends KrollModule {
 
     public static final String LAST_MESSAGE_DATA_KEY_NAME = "titanium.firebase.cloudmessaging.message";
 
-    // DO NOT MODIFY field names themselves as they point to method names exposed to Braze module.
-    // If method name changes are required in this class, update their names here as well.
-    public static final String FIREBASE_EVENT_DID_OPEN_NOTIFICATION = "triggerDidOpenNotification";
+    // DO NOT MODIFY FIELD NAMES - EXPOSED TO BRAZE MODULE, if required, update field values only.
     public static final String FIREBASE_EVENT_DID_RECEIVE_MESSAGE = "triggerDidReceiveMessage";
+    public static final String FIREBASE_EVENT_DID_OPEN_NOTIFICATION = "triggerDidOpenNotification";
 
     public CloudMessagingModule() {
         super("CloudMessaging");
         instance = this;
+
+        // To keep parity with iOS Ti.Network.registerForPushNotifications's callback behaviour.
+        defaultValues.put("notifyOnPushTap", true);
     }
 
     public static CloudMessagingModule getInstance() {
@@ -259,12 +258,30 @@ public class CloudMessagingModule extends KrollModule {
         }
     }
 
-    public void triggerDidReceiveMessage(String data, boolean inBackground) {
-        KrollDict result = Utils.prepareEventResult(data, inBackground);
+    public boolean triggerDidReceiveMessage(String data, boolean inBackground) {
+        if (!hasListeners("didReceiveMessage")) {
+            return false;
+        }
 
+        KrollDict result = Utils.prepareEventResult(data, inBackground);
         if (result != null) {
             fireEvent("didReceiveMessage", result);
         }
+
+        return true;
+    }
+
+    public void triggerDidReceiveMessageForRemoteMessage(RemoteMessage remoteMessage, boolean inBackground) {
+        KrollDict data = Utils.prepareMessagePayload(remoteMessage);
+
+        KrollDict message = new KrollDict();
+        message.putAll(data);
+
+        KrollDict result = new KrollDict();
+        result.put("message", message);
+        result.put("inBackground", inBackground);
+
+        fireEvent("didReceiveMessage", result);
     }
 
     @Kroll.method
@@ -382,7 +399,7 @@ public class CloudMessagingModule extends KrollModule {
      * @return true when a listener actually received it, so the caller knows the
      *         Intent does not need to carry the payload as well.
      */
-    public boolean triggerDidOpenNotification(String data, boolean inBackground) {
+    public boolean triggerDidOpenNotification(boolean inBackground, String data) {
         notificationData = data;
 
         // PushHandlerActivity calls this the moment the user taps a notification,
@@ -390,25 +407,16 @@ public class CloudMessagingModule extends KrollModule {
         // the launcher Intent is not delivered a second time, so this event is the
         // only way the app gets to know about the tap. On a cold start the module
         // does not exist yet and parseBootIntent() reads the payload instead.
-        if (hasListeners("didOpenNotification")) {
-            KrollDict result = Utils.prepareEventResult(data, inBackground);
-            if (result != null) {
-                fireEvent("didOpenNotification", result);
-            }
-
-            return true;
+        if (!hasListeners("didOpenNotification")) {
+            return false;
         }
 
-        return false;
-    }
+        KrollDict result = Utils.prepareEventResult(data, inBackground);
+        if (result != null) {
+            fireEvent("didOpenNotification", result);
+        }
 
-    // Whether the app was on screen when the notification was tapped. By now starting
-    // PushHandlerActivity has paused the Titanium activity, so isCurrentActivityInForeground()
-    // is false in both cases. A paused activity is still visible; a stopped one is not.
-    static boolean wasOnScreen() {
-        Activity activity = TiApplication.getAppCurrentActivity();
-        return (activity instanceof LifecycleOwner)
-                && ((LifecycleOwner) activity).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
+        return true;
     }
 
     public void parseBootIntent() {
@@ -420,12 +428,14 @@ public class CloudMessagingModule extends KrollModule {
 
             // Boot intent is always invoked from killed state by tapping on the notification.
             String data = intent.getStringExtra("fcm_data");
-            triggerDidReceiveMessage(data, true);
-            triggerDidOpenNotification(data, true);
-
+            triggerDidReceiveMessage(data,true);
             clearLastData();
         } catch (Exception ex) {
             Log.e(LCAT, "parseBootIntent" + ex);
         }
+    }
+
+    public Boolean shouldNotifyOnPushTap() {
+        return getProperties().getBoolean("notifyOnPushTap");
     }
 }

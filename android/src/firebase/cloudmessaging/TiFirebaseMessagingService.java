@@ -1,6 +1,7 @@
 package firebase.cloudmessaging;
 
 import static firebase.cloudmessaging.CloudMessagingModule.LAST_MESSAGE_DATA_KEY_NAME;
+import static firebase.cloudmessaging.Utils.wasOnScreen;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -22,7 +23,6 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiRHelper;
@@ -77,34 +77,35 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
+        // Handle Braze first, it keeps all Braze related internal analytics intact
         if (handleBrazeRemoteMessage(remoteMessage)) {
             return;
         }
 
-        boolean isVisible = showNotification(remoteMessage);
+        // Show notification
+        boolean didShowNotification = showNotification(remoteMessage);
 
-        RemoteMessage.Notification remoteMessageNotification = remoteMessage.getNotification();
-        if (remoteMessageNotification != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessageNotification.getBody());
-            isVisible = true;
-        }
+        // Finally trigger module "didReceiveMessage" event
+        triggerEventIfRequired(remoteMessage, didShowNotification);
+    }
 
-        // Fire the JS "didReceiveMessage" event when the app is in the foreground, when a
-        // notification was shown, OR when a silent data-only push arrives while the JS runtime
-        // is still alive (app backgrounded but not killed). The last case lets background
-        // data-only pushes (e.g. silent sync_signal) be handled immediately instead of waiting
-        // for the next app resume. When the process is dead, module == null and the payload is
-        // still persisted to LAST_MESSAGE_DATA_KEY_NAME for cold-start recovery.
-        boolean isSilentData = !isVisible && remoteMessageNotification == null;
-
+    private void triggerEventIfRequired(RemoteMessage remoteMessage, boolean manualNotificationShown) {
         CloudMessagingModule module = CloudMessagingModule.getInstance();
-        boolean inForeground = TiApplication.isCurrentActivityInForeground();
+        if (module == null) return;
 
-        if (isVisible || inForeground || (module != null && isSilentData)) {
-            if (module != null) {
-                KrollDict message = Utils.prepareMessageFromRemoteMessage(remoteMessage);
-                module.triggerDidReceiveMessage(message.toString(), !inForeground);
-            }
+        boolean inForeground = wasOnScreen();
+        boolean notifyOnPushTap = module.shouldNotifyOnPushTap();
+        boolean isSilentPush = !manualNotificationShown && remoteMessage.getNotification() == null;
+
+        // 4. Determine if we should alert the JS side
+        // We trigger if:
+        // - App is in foreground (User is active)
+        // - It's a silent sync (Background work needed)
+        // - User explicitly wants background callback before tapping on push.
+
+        if (isSilentPush || inForeground || !notifyOnPushTap) {
+            Log.d(TAG, "Triggering didReceiveMessage. Foreground: " + inForeground + ", Silent Push: " + isSilentPush);
+            module.triggerDidReceiveMessageForRemoteMessage(remoteMessage, !inForeground);
         }
     }
 

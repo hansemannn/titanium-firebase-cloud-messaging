@@ -2,6 +2,7 @@ package firebase.cloudmessaging;
 
 import static firebase.cloudmessaging.CloudMessagingModule.LCAT;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +13,9 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.net.Uri;
+
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -102,7 +106,16 @@ public final class Utils {
         return output;
     }
 
-    static KrollDict prepareMessageFromRemoteMessage(RemoteMessage remoteMessage) {
+    // Whether the app was on screen when the notification was tapped. By now starting
+    // PushHandlerActivity has paused the Titanium activity, so isCurrentActivityInForeground()
+    // is false in both cases. A paused activity is still visible; a stopped one is not.
+    static boolean wasOnScreen() {
+        Activity activity = TiApplication.getAppCurrentActivity();
+        return (activity instanceof LifecycleOwner)
+                && ((LifecycleOwner) activity).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
+    }
+
+    static KrollDict prepareMessagePayload(RemoteMessage remoteMessage) {
         KrollDict dict = new KrollDict();
 
         dict.put("from", remoteMessage.getFrom());
@@ -127,11 +140,10 @@ public final class Utils {
         }
 
         try {
-            KrollDict result = new KrollDict();
-
             KrollDict message = new KrollDict();
             message.put("data", new KrollDict(new JSONObject(data)));
 
+            KrollDict result = new KrollDict();
             result.put("message", message);
             result.put("inBackground", inBackground);
 

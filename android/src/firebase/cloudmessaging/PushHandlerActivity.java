@@ -1,6 +1,6 @@
 package firebase.cloudmessaging;
 
-import static firebase.cloudmessaging.CloudMessagingModule.wasOnScreen;
+import static firebase.cloudmessaging.Utils.wasOnScreen;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,14 +20,23 @@ public class PushHandlerActivity extends Activity {
             // is the app's only one, and the launcher intent would join it and be removed with it.
             finish();
 
-            CloudMessagingModule module = CloudMessagingModule.getInstance();
             Context context = getApplicationContext();
+            CloudMessagingModule module = CloudMessagingModule.getInstance();
             String notification = getIntent().getStringExtra("fcm_data");
+            boolean appNotifiedForMessage = false;
 
             // The payload travels by exactly one route. If a listener took it, the
             // Intent must not carry it as well: Titanium resumes the root activity
             // twice, and the second pass would deliver the same notification again.
-            boolean delivered = (module != null) && module.triggerDidOpenNotification(notification, !wasOnScreen());
+            if (module != null) {
+                boolean inBackground = !wasOnScreen();
+
+                if (module.shouldNotifyOnPushTap()) {
+                    appNotifiedForMessage = module.triggerDidReceiveMessage(notification, inBackground);
+                } else {
+                    appNotifiedForMessage = module.triggerDidOpenNotification(inBackground, notification);
+                }
+            }
 
             Intent launcherIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             assert launcherIntent != null;
@@ -36,14 +45,15 @@ public class PushHandlerActivity extends Activity {
             // before finishing itself. Matching that intent keeps the launch to one.
             launcherIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             launcherIntent.setPackage(context.getPackageName());
-            if (!delivered) {
+
+            if (!appNotifiedForMessage) {
                 launcherIntent.putExtra("fcm_data", notification);
             }
 
             startActivity(launcherIntent);
 
         } catch (Exception e) {
-            // noop
+            // no op
         } finally {
             finish();
         }

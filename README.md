@@ -11,6 +11,7 @@ thank you!
 ## Topics
 * [Requirements](#requirements)
 * [Download](#download)
+* [Recent changes](#recent-changes)
 * [iOS notes](#ios-notes)
 * [Android Notes](#android-notes)
 * [API: Methods, Properties, Events](#api)
@@ -28,6 +29,15 @@ thank you!
 ## Download
 - [x] [Stable release](https://github.com/hansemannn/titanium-firebase-cloud-messaging/releases)
 - [x] [![gitTio](http://hans-knoechel.de/shields/shield-gittio.svg)](http://gitt.io/component/firebase.cloudmessaging)
+
+## Recent changes
+
+Android `4.0.0`:
+- New `notifyOnPushTap` property (Android-only, default `true`) matches iOS `callback` behavior for `didReceiveMessage` — see [Android `notifyOnPushTap`](#android-notifyonpushtap).
+- **Breaking**: `inBackground` moved to the root of the `didReceiveMessage`/`didOpenNotification` payload (was nested under `message`).
+- Background/killed-state data-only pushes now reliably fire `didReceiveMessage`.
+- Removed deprecated `sendMessage()` (FCM upstream messaging, shut down by Google in June 2023).
+- Fixed null-safety crashes around intent/activity access.
 
 ## iOS notes:
 
@@ -207,6 +217,28 @@ With versions prior to 2.0.3 of this module, FirebaseCloudMessaging.createNotifi
 With version 2.0.3 and later, we now create the uri's using the string filename so that it will not change if resource ids change. So if you are on version <=2.0.2 and are switching to version >=2.0.3, you will want to check if this is a problem for you by installing a test app using version >= 2.0.3 as an upgrade to a previous test app using version <= 2.0.2. Note that you should not uninstall the first app before installing the second app; nor should you reset user data.
 If it is a problem you can workaround by first deleting the existing channel using deleteNotificationChannel, and then recreating the channel with the same settings as before, except with a different id. Don't forget that your push server will need to be version aware and send to this new channel for newer versions of your apps.
 
+### Android `notifyOnPushTap`
+
+> Applies from Android module **v4.0.0** onward. Before that version, Android only had the pre-4.0.0 behavior described below, and `notifyOnPushTap` did not exist.
+
+On iOS, `Ti.Network.registerForPushNotifications`'s `callback` behaves like this:
+
+| App state | Behavior |
+| --- | --- |
+| Background | Push shown, `callback` fires only when tapped |
+| Killed | Same as background |
+| Foreground | Push not shown, `callback` fires right away |
+
+Before v4.0.0 (and still today with `notifyOnPushTap = false`), Android's `didReceiveMessage` behaved like this instead:
+
+| App state | Behavior |
+| --- | --- |
+| Background | Push shown, fires as soon as it arrives, with `inBackground` |
+| Killed | Push shown, fires on tap, without `inBackground` |
+| Foreground | Push not shown, fires right away |
+
+Since v4.0.0, `FirebaseCloudMessaging.notifyOnPushTap` defaults to `true`, which matches the background/killed behavior to iOS — `didReceiveMessage` fires on tap instead of on arrival. Set it to `false` to keep the pre-4.0.0 Android behavior shown above.
+
 ### Errors with firebase.analytics
 
 If you run into errors in combination with firebase.analytics e.g. `Error: Attempt to invoke virtual method 'getInstanceId()' on a null object reference` you can add:
@@ -290,6 +322,9 @@ so receive the `gcm.message_id` key from the notification payload instead.
 
 `lastData` (Object) (Android only)
 The propery `lastData` will contain the data part when you send a notification push message (so both nodes are visible inside the push payload). Read before calling `registerForPushNotifications()`.
+
+`notifyOnPushTap` (Boolean, get/set) (Android only, default `true`, since module v4.0.0)
+Matches `didReceiveMessage`'s background/killed-state timing to iOS: fires on notification tap instead of on arrival. Set to `false` to keep the pre-4.0.0 behavior. See [Android `notifyOnPushTap`](#android-notifyonpushtap).
 
 #### Events
 

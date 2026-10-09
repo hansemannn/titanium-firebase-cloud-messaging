@@ -1,5 +1,8 @@
 package firebase.cloudmessaging;
 
+import static firebase.cloudmessaging.CloudMessagingModule.LCAT;
+
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,7 +14,16 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.net.Uri;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+
+import com.google.firebase.messaging.RemoteMessage;
+
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public final class Utils {
 
@@ -92,5 +104,53 @@ public final class Utils {
         bitmap.recycle();
 
         return output;
+    }
+
+    // Whether the app was on screen when the notification was tapped. By now starting
+    // PushHandlerActivity has paused the Titanium activity, so isCurrentActivityInForeground()
+    // is false in both cases. A paused activity is still visible; a stopped one is not.
+    static boolean wasOnScreen() {
+        Activity activity = TiApplication.getAppCurrentActivity();
+        return (activity instanceof LifecycleOwner)
+                && ((LifecycleOwner) activity).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
+    }
+
+    static KrollDict prepareMessagePayload(RemoteMessage remoteMessage) {
+        KrollDict dict = new KrollDict();
+
+        dict.put("from", remoteMessage.getFrom());
+        dict.put("ttl", remoteMessage.getTtl());
+        dict.put("messageId", remoteMessage.getMessageId());
+        dict.put("messageType", remoteMessage.getMessageType());
+        dict.put("data", new KrollDict(remoteMessage.getData()));
+        dict.put("sendTime", remoteMessage.getSentTime());
+
+        RemoteMessage.Notification remoteMessageNotification = remoteMessage.getNotification();
+        if (remoteMessageNotification != null) {
+            dict.put("title", remoteMessageNotification.getTitle());
+            dict.put("body", remoteMessageNotification.getBody());
+        }
+
+        return dict;
+    }
+
+    static KrollDict prepareEventResult(String data, boolean inBackground) {
+        if (data == null || data.isEmpty()) {
+            return null;
+        }
+
+        try {
+            KrollDict message = new KrollDict();
+            message.put("data", new KrollDict(new JSONObject(data)));
+
+            KrollDict result = new KrollDict();
+            result.put("message", message);
+            result.put("inBackground", inBackground);
+
+            return result;
+        } catch (JSONException ex) {
+            Log.e(LCAT, "JSONException while converting data into result: " + ex.getMessage());
+            return null;
+        }
     }
 }

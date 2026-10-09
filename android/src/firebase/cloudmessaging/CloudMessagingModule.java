@@ -22,8 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -34,31 +33,49 @@ import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
-import org.appcelerator.titanium.util.TiConvert;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import ti.modules.titanium.android.notificationmanager.NotificationChannelProxy;
 
-@Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging")
+@Kroll.module(name = "CloudMessaging", id = "firebase.cloudmessaging", propertyAccessors = {
+    "notifyOnPushTap",
+})
 public class CloudMessagingModule extends KrollModule {
 
-    private static final String LCAT = "FirebaseCloudMessaging";
+    static final String LCAT = "FirebaseCloudMessaging";
     private static final String FORCE_SHOW_IN_FOREGROUND = "titanium.firebase.cloudmessaging.key";
     private static CloudMessagingModule instance = null;
     private static String fcmToken = null;
     private String notificationData = "";
 
+    public static final String LAST_MESSAGE_DATA_KEY_NAME = "titanium.firebase.cloudmessaging.message";
+
+    // DO NOT MODIFY FIELD NAMES - EXPOSED TO BRAZE MODULE, if required, update field values only.
+    public static final String FIREBASE_EVENT_DID_RECEIVE_MESSAGE = "triggerDidReceiveMessage";
+    public static final String FIREBASE_EVENT_DID_OPEN_NOTIFICATION = "triggerDidOpenNotification";
+
     public CloudMessagingModule() {
-        super();
+        super("CloudMessaging");
         instance = this;
+
+        // To keep parity with iOS Ti.Network.registerForPushNotifications's callback behaviour.
+        defaultValues.put("notifyOnPushTap", true);
     }
 
     public static CloudMessagingModule getInstance() {
         return instance;
     }
+
+    @Nullable
+    private static Intent getCurrentIntent() {
+        Activity activity = TiApplication.getAppRootOrCurrentActivity();
+        if (activity == null) {
+            return null;
+        }
+
+        return activity.getIntent();
+    }
+
 
     // clang-format off
     @Kroll.method
@@ -69,21 +86,23 @@ public class CloudMessagingModule extends KrollModule {
         KrollDict data = new KrollDict();
 
         try {
-            Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
+            Intent intent = getCurrentIntent();
+            if (intent == null) {
+                return data;
+            }
+
             Bundle extras = intent.getExtras();
 
             if (extras != null) {
                 for (String key : extras.keySet()) {
-                    Bundle bundle = extras.getBundle(key);
-                    if (bundle != null) {
+                    Object value = extras.get(key);
+
+                    if (value instanceof Bundle bundle) {
                         for (String bundleKey : bundle.keySet()) {
                             data.put(key + "_" + bundleKey, bundle.getString(bundleKey));
                         }
                     } else {
-                        String value = extras.getString(key);
-                        if (value != null) {
-                            data.put(key, value);
-                        }
+                        data.put(key, value);
                     }
                 }
 
@@ -99,11 +118,13 @@ public class CloudMessagingModule extends KrollModule {
             if (data.get("message") == null) {
                 SharedPreferences preferences =
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                String prefMessage = preferences.getString("titanium.firebase.cloudmessaging.message", null);
+                String prefMessage = preferences.getString(LAST_MESSAGE_DATA_KEY_NAME, null);
                 if (prefMessage != null) {
                     data.put("message", new KrollDict(new JSONObject(prefMessage)));
                 }
-                preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
+
+
+                clearLastData();
             }
         } catch (Exception ex) {
             Log.e(LCAT, "getLastData" + ex);
@@ -158,12 +179,11 @@ public class CloudMessagingModule extends KrollModule {
     public void clearLastData() {
         SharedPreferences preferences =
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
+        preferences.edit().remove(LAST_MESSAGE_DATA_KEY_NAME).apply();
 
-        // remove intent value
-        Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
-        String notification = intent.getStringExtra("fcm_data");
-        if (notification != null) {
+        // Remove data from intent as well.
+        Intent intent = getCurrentIntent();
+        if (intent != null) {
             intent.removeExtra("fcm_data");
         }
     }
@@ -194,37 +214,6 @@ public class CloudMessagingModule extends KrollModule {
         });
     }
 
-    @Kroll.method
-    @SuppressWarnings("deprecation")
-    public void sendMessage(KrollDict obj) {
-        Log.e(LCAT, "Deprecated: This function is actually decommissioned along " +
-                "with all of FCM upstream messaging. Learn more in the FAQ about FCM features " +
-                "deprecated in June 2023: https://firebase.google.com/support/faq?hl=de#fcm-23-deprecation");
-
-        FirebaseMessaging fm = FirebaseMessaging.getInstance();
-
-        String fireTo = obj.getString("to");
-        String fireMessageId = obj.getString("messageId");
-        int ttl = TiConvert.toInt(obj.get("timeToLive"), 0);
-
-        RemoteMessage.Builder rm = new RemoteMessage.Builder(fireTo);
-        rm.setMessageId(fireMessageId);
-        rm.setTtl(ttl);
-
-        // add custom data
-        if (obj.get("data") instanceof Map<?, ?> data) {
-            for (Object o : data.keySet()) {
-                rm.addData((String) o, (String) data.get(o));
-            }
-        }
-
-        if (!fireTo.isEmpty() && !fireMessageId.isEmpty()) {
-            fm.send(rm.build());
-        } else {
-            Log.e(LCAT, "Please set 'to' and 'messageId'");
-        }
-    }
-
     public void onTokenRefresh(String token) {
         try {
             if (hasListeners("didRefreshRegistrationToken")) {
@@ -238,16 +227,30 @@ public class CloudMessagingModule extends KrollModule {
         }
     }
 
-    public void onMessageReceived(HashMap<String, Object> message) {
-        try {
-            if (hasListeners("didReceiveMessage")) {
-                KrollDict data = new KrollDict();
-                data.put("message", new KrollDict(message));
-                fireEvent("didReceiveMessage", data);
-            }
-        } catch (Exception e) {
-            Log.e(LCAT, "Message exception: " + e.getMessage());
+    public boolean triggerDidReceiveMessage(String data, boolean inBackground) {
+        if (!hasListeners("didReceiveMessage")) {
+            return false;
         }
+
+        KrollDict result = Utils.prepareEventResult(data, inBackground);
+        if (result != null) {
+            fireEvent("didReceiveMessage", result);
+        }
+
+        return true;
+    }
+
+    public void triggerDidReceiveMessageForRemoteMessage(RemoteMessage remoteMessage, boolean inBackground) {
+        KrollDict data = Utils.prepareMessagePayload(remoteMessage);
+
+        KrollDict message = new KrollDict();
+        message.putAll(data);
+
+        KrollDict result = new KrollDict();
+        result.put("message", message);
+        result.put("inBackground", inBackground);
+
+        fireEvent("didReceiveMessage", result);
     }
 
     @Kroll.method
@@ -365,7 +368,7 @@ public class CloudMessagingModule extends KrollModule {
      * @return true when a listener actually received it, so the caller knows the
      *         Intent does not need to carry the payload as well.
      */
-    public boolean setNotificationData(String data) {
+    public boolean triggerDidOpenNotification(boolean inBackground, String data) {
         notificationData = data;
 
         // PushHandlerActivity calls this the moment the user taps a notification,
@@ -373,51 +376,35 @@ public class CloudMessagingModule extends KrollModule {
         // the launcher Intent is not delivered a second time, so this event is the
         // only way the app gets to know about the tap. On a cold start the module
         // does not exist yet and parseBootIntent() reads the payload instead.
-        try {
-            if ((data != null) && !data.isEmpty() && hasListeners("didOpenNotification")) {
-                // Same shape as didReceiveMessage: the payload goes under message.data.
-                KrollDict message = new KrollDict();
-                message.put("data", new KrollDict(new JSONObject(data)));
-                message.put("inBackground", !wasOnScreen());
-
-                KrollDict event = new KrollDict();
-                event.put("message", message);
-                fireEvent("didOpenNotification", event);
-                return true;
-            }
-        } catch (Exception ex) {
-            Log.e(LCAT, "didOpenNotification: " + ex.getMessage());
+        if (!hasListeners("didOpenNotification")) {
+            return false;
         }
 
-        return false;
-    }
+        KrollDict result = Utils.prepareEventResult(data, inBackground);
+        if (result != null) {
+            fireEvent("didOpenNotification", result);
+        }
 
-    // Whether the app was on screen when the notification was tapped. By now starting
-    // PushHandlerActivity has paused the Titanium activity, so isCurrentActivityInForeground()
-    // is false in both cases. A paused activity is still visible; a stopped one is not.
-    private static boolean wasOnScreen() {
-        Activity activity = TiApplication.getAppCurrentActivity();
-        return (activity instanceof LifecycleOwner)
-                && ((LifecycleOwner) activity).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
+        return true;
     }
 
     public void parseBootIntent() {
         try {
-            Intent intent = TiApplication.getAppRootOrCurrentActivity().getIntent();
-            String notification = intent.getStringExtra("fcm_data");
-            if (notification != null) {
-                HashMap<String, Object> msg = new HashMap<>();
-                msg.put("data", new KrollDict(new JSONObject(notification)));
-                onMessageReceived(msg);
-                intent.removeExtra("fcm_data");
-            } else {
-                Log.d(LCAT, "Empty notification in Intent");
+            Intent intent = getCurrentIntent();
+            if (intent == null) {
+                return;
             }
+
+            // Boot intent is always invoked from killed state by tapping on the notification.
+            String data = intent.getStringExtra("fcm_data");
+            triggerDidReceiveMessage(data,true);
+            clearLastData();
         } catch (Exception ex) {
             Log.e(LCAT, "parseBootIntent" + ex);
         }
+    }
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        preferences.edit().remove("titanium.firebase.cloudmessaging.message").apply();
+    public Boolean shouldNotifyOnPushTap() {
+        return getProperties().getBoolean("notifyOnPushTap");
     }
 }

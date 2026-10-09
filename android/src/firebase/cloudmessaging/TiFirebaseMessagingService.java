@@ -1,5 +1,8 @@
 package firebase.cloudmessaging;
 
+import static firebase.cloudmessaging.CloudMessagingModule.LAST_MESSAGE_DATA_KEY_NAME;
+import static firebase.cloudmessaging.Utils.wasOnScreen;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,7 +23,6 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiRHelper;
@@ -30,7 +32,6 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,6 +40,7 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 public class TiFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
     private static final AtomicInteger atomic = new AtomicInteger(0);
+    private static final int NOTIFICATION_INTENT_FLAGS = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP;
 
     @Override
     public void onNewToken(@NonNull String s) {
@@ -74,56 +76,47 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        
-        HashMap<String, Object> msg = new HashMap<>();
-        CloudMessagingModule module = CloudMessagingModule.getInstance();
-        boolean isVisible = true;
 
+        // Handle Braze first, it keeps all Braze related internal analytics intact
         if (handleBrazeRemoteMessage(remoteMessage)) {
             return;
         }
 
-        if (!remoteMessage.getData().isEmpty()) {
-            // data message
-            isVisible = showNotification(remoteMessage);
-        }
+        // Show notification
+        boolean didShowNotification = showNotification(remoteMessage);
 
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            msg.put("title", remoteMessage.getNotification().getTitle());
-            msg.put("body", remoteMessage.getNotification().getBody());
-            isVisible = true;
-        } else {
-            Log.d(TAG, "Data message: " + remoteMessage.getData());
-        }
+        // Finally trigger module "didReceiveMessage" event
+        triggerEventIfRequired(remoteMessage, didShowNotification);
+    }
 
-        msg.put("from", remoteMessage.getFrom());
-        msg.put("ttl", remoteMessage.getTtl());
-        msg.put("messageId", remoteMessage.getMessageId());
-        msg.put("messageType", remoteMessage.getMessageType());
-        msg.put("data", new KrollDict(remoteMessage.getData()));
-        msg.put("sendTime", remoteMessage.getSentTime());
+    private void triggerEventIfRequired(RemoteMessage remoteMessage, boolean manualNotificationShown) {
+        CloudMessagingModule module = CloudMessagingModule.getInstance();
+        if (module == null) return;
 
-        boolean inForeground = TiApplication.isCurrentActivityInForeground();
-        msg.put("inBackground", !inForeground);
+        boolean inForeground = wasOnScreen();
+        boolean notifyOnPushTap = module.shouldNotifyOnPushTap();
+        boolean isSilentPush = !manualNotificationShown && remoteMessage.getNotification() == null;
 
-        // Fire the JS "didReceiveMessage" event when the app is in the foreground, when a
-        // notification was shown, OR when a silent data-only push arrives while the JS runtime
-        // is still alive (app backgrounded but not killed). The last case lets background
-        // data-only pushes (e.g. silent sync_signal) be handled immediately instead of waiting
-        // for the next app resume. When the process is dead, module == null and the payload is
-        // still persisted to "titanium.firebase.cloudmessaging.message" for cold-start recovery.
-        boolean isSilentData = !isVisible && remoteMessage.getNotification() == null;
-        if (isVisible || inForeground || (module != null && isSilentData)) {
-            if (module != null) {
-                module.onMessageReceived(msg);
-            }
+        // 4. Determine if we should alert the JS side
+        // We trigger if:
+        // - App is in foreground (User is active)
+        // - It's a silent sync (Background work needed)
+        // - User explicitly wants background callback before tapping on push.
+
+        if (isSilentPush || inForeground || !notifyOnPushTap) {
+            Log.d(TAG, "Triggering didReceiveMessage. Foreground: " + inForeground + ", Silent Push: " + isSilentPush);
+            module.triggerDidReceiveMessageForRemoteMessage(remoteMessage, !inForeground);
         }
     }
 
     private Boolean showNotification(RemoteMessage remoteMessage) {
-        CloudMessagingModule module = CloudMessagingModule.getInstance();
         Map<String, String> params = remoteMessage.getData();
+
+        if (params.isEmpty()) {
+            return false;
+        }
+
+        CloudMessagingModule module = CloudMessagingModule.getInstance();
         JSONObject jsonData = new JSONObject(params);
         boolean showNotification = true;
         Context context = getApplicationContext();
@@ -203,7 +196,7 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("titanium.firebase.cloudmessaging.message", jsonData.toString());
+        editor.putString(LAST_MESSAGE_DATA_KEY_NAME, jsonData.toString());
         editor.apply();
 
         try {
@@ -228,14 +221,14 @@ public class TiFirebaseMessagingService extends FirebaseMessagingService {
             // hidden notification - still send broadcast with data for next app start
             Intent i = new Intent().setAction("ti.firebase.messaging.hidden-notification");
             i.addCategory(Intent.CATEGORY_LAUNCHER);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i.setFlags(NOTIFICATION_INTENT_FLAGS);
             i.putExtra("fcm_data", jsonData.toString());
             sendBroadcast(i);
             return false;
         }
 
         Intent notificationIntent = new Intent(this, PushHandlerActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.setFlags(NOTIFICATION_INTENT_FLAGS);
         notificationIntent.putExtra("fcm_data", jsonData.toString());
 
         int id = 0;

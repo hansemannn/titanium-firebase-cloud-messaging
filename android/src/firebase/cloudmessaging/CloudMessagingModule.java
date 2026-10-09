@@ -77,6 +77,15 @@ public class CloudMessagingModule extends KrollModule {
     }
 
 
+    // Keep primitives as-is so JS gets booleans/numbers; stringify anything else
+    // (Parcelables etc.) so it can still cross the bridge.
+    private static Object toDictValue(Object value) {
+        if (value instanceof String || value instanceof Boolean || value instanceof Number) {
+            return value;
+        }
+        return String.valueOf(value);
+    }
+
     // clang-format off
     @Kroll.method
     @Kroll.getProperty
@@ -96,13 +105,15 @@ public class CloudMessagingModule extends KrollModule {
             if (extras != null) {
                 for (String key : extras.keySet()) {
                     Object value = extras.get(key);
-
                     if (value instanceof Bundle bundle) {
                         for (String bundleKey : bundle.keySet()) {
-                            data.put(key + "_" + bundleKey, bundle.getString(bundleKey));
+                            Object bundleValue = bundle.get(bundleKey);
+                            if (bundleValue != null) {
+                                data.put(key + "_" + bundleKey, toDictValue(bundleValue));
+                            }
                         }
-                    } else {
-                        data.put(key, value);
+                    } else if (value != null) {
+                        data.put(key, toDictValue(value));
                     }
                 }
 

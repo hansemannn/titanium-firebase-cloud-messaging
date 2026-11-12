@@ -13,6 +13,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Bundle;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
@@ -132,6 +133,28 @@ public final class Utils {
         }
 
         return dict;
+    }
+
+    /**
+     * The String extras of an intent as a JSON object string, or null when there are none.
+     * A tap on a notification the system drew carries the message's data fields as separate extras.
+     */
+    static String extrasToJson(Bundle extras) {
+        if (extras == null || extras.isEmpty()) {
+            return null;
+        }
+        JSONObject json = new JSONObject();
+        for (String key : extras.keySet()) {
+            Object value = extras.get(key);
+            if (value instanceof String) {
+                try {
+                    json.put(key, value);
+                } catch (JSONException ex) {
+                    Log.e(LCAT, "Skipping extra " + key + ": " + ex.getMessage());
+                }
+            }
+        }
+        return json.length() > 0 ? json.toString() : null;
     }
 
     static KrollDict prepareEventResult(String data, boolean inBackground) {

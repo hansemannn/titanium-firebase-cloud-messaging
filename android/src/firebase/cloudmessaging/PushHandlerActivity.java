@@ -23,6 +23,12 @@ public class PushHandlerActivity extends Activity {
             Context context = getApplicationContext();
             CloudMessagingModule module = CloudMessagingModule.getInstance();
             String notification = getIntent().getStringExtra("fcm_data");
+            if (notification == null) {
+                // A notification message (top-level `notification` block) drawn by the system while the app was
+                // in the background, sent with `click_action` naming this activity: FCM puts the data fields into
+                // the extras one by one instead of into fcm_data.
+                notification = Utils.extrasToJson(getIntent().getExtras());
+            }
             boolean appNotifiedForMessage = false;
 
             // The payload travels by exactly one route. If a listener took it, the

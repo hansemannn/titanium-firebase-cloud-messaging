@@ -32,6 +32,9 @@ thank you!
 
 ## Recent changes
 
+Android `4.1.0`:
+- A tap on a notification message (top-level `notification` block) drawn by the system can resume the app instead of relaunching it: send `click_action` and declare it on `PushHandlerActivity`, see [Android: tapping notification messages](#android-tapping-notification-messages).
+
 Android `4.0.0`:
 - New `notifyOnPushTap` property (Android-only, default `true`) matches iOS `callback` behavior for `didReceiveMessage` — see [Android `notifyOnPushTap`](#android-notifyonpushtap).
 - **Breaking**: `inBackground` moved to the root of the `didReceiveMessage`/`didOpenNotification` payload (was nested under `message`).
@@ -207,6 +210,37 @@ Supported notification fields:
 * "sound" => "string" (e.g. "notification.mp3" will play /platform/android/res/raw/notification.mp3)
 
 Both lists are Android. On iOS the text comes from the APNs `alert` payload, and images need more than a field: [Firebase's image flow](https://firebase.google.com/docs/cloud-messaging/customize-messages/cross-platform) wants `apns.fcm_options.image`, `"mutable-content": 1` inside `apns.payload.aps`, and a Notification Service Extension in the app.
+
+### Android: tapping notification messages
+
+A notification message the system draws (the app in the background or not running) opens the launcher activity with
+`FLAG_ACTIVITY_CLEAR_TOP`. Titanium cannot resume its root activity with that flag, so a tap on such a notification
+while the app is in the background relaunches the app: its windows are closed and `app.js` runs again.
+
+To have the tap resume the app instead, route it through the module's `PushHandlerActivity`:
+
+1. Declare an action for it in `tiapp.xml` (any name; the app id keeps it unique):
+
+```xml
+<android xmlns:android="http://schemas.android.com/apk/res/android">
+	<manifest>
+		<application>
+			<activity android:name="firebase.cloudmessaging.PushHandlerActivity" android:exported="true"
+				android:theme="@android:style/Theme.Translucent.NoTitleBar" android:excludeFromRecents="true">
+				<intent-filter>
+					<action android:name="com.example.app.NOTIFICATION_TAP"/>
+					<category android:name="android.intent.category.DEFAULT"/>
+				</intent-filter>
+			</activity>
+		</application>
+	</manifest>
+</android>
+```
+
+2. Send that action as the notification's `click_action` (FCM HTTP v1: `message.android.notification.click_action`).
+
+The data fields then arrive like a tap on a notification the module drew: `didOpenNotification` (or `didReceiveMessage`
+with `notifyOnPushTap`) while the app runs, the `fcm_data` extra of the launch intent on a cold start.
 
 ### Android: Note about custom sounds
 To use a custom sound you have to create a second channel. The default channel will always use the default notification sound on the device!
